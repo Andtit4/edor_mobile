@@ -16,5 +16,6 @@ class Category with _$Category {
     DateTime? createdAt,
   }) = _Category;
 
-  factory Category.fromJson(Map<String, dynamic> json) => _$CategoryFromJson(json);
+  factory Category.fromJson(Map<String, dynamic> json) =>
+      _$CategoryFromJson(json);
 }

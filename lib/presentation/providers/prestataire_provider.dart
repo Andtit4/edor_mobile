@@ -68,43 +68,35 @@ class PrestatairesNotifier extends StateNotifier<PrestatairesState> {
     state = state.copyWith(isLoading: true);
 
     // Charger prestataires et catégories en parallèle
-    final results = await Future.wait([
-      _repository.getAllPrestataires(),
-      _repository.getCategories(),
-      _repository.getFavoritePrestataires(),
-    ]);
-
-    final prestataireResult = results[0];
-    final categoriesResult = results[1];
-    final favoritesResult = results[2];
+    final prestataireResult = await _repository.getAllPrestataires();
+    final categoriesResult = await _repository.getCategories();
+    final favoritesResult = await _repository.getFavoritePrestataires();
 
     prestataireResult.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
       (prestataires) {
         categoriesResult.fold(
-          (failure) => state = state.copyWith(
-            isLoading: false,
-            error: failure.message,
-          ),
+          (failure) =>
+              state = state.copyWith(isLoading: false, error: failure.message),
           (categories) {
             favoritesResult.fold(
-              (failure) => state = state.copyWith(
-                isLoading: false,
-                prestataires: prestataires,
-                filteredPrestataires: prestataires,
-                categories: categories,
-                error: failure.message,
-              ),
-              (favorites) => state = state.copyWith(
-                isLoading: false,
-                prestataires: prestataires,
-                filteredPrestataires: prestataires,
-                categories: categories,
-                favorites: favorites,
-              ),
+              (failure) =>
+                  state = state.copyWith(
+                    isLoading: false,
+                    prestataires: prestataires,
+                    filteredPrestataires: prestataires,
+                    categories: categories,
+                    error: failure.message,
+                  ),
+              (favorites) =>
+                  state = state.copyWith(
+                    isLoading: false,
+                    prestataires: prestataires,
+                    filteredPrestataires: prestataires,
+                    categories: categories,
+                    favorites: favorites,
+                  ),
             );
           },
         );
@@ -126,22 +118,39 @@ class PrestatairesNotifier extends StateNotifier<PrestatairesState> {
     List<Prestataire> filtered = state.prestataires;
 
     // Filtrer par catégorie
-    if (state.selectedCategoryId != null && state.selectedCategoryId!.isNotEmpty) {
+    if (state.selectedCategoryId != null &&
+        state.selectedCategoryId!.isNotEmpty) {
       final category = state.categories.firstWhere(
         (c) => c.id == state.selectedCategoryId,
         orElse: () => state.categories.first,
       );
-      filtered = filtered.where((p) => 
-        p.category.toLowerCase() == category.name.toLowerCase()).toList();
+      filtered =
+          filtered
+              .where(
+                (p) => p.category.toLowerCase() == category.name.toLowerCase(),
+              )
+              .toList();
     }
 
     // Filtrer par recherche
     if (state.searchQuery.isNotEmpty) {
-      filtered = filtered.where((p) =>
-          p.name.toLowerCase().contains(state.searchQuery.toLowerCase()) ||
-          p.category.toLowerCase().contains(state.searchQuery.toLowerCase()) ||
-          p.skills.any((skill) => 
-            skill.toLowerCase().contains(state.searchQuery.toLowerCase()))).toList();
+      filtered =
+          filtered
+              .where(
+                (p) =>
+                    p.name.toLowerCase().contains(
+                      state.searchQuery.toLowerCase(),
+                    ) ||
+                    p.category.toLowerCase().contains(
+                      state.searchQuery.toLowerCase(),
+                    ) ||
+                    p.skills.any(
+                      (skill) => skill.toLowerCase().contains(
+                        state.searchQuery.toLowerCase(),
+                      ),
+                    ),
+              )
+              .toList();
     }
 
     state = state.copyWith(filteredPrestataires: filtered);
@@ -149,17 +158,16 @@ class PrestatairesNotifier extends StateNotifier<PrestatairesState> {
 
   Future<void> toggleFavorite(String prestataireId) async {
     final result = await _repository.toggleFavorite(prestataireId);
-    result.fold(
-      (failure) => state = state.copyWith(error: failure.message),
-      (_) async {
-        // Recharger les favoris
-        final favoritesResult = await _repository.getFavoritePrestataires();
-        favoritesResult.fold(
-          (failure) => state = state.copyWith(error: failure.message),
-          (favorites) => state = state.copyWith(favorites: favorites),
-        );
-      },
-    );
+    result.fold((failure) => state = state.copyWith(error: failure.message), (
+      _,
+    ) async {
+      // Recharger les favoris
+      final favoritesResult = await _repository.getFavoritePrestataires();
+      favoritesResult.fold(
+        (failure) => state = state.copyWith(error: failure.message),
+        (favorites) => state = state.copyWith(favorites: favorites),
+      );
+    });
   }
 
   void clearError() {
@@ -172,19 +180,20 @@ class PrestatairesNotifier extends StateNotifier<PrestatairesState> {
 }
 
 // Prestataires Provider
-final prestatairesProvider = StateNotifierProvider<PrestatairesNotifier, PrestatairesState>((ref) {
-  final repository = ref.watch(prestataireRepositoryProvider);
-  return PrestatairesNotifier(repository);
-});
+final prestatairesProvider =
+    StateNotifierProvider<PrestatairesNotifier, PrestatairesState>((ref) {
+      final repository = ref.watch(prestataireRepositoryProvider);
+      return PrestatairesNotifier(repository);
+    });
 
 // Individual Prestataire Provider
-final prestataireProvider = FutureProvider.family<Prestataire?, String>((ref, id) async {
+final prestataireProvider = FutureProvider.family<Prestataire?, String>((
+  ref,
+  id,
+) async {
   final repository = ref.watch(prestataireRepositoryProvider);
   final result = await repository.getPrestataireById(id);
-  return result.fold(
-    (failure) => null,
-    (prestataire) => prestataire,
-  );
+  return result.fold((failure) => null, (prestataire) => prestataire);
 });
 
 // Convenient providers

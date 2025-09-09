@@ -1,0 +1,54 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'conversation.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+_$ConversationImpl _$$ConversationImplFromJson(Map<String, dynamic> json) =>
+    _$ConversationImpl(
+      id: json['id'] as String,
+      clientId: json['clientId'] as String,
+      prestataireId: json['prestataireId'] as String,
+      clientName: json['clientName'] as String,
+      prestataireName: json['prestataireName'] as String,
+      clientAvatar: json['clientAvatar'] as String?,
+      prestataireAvatar: json['prestataireAvatar'] as String?,
+      lastMessage: json['lastMessage'] as String?,
+      lastMessageTime:
+          json['lastMessageTime'] == null
+              ? null
+              : DateTime.parse(json['lastMessageTime'] as String),
+      unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
+      messages:
+          (json['messages'] as List<dynamic>?)
+              ?.map((e) => Message.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      createdAt:
+          json['createdAt'] == null
+              ? null
+              : DateTime.parse(json['createdAt'] as String),
+      updatedAt:
+          json['updatedAt'] == null
+              ? null
+              : DateTime.parse(json['updatedAt'] as String),
+    );
+
+Map<String, dynamic> _$$ConversationImplToJson(_$ConversationImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'clientId': instance.clientId,
+      'prestataireId': instance.prestataireId,
+      'clientName': instance.clientName,
+      'prestataireName': instance.prestataireName,
+      'clientAvatar': instance.clientAvatar,
+      'prestataireAvatar': instance.prestataireAvatar,
+      'lastMessage': instance.lastMessage,
+      'lastMessageTime': instance.lastMessageTime?.toIso8601String(),
+      'unreadCount': instance.unreadCount,
+      'messages': instance.messages,
+      'createdAt': instance.createdAt?.toIso8601String(),
+      'updatedAt': instance.updatedAt?.toIso8601String(),
+    };

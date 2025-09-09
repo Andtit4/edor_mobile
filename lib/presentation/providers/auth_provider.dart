@@ -59,41 +59,35 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> _checkAuthStatus() async {
     state = state.copyWith(isLoading: true);
-    
+
     final result = await _authRepository.isLoggedIn();
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
       (isLoggedIn) async {
         if (isLoggedIn) {
           final userResult = await _authRepository.getCurrentUser();
           userResult.fold(
-            (failure) => state = state.copyWith(
-              isLoading: false,
-              error: failure.message,
-            ),
-            (user) => state = state.copyWith(
-              isLoading: false,
-              user: user,
-              isAuthenticated: user != null,
-            ),
+            (failure) =>
+                state = state.copyWith(
+                  isLoading: false,
+                  error: failure.message,
+                ),
+            (user) =>
+                state = state.copyWith(
+                  isLoading: false,
+                  user: user,
+                  isAuthenticated: user != null,
+                ),
           );
         } else {
-          state = state.copyWith(
-            isLoading: false,
-            isAuthenticated: false,
-          );
+          state = state.copyWith(isLoading: false, isAuthenticated: false);
         }
       },
     );
   }
 
-  Future<void> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> login({required String email, required String password}) async {
     state = state.copyWith(isLoading: true, error: null);
 
     final result = await _authRepository.login(
@@ -102,16 +96,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
-      (user) => state = state.copyWith(
-        isLoading: false,
-        user: user,
-        isAuthenticated: true,
-        error: null,
-      ),
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
+      (user) =>
+          state = state.copyWith(
+            isLoading: false,
+            user: user,
+            isAuthenticated: true,
+            error: null,
+          ),
     );
   }
 
@@ -131,16 +124,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
-      (user) => state = state.copyWith(
-        isLoading: false,
-        user: user,
-        isAuthenticated: true,
-        error: null,
-      ),
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
+      (user) =>
+          state = state.copyWith(
+            isLoading: false,
+            user: user,
+            isAuthenticated: true,
+            error: null,
+          ),
     );
   }
 
@@ -149,10 +141,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     final result = await _authRepository.logout();
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
       (_) => state = const AuthState(isAuthenticated: false),
     );
   }

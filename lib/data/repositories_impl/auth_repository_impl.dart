@@ -17,9 +17,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     try {
       // Charger les utilisateurs depuis le JSON
-      final usersData = await localDataSource.loadAssetJson('assets/mock/users.json');
-      final usersList = usersData['users'] as List<dynamic>? ?? usersData as List<dynamic>;
-      
+      final usersData = await localDataSource.loadAssetJson(
+        'assets/mock/users.json',
+      );
+      final usersList =
+          usersData['users'] as List<dynamic>? ?? usersData as List<dynamic>;
+
       // Trouver l'utilisateur avec cet email
       final userData = usersList.firstWhere(
         (user) => user['email'] == email,
@@ -27,7 +30,9 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       if (userData == null) {
-        return const Left(Failure.authentication(message: 'Email ou mot de passe incorrect'));
+        return const Left(
+          Failure.authentication(message: 'Email ou mot de passe incorrect'),
+        );
       }
 
       // Pour le MVP, on accepte n'importe quel mot de passe

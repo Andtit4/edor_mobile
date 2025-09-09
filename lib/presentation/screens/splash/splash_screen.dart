@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lottie/lottie.dart';
 import '../../providers/auth_provider.dart';
 import '../../../core/theme/app_colors.dart';
 
@@ -21,32 +20,24 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   void initState() {
     super.initState();
-    
+
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    
+
     _scaleController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
 
-    _scaleAnimation = Tween<double>(
-      begin: 0.5,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _scaleController,
-      curve: Curves.elasticOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
+    );
 
     _startAnimations();
   }
@@ -74,9 +65,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     return Scaffold(
       backgroundColor: AppColors.primaryBlue,
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.primaryGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -113,9 +102,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   );
                 },
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Nom de l'app
               FadeTransition(
                 opacity: _fadeAnimation,
@@ -128,9 +117,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               // Slogan
               FadeTransition(
                 opacity: _fadeAnimation,
@@ -142,9 +131,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 80),
-              
+
               // Indicateur de chargement
               FadeTransition(
                 opacity: _fadeAnimation,

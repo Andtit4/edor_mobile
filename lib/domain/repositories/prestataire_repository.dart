@@ -6,7 +6,9 @@ import '../entities/category.dart';
 abstract class PrestataireRepository {
   Future<Either<Failure, List<Prestataire>>> getAllPrestataires();
 
-  Future<Either<Failure, List<Prestataire>>> getPrestatairesByCategory(String categoryId);
+  Future<Either<Failure, List<Prestataire>>> getPrestatairesByCategory(
+    String categoryId,
+  );
 
   Future<Either<Failure, List<Prestataire>>> searchPrestataires(String query);
 

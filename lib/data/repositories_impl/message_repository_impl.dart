@@ -14,10 +14,15 @@ class MessageRepositoryImpl implements MessageRepository {
   @override
   Future<Either<Failure, List<Conversation>>> getConversations() async {
     try {
-      final conversationsList = await localDataSource.loadAssetJson('assets/mock/conversations.json');
-      final conversations = (conversationsList as List<dynamic>)
-          .map((json) => Conversation.fromJson(json as Map<String, dynamic>))
-          .toList();
+      final conversationsList = await localDataSource.loadAssetJson(
+        'assets/mock/conversations.json',
+      );
+      final conversations =
+          (conversationsList as List<dynamic>)
+              .map(
+                (json) => Conversation.fromJson(json as Map<String, dynamic>),
+              )
+              .toList();
 
       return Right(conversations);
     } on CacheException catch (e) {
@@ -28,19 +33,22 @@ class MessageRepositoryImpl implements MessageRepository {
   }
 
   @override
-  Future<Either<Failure, Conversation>> getConversation(String conversationId) async {
+  Future<Either<Failure, Conversation>> getConversation(
+    String conversationId,
+  ) async {
     try {
       final result = await getConversations();
-      return result.fold(
-        (failure) => Left(failure),
-        (conversations) {
-          final conversation = conversations.firstWhere(
-            (c) => c.id == conversationId,
-            orElse: () => throw const CacheException(message: 'Conversation non trouvée'),
-          );
-          return Right(conversation);
-        },
-      );
+      return result.fold((failure) => Left(failure), (conversations) {
+        final conversation = conversations.firstWhere(
+          (c) => c.id == conversationId,
+          orElse:
+              () =>
+                  throw const CacheException(
+                    message: 'Conversation non trouvée',
+                  ),
+        );
+        return Right(conversation);
+      });
     } on CacheException catch (e) {
       return Left(Failure.cache(message: e.message));
     } catch (e) {
@@ -49,7 +57,9 @@ class MessageRepositoryImpl implements MessageRepository {
   }
 
   @override
-  Future<Either<Failure, List<Message>>> getMessages(String conversationId) async {
+  Future<Either<Failure, List<Message>>> getMessages(
+    String conversationId,
+  ) async {
     try {
       final result = await getConversation(conversationId);
       return result.fold(

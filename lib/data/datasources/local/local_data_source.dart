@@ -21,7 +21,9 @@ class LocalDataSourceImpl implements LocalDataSource {
       final String jsonString = await rootBundle.loadString(assetPath);
       return json.decode(jsonString) as Map<String, dynamic>;
     } catch (e) {
-      throw CacheException(message: 'Erreur lors du chargement de $assetPath: $e');
+      throw CacheException(
+        message: 'Erreur lors du chargement de $assetPath: $e',
+      );
     }
   }
 
@@ -31,7 +33,9 @@ class LocalDataSourceImpl implements LocalDataSource {
       final String jsonString = json.encode(data);
       await sharedPreferences.setString(key, jsonString);
     } catch (e) {
-      throw CacheException(message: 'Erreur lors de la sauvegarde en cache: $e');
+      throw CacheException(
+        message: 'Erreur lors de la sauvegarde en cache: $e',
+      );
     }
   }
 
@@ -51,7 +55,9 @@ class LocalDataSourceImpl implements LocalDataSource {
     try {
       await sharedPreferences.clear();
     } catch (e) {
-      throw CacheException(message: 'Erreur lors de la suppression du cache: $e');
+      throw CacheException(
+        message: 'Erreur lors de la suppression du cache: $e',
+      );
     }
   }
 }

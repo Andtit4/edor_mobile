@@ -42,7 +42,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       // Si authentifié et sur splash ou login, rediriger vers home
-      if (isAuthenticated && (state.matchedLocation == AppRoutes.splash || state.matchedLocation == AppRoutes.login)) {
+      if (isAuthenticated &&
+          (state.matchedLocation == AppRoutes.splash ||
+              state.matchedLocation == AppRoutes.login)) {
         return AppRoutes.home;
       }
 
@@ -92,7 +94,8 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: '/chat/:conversationId',
                 name: AppRoutes.chatName,
                 builder: (context, state) {
-                  final conversationId = state.pathParameters['conversationId']!;
+                  final conversationId =
+                      state.pathParameters['conversationId']!;
                   return ChatScreen(conversationId: conversationId);
                 },
               ),
@@ -128,35 +131,32 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
     ],
-    errorBuilder: (context, state) => Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
+    errorBuilder:
+        (context, state) => Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                Text(
+                  'Page non trouvée',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'La page que vous cherchez n\'existe pas.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () => context.go(AppRoutes.home),
+                  child: const Text('Retour à l\'accueil'),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Page non trouvée',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'La page que vous cherchez n\'existe pas.',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () => context.go(AppRoutes.home),
-              child: const Text('Retour à l\'accueil'),
-            ),
-          ],
+          ),
         ),
-      ),
-    ),
   );
 });
 
@@ -175,18 +175,9 @@ class MainWrapper extends ConsumerWidget {
         currentIndex: _getCurrentIndex(context),
         onTap: (index) => _onTap(context, index),
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Accueil',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.message),
-            label: 'Messages',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
+          BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Messages'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),
     );
@@ -194,7 +185,7 @@ class MainWrapper extends ConsumerWidget {
 
   int _getCurrentIndex(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
-    
+
     if (location.startsWith(AppRoutes.messages)) return 1;
     if (location == AppRoutes.profile) return 2;
     return 0; // home par défaut

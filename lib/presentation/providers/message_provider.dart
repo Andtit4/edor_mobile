@@ -36,7 +36,8 @@ class MessagesState {
   }) {
     return MessagesState(
       conversations: conversations ?? this.conversations,
-      messagesByConversation: messagesByConversation ?? this.messagesByConversation,
+      messagesByConversation:
+          messagesByConversation ?? this.messagesByConversation,
       isLoading: isLoading ?? this.isLoading,
       error: error,
       isSendingMessage: isSendingMessage ?? this.isSendingMessage,
@@ -57,10 +58,8 @@ class MessagesNotifier extends StateNotifier<MessagesState> {
 
     final result = await _repository.getConversations();
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
       (conversations) {
         // Créer la map des messages par conversation
         final Map<String, List<Message>> messagesByConversation = {};
@@ -79,17 +78,16 @@ class MessagesNotifier extends StateNotifier<MessagesState> {
 
   Future<void> loadMessages(String conversationId) async {
     final result = await _repository.getMessages(conversationId);
-    result.fold(
-      (failure) => state = state.copyWith(error: failure.message),
-      (messages) {
-        final updatedMessagesMap = Map<String, List<Message>>.from(state.messagesByConversation);
-        updatedMessagesMap[conversationId] = messages;
-        
-        state = state.copyWith(
-          messagesByConversation: updatedMessagesMap,
-        );
-      },
-    );
+    result.fold((failure) => state = state.copyWith(error: failure.message), (
+      messages,
+    ) {
+      final updatedMessagesMap = Map<String, List<Message>>.from(
+        state.messagesByConversation,
+      );
+      updatedMessagesMap[conversationId] = messages;
+
+      state = state.copyWith(messagesByConversation: updatedMessagesMap);
+    });
   }
 
   Future<void> sendMessage({
@@ -106,28 +104,33 @@ class MessagesNotifier extends StateNotifier<MessagesState> {
     );
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isSendingMessage: false,
-        error: failure.message,
-      ),
+      (failure) =>
+          state = state.copyWith(
+            isSendingMessage: false,
+            error: failure.message,
+          ),
       (message) {
         // Ajouter le message à la liste existante
-        final currentMessages = state.messagesByConversation[conversationId] ?? [];
+        final currentMessages =
+            state.messagesByConversation[conversationId] ?? [];
         final updatedMessages = [...currentMessages, message];
-        
-        final updatedMessagesMap = Map<String, List<Message>>.from(state.messagesByConversation);
+
+        final updatedMessagesMap = Map<String, List<Message>>.from(
+          state.messagesByConversation,
+        );
         updatedMessagesMap[conversationId] = updatedMessages;
 
         // Mettre à jour la conversation avec le dernier message
-        final updatedConversations = state.conversations.map((conv) {
-          if (conv.id == conversationId) {
-            return conv.copyWith(
-              lastMessage: content,
-              lastMessageTime: DateTime.now(),
-            );
-          }
-          return conv;
-        }).toList();
+        final updatedConversations =
+            state.conversations.map((conv) {
+              if (conv.id == conversationId) {
+                return conv.copyWith(
+                  lastMessage: content,
+                  lastMessageTime: DateTime.now(),
+                );
+              }
+              return conv;
+            }).toList();
 
         state = state.copyWith(
           isSendingMessage: false,
@@ -150,13 +153,13 @@ class MessagesNotifier extends StateNotifier<MessagesState> {
     );
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
       (conversation) {
         final updatedConversations = [...state.conversations, conversation];
-        final updatedMessagesMap = Map<String, List<Message>>.from(state.messagesByConversation);
+        final updatedMessagesMap = Map<String, List<Message>>.from(
+          state.messagesByConversation,
+        );
         updatedMessagesMap[conversation.id] = conversation.messages;
 
         state = state.copyWith(
@@ -183,13 +186,18 @@ class MessagesNotifier extends StateNotifier<MessagesState> {
 }
 
 // Messages Provider
-final messagesProvider = StateNotifierProvider<MessagesNotifier, MessagesState>((ref) {
-  final repository = ref.watch(messageRepositoryProvider);
-  return MessagesNotifier(repository);
-});
+final messagesProvider = StateNotifierProvider<MessagesNotifier, MessagesState>(
+  (ref) {
+    final repository = ref.watch(messageRepositoryProvider);
+    return MessagesNotifier(repository);
+  },
+);
 
 // Individual Conversation Provider
-final conversationProvider = Provider.family<Conversation?, String>((ref, conversationId) {
+final conversationProvider = Provider.family<Conversation?, String>((
+  ref,
+  conversationId,
+) {
   final conversations = ref.watch(messagesProvider).conversations;
   try {
     return conversations.firstWhere((conv) => conv.id == conversationId);
@@ -199,7 +207,10 @@ final conversationProvider = Provider.family<Conversation?, String>((ref, conver
 });
 
 // Messages for Conversation Provider
-final messagesForConversationProvider = Provider.family<List<Message>, String>((ref, conversationId) {
+final messagesForConversationProvider = Provider.family<List<Message>, String>((
+  ref,
+  conversationId,
+) {
   final messagesMap = ref.watch(messagesProvider).messagesByConversation;
   return messagesMap[conversationId] ?? [];
 });

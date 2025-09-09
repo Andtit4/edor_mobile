@@ -24,5 +24,6 @@ class Reservation with _$Reservation {
     DateTime? updatedAt,
   }) = _Reservation;
 
-  factory Reservation.fromJson(Map<String, dynamic> json) => _$ReservationFromJson(json);
+  factory Reservation.fromJson(Map<String, dynamic> json) =>
+      _$ReservationFromJson(json);
 }

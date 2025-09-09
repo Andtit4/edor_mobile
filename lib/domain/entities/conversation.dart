@@ -22,5 +22,6 @@ class Conversation with _$Conversation {
     DateTime? updatedAt,
   }) = _Conversation;
 
-  factory Conversation.fromJson(Map<String, dynamic> json) => _$ConversationFromJson(json);
+  factory Conversation.fromJson(Map<String, dynamic> json) =>
+      _$ConversationFromJson(json);
 }

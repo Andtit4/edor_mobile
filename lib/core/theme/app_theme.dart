@@ -20,14 +20,16 @@ class AppTheme {
         onSurface: AppColors.onSurfaceLight,
         outline: AppColors.outlineLight,
       ),
-      
+
       // AppBar Theme
       appBarTheme: AppBarTheme(
         elevation: 0,
         centerTitle: true,
         backgroundColor: AppColors.surfaceLight,
         foregroundColor: AppColors.onSurfaceLight,
-        titleTextStyle: AppTextStyles.h6.copyWith(color: AppColors.onSurfaceLight),
+        titleTextStyle: AppTextStyles.h6.copyWith(
+          color: AppColors.onSurfaceLight,
+        ),
         systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.dark,
@@ -48,7 +50,9 @@ class AppTheme {
           foregroundColor: AppColors.onPrimaryLight,
           elevation: 2,
           shadowColor: AppColors.primaryBlue.withOpacity(0.3),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: AppTextStyles.buttonMedium,
           minimumSize: const Size(88, 48),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -60,7 +64,9 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primaryBlue,
           side: const BorderSide(color: AppColors.primaryBlue, width: 1.5),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: AppTextStyles.buttonMedium,
           minimumSize: const Size(88, 48),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -97,7 +103,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.error),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         labelStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray600),
         hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray500),
       ),
@@ -162,7 +171,9 @@ class AppTheme {
         centerTitle: true,
         backgroundColor: AppColors.surfaceDark,
         foregroundColor: AppColors.onSurfaceDark,
-        titleTextStyle: AppTextStyles.h6.copyWith(color: AppColors.onSurfaceDark),
+        titleTextStyle: AppTextStyles.h6.copyWith(
+          color: AppColors.onSurfaceDark,
+        ),
         systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.light,
@@ -183,7 +194,9 @@ class AppTheme {
           foregroundColor: AppColors.backgroundDark,
           elevation: 2,
           shadowColor: AppColors.primaryDark.withOpacity(0.3),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: AppTextStyles.buttonMedium,
           minimumSize: const Size(88, 48),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -210,7 +223,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.error),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         labelStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
         hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray500),
       ),
@@ -227,17 +243,37 @@ class AppTheme {
       // Text Theme
       textTheme: TextTheme(
         displayLarge: AppTextStyles.h1.copyWith(color: AppColors.onSurfaceDark),
-        displayMedium: AppTextStyles.h2.copyWith(color: AppColors.onSurfaceDark),
+        displayMedium: AppTextStyles.h2.copyWith(
+          color: AppColors.onSurfaceDark,
+        ),
         displaySmall: AppTextStyles.h3.copyWith(color: AppColors.onSurfaceDark),
-        headlineLarge: AppTextStyles.h4.copyWith(color: AppColors.onSurfaceDark),
-        headlineMedium: AppTextStyles.h5.copyWith(color: AppColors.onSurfaceDark),
-        headlineSmall: AppTextStyles.h6.copyWith(color: AppColors.onSurfaceDark),
-        bodyLarge: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurfaceDark),
-        bodyMedium: AppTextStyles.bodyMedium.copyWith(color: AppColors.onSurfaceDark),
-        bodySmall: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceDark),
-        labelLarge: AppTextStyles.labelLarge.copyWith(color: AppColors.onSurfaceDark),
-        labelMedium: AppTextStyles.labelMedium.copyWith(color: AppColors.onSurfaceDark),
-        labelSmall: AppTextStyles.labelSmall.copyWith(color: AppColors.onSurfaceDark),
+        headlineLarge: AppTextStyles.h4.copyWith(
+          color: AppColors.onSurfaceDark,
+        ),
+        headlineMedium: AppTextStyles.h5.copyWith(
+          color: AppColors.onSurfaceDark,
+        ),
+        headlineSmall: AppTextStyles.h6.copyWith(
+          color: AppColors.onSurfaceDark,
+        ),
+        bodyLarge: AppTextStyles.bodyLarge.copyWith(
+          color: AppColors.onSurfaceDark,
+        ),
+        bodyMedium: AppTextStyles.bodyMedium.copyWith(
+          color: AppColors.onSurfaceDark,
+        ),
+        bodySmall: AppTextStyles.bodySmall.copyWith(
+          color: AppColors.onSurfaceDark,
+        ),
+        labelLarge: AppTextStyles.labelLarge.copyWith(
+          color: AppColors.onSurfaceDark,
+        ),
+        labelMedium: AppTextStyles.labelMedium.copyWith(
+          color: AppColors.onSurfaceDark,
+        ),
+        labelSmall: AppTextStyles.labelSmall.copyWith(
+          color: AppColors.onSurfaceDark,
+        ),
       ),
     );
   }

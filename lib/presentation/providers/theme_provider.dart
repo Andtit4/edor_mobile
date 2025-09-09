@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'auth_provider.dart';
 
 // Theme Mode State
 class ThemeModeNotifier extends StateNotifier<ThemeMode> {
@@ -47,13 +48,16 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
   }
 
   void toggleTheme() {
-    final newThemeMode = state == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    final newThemeMode =
+        state == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
     setThemeMode(newThemeMode);
   }
 }
 
 // Theme Provider
-final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
+final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((
+  ref,
+) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return ThemeModeNotifier(prefs);
 });
@@ -61,12 +65,12 @@ final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((r
 // Is Dark Mode Provider
 final isDarkModeProvider = Provider<bool>((ref) {
   final themeMode = ref.watch(themeModeProvider);
-  
+
   if (themeMode == ThemeMode.system) {
     // Pour le MVP, on suppose que le système est en mode clair
     // Dans une vraie app, on utiliserait MediaQuery.platformBrightnessOf(context)
     return false;
   }
-  
+
   return themeMode == ThemeMode.dark;
 });

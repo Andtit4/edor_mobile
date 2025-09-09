@@ -25,5 +25,6 @@ class Prestataire with _$Prestataire {
     DateTime? updatedAt,
   }) = _Prestataire;
 
-  factory Prestataire.fromJson(Map<String, dynamic> json) => _$PrestataireFromJson(json);
+  factory Prestataire.fromJson(Map<String, dynamic> json) =>
+      _$PrestataireFromJson(json);
 }

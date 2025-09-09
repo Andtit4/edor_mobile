@@ -29,7 +29,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   void _login() {
     if (_formKey.currentState?.validate() ?? false) {
-      ref.read(authProvider.notifier).login(
+      ref
+          .read(authProvider.notifier)
+          .login(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
@@ -63,7 +65,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 60),
-                
+
                 // Logo
                 Center(
                   child: Container(
@@ -80,9 +82,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Titre
                 Text(
                   'Connexion',
@@ -91,19 +93,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 Text(
                   'Connectez-vous pour accéder à vos services',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.gray600,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: AppColors.gray600),
                   textAlign: TextAlign.center,
                 ),
-                
+
                 const SizedBox(height: 48),
-                
+
                 // Email
                 CustomTextField(
                   controller: _emailController,
@@ -119,9 +121,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     return null;
                   },
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Mot de passe
                 CustomTextField(
                   controller: _passwordController,
@@ -129,7 +131,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   obscureText: _obscurePassword,
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                      _obscurePassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -144,9 +148,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     return null;
                   },
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Mot de passe oublié
                 Align(
                   alignment: Alignment.centerRight,
@@ -154,26 +158,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     onPressed: () {
                       // TODO: Implémenter mot de passe oublié
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Fonctionnalité à venir'),
-                        ),
+                        const SnackBar(content: Text('Fonctionnalité à venir')),
                       );
                     },
                     child: const Text('Mot de passe oublié ?'),
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Bouton de connexion
                 CustomButton(
                   onPressed: authState.isLoading ? null : _login,
                   isLoading: authState.isLoading,
                   child: const Text('Se connecter'),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Lien vers inscription
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -185,9 +187,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 48),
-                
+
                 // Connexion demo
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -199,9 +201,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       Text(
                         'Demo - Utilisez ces identifiants :',
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: AppColors.gray600,
-                        ),
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(color: AppColors.gray600),
                       ),
                       const SizedBox(height: 8),
                       Text(
