@@ -91,7 +91,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               // Chat
               GoRoute(
-                path: '/chat/:conversationId',
+                path: 'chat/:conversationId',
                 name: AppRoutes.chatName,
                 builder: (context, state) {
                   final conversationId =

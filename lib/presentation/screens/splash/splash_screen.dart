@@ -44,8 +44,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   void _startAnimations() async {
     await Future.delayed(const Duration(milliseconds: 500));
-    _scaleController.forward();
-    _fadeController.forward();
+    if (mounted) {
+      _scaleController.forward();
+      _fadeController.forward();
+    }
   }
 
   @override

@@ -48,9 +48,9 @@ class EdorApp extends ConsumerWidget {
       // Navigation
       routerConfig: router,
 
-      // Localisation
-      locale: const Locale('fr', 'FR'),
-      supportedLocales: const [Locale('fr', 'FR'), Locale('en', 'US')],
+      // Localisation - À configurer plus tard avec flutter_localizations
+      // locale: const Locale('fr'),
+      // supportedLocales: const [Locale('fr'), Locale('en')],
     );
   }
 }
