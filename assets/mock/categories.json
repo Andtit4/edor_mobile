@@ -1,0 +1,82 @@
+[
+  {
+    "id": "c1",
+    "name": "Bricolage",
+    "description": "Petits travaux de réparation et d'amélioration",
+    "icon": "build",
+    "image": "assets/images/categories/bricolage.png",
+    "isActive": true,
+    "prestataireCount": 15,
+    "createdAt": "2023-01-01T00:00:00Z"
+  },
+  {
+    "id": "c2",
+    "name": "Ménage",
+    "description": "Nettoyage et entretien domestique",
+    "icon": "cleaning_services",
+    "image": "assets/images/categories/menage.png",
+    "isActive": true,
+    "prestataireCount": 23,
+    "createdAt": "2023-01-01T00:00:00Z"
+  },
+  {
+    "id": "c3",
+    "name": "Jardinage",
+    "description": "Entretien d'espaces verts et jardins",
+    "icon": "grass",
+    "image": "assets/images/categories/jardinage.png",
+    "isActive": true,
+    "prestataireCount": 8,
+    "createdAt": "2023-01-01T00:00:00Z"
+  },
+  {
+    "id": "c4",
+    "name": "Cuisine",
+    "description": "Préparation de repas et service traiteur",
+    "icon": "restaurant",
+    "image": "assets/images/categories/cuisine.png",
+    "isActive": true,
+    "prestataireCount": 12,
+    "createdAt": "2023-01-01T00:00:00Z"
+  },
+  {
+    "id": "c5",
+    "name": "Transport",
+    "description": "Services de transport et livraison",
+    "icon": "directions_car",
+    "image": "assets/images/categories/transport.png",
+    "isActive": true,
+    "prestataireCount": 18,
+    "createdAt": "2023-01-01T00:00:00Z"
+  },
+  {
+    "id": "c6",
+    "name": "Électricité",
+    "description": "Installation et réparation électrique",
+    "icon": "electrical_services",
+    "image": "assets/images/categories/electricite.png",
+    "isActive": true,
+    "prestataireCount": 6,
+    "createdAt": "2023-01-01T00:00:00Z"
+  },
+  {
+    "id": "c7",
+    "name": "Plomberie",
+    "description": "Installation et réparation de plomberie",
+    "icon": "plumbing",
+    "image": "assets/images/categories/plomberie.png",
+    "isActive": true,
+    "prestataireCount": 9,
+    "createdAt": "2023-01-01T00:00:00Z"
+  },
+  {
+    "id": "c8",
+    "name": "Beauté",
+    "description": "Services de coiffure et soins esthétiques",
+    "icon": "face",
+    "image": "assets/images/categories/beaute.png",
+    "isActive": true,
+    "prestataireCount": 14,
+    "createdAt": "2023-01-01T00:00:00Z"
+  }
+]

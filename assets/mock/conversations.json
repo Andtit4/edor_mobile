@@ -1,0 +1,88 @@
+[
+  {
+    "id": "conv1",
+    "clientId": "user1",
+    "prestataireId": "p1",
+    "clientName": "Jean Dupont",
+    "prestataireName": "Kossi Agbéto",
+    "clientAvatar": "assets/images/avatars/jean.png",
+    "prestataireAvatar": "assets/images/avatars/kossi.png",
+    "lastMessage": "Parfait, je serai là à 14h demain !",
+    "lastMessageTime": "2024-12-08T16:45:00Z",
+    "unreadCount": 0,
+    "messages": [
+      {
+        "id": "msg1",
+        "conversationId": "conv1",
+        "senderId": "user1",
+        "content": "Bonjour, j'aurais besoin d'aide pour monter un meuble IKEA",
+        "type": "text",
+        "isRead": true,
+        "createdAt": "2024-12-08T10:30:00Z"
+      },
+      {
+        "id": "msg2",
+        "conversationId": "conv1",
+        "senderId": "p1",
+        "content": "Bonjour ! Pas de problème, quel type de meuble ?",
+        "type": "text",
+        "isRead": true,
+        "createdAt": "2024-12-08T10:32:00Z"
+      },
+      {
+        "id": "msg3",
+        "conversationId": "conv1",
+        "senderId": "user1",
+        "content": "Une armoire 3 portes. Vous pourriez venir demain après-midi ?",
+        "type": "text",
+        "isRead": true,
+        "createdAt": "2024-12-08T10:35:00Z"
+      },
+      {
+        "id": "msg4",
+        "conversationId": "conv1",
+        "senderId": "p1",
+        "content": "Parfait, je serai là à 14h demain !",
+        "type": "text",
+        "isRead": true,
+        "createdAt": "2024-12-08T16:45:00Z"
+      }
+    ],
+    "createdAt": "2024-12-08T10:30:00Z",
+    "updatedAt": "2024-12-08T16:45:00Z"
+  },
+  {
+    "id": "conv2",
+    "clientId": "user1",
+    "prestataireId": "p2",
+    "clientName": "Jean Dupont",
+    "prestataireName": "Ama Koffi",
+    "clientAvatar": "assets/images/avatars/jean.png",
+    "prestataireAvatar": "assets/images/avatars/ama.png",
+    "lastMessage": "Merci pour votre message, je reviens vers vous",
+    "lastMessageTime": "2024-12-08T14:20:00Z",
+    "unreadCount": 2,
+    "messages": [
+      {
+        "id": "msg5",
+        "conversationId": "conv2",
+        "senderId": "user1",
+        "content": "Bonjour, êtes-vous disponible pour un ménage complet cette semaine ?",
+        "type": "text",
+        "isRead": true,
+        "createdAt": "2024-12-08T14:15:00Z"
+      },
+      {
+        "id": "msg6",
+        "conversationId": "conv2",
+        "senderId": "p2",
+        "content": "Merci pour votre message, je reviens vers vous",
+        "type": "text",
+        "isRead": false,
+        "createdAt": "2024-12-08T14:20:00Z"
+      }
+    ],
+    "createdAt": "2024-12-08T14:15:00Z",
+    "updatedAt": "2024-12-08T14:20:00Z"
+  }
+]
