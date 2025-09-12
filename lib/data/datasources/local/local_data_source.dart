@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/errors/exceptions.dart';
 
 abstract class LocalDataSource {
-  Future<Map<String, dynamic>> loadAssetJson(String assetPath);
+  Future<dynamic> loadAssetJson(String assetPath);
   Future<void> saveToCache(String key, Map<String, dynamic> data);
   Future<Map<String, dynamic>?> getFromCache(String key);
   Future<void> clearCache();
@@ -16,10 +16,10 @@ class LocalDataSourceImpl implements LocalDataSource {
   LocalDataSourceImpl({required this.sharedPreferences});
 
   @override
-  Future<Map<String, dynamic>> loadAssetJson(String assetPath) async {
+  Future<dynamic> loadAssetJson(String assetPath) async {
     try {
       final String jsonString = await rootBundle.loadString(assetPath);
-      return json.decode(jsonString) as Map<String, dynamic>;
+      return json.decode(jsonString);
     } catch (e) {
       throw CacheException(
         message: 'Erreur lors du chargement de $assetPath: $e',

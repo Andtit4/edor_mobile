@@ -7,6 +7,25 @@ class AppColors {
   static const Color accentYellow = Color(0xFFF9A825);
   static const Color backgroundLight = Color(0xFFF7F8FA);
 
+  // New colors for modern design
+  static const Color purple = Color(0xFF8B5CF6);
+  static const Color purpleDark = Color(0xFF7C3AED);
+  static const Color lightGray = Color(0xFFF8F9FA);
+  static const Color textSecondary = Color(0xFF6B7280);
+  static const Color borderColor = Color(0xFFE5E7EB);
+  static const Color socialButtonBg = Color(0xFFF3F4F6);
+
+  // Activity Feed Colors
+  static const Color activityCardBg = Color(0xFFFFFFFF);
+  static const Color activityBorder = Color(0xFFF1F3F4);
+  static const Color activityText = Color(0xFF1F2937);
+  static const Color activityTextSecondary = Color(0xFF6B7280);
+  static const Color activityTime = Color(0xFF9CA3AF);
+  static const Color activityButton = Color(0xFF3B82F6);
+  static const Color activityButtonText = Color(0xFFFFFFFF);
+  static const Color activityLike = Color(0xFFEF4444);
+  static const Color activityComment = Color(0xFF6B7280);
+
   // Light Theme Colors
   static const Color surfaceLight = Color(0xFFFFFFFF);
   static const Color onSurfaceLight = Color(0xFF1C1B1F);
@@ -52,4 +71,20 @@ class AppColors {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+
+  // New gradient for modern design
+  static const LinearGradient purpleGradient = LinearGradient(
+    colors: [purple, purpleDark],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  // Activity card shadow
+  static List<BoxShadow> get activityCardShadow => [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.05),
+      blurRadius: 10,
+      offset: const Offset(0, 2),
+    ),
+  ];
 }

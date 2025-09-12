@@ -2,40 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTextStyles {
-  // Headings
-  static TextStyle get h1 => GoogleFonts.inter(
+  // Headings - Police plus élégante
+  static TextStyle get h1 => GoogleFonts.poppins(
     fontSize: 32,
     fontWeight: FontWeight.w700,
     height: 1.25,
+    letterSpacing: -0.5,
   );
 
-  static TextStyle get h2 => GoogleFonts.inter(
+  static TextStyle get h2 => GoogleFonts.poppins(
     fontSize: 28,
     fontWeight: FontWeight.w600,
     height: 1.29,
+    letterSpacing: -0.3,
   );
 
-  static TextStyle get h3 => GoogleFonts.inter(
+  static TextStyle get h3 => GoogleFonts.poppins(
     fontSize: 24,
     fontWeight: FontWeight.w600,
     height: 1.33,
+    letterSpacing: -0.2,
   );
 
-  static TextStyle get h4 =>
-      GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w500, height: 1.4);
+  static TextStyle get h4 => GoogleFonts.poppins(
+    fontSize: 20,
+    fontWeight: FontWeight.w500,
+    height: 1.4,
+    letterSpacing: -0.1,
+  );
 
-  static TextStyle get h5 => GoogleFonts.inter(
+  static TextStyle get h5 => GoogleFonts.poppins(
     fontSize: 18,
     fontWeight: FontWeight.w500,
     height: 1.44,
   );
 
-  static TextStyle get h6 =>
-      GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500, height: 1.5);
+  static TextStyle get h6 => GoogleFonts.poppins(
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+    height: 1.5,
+  );
 
-  // Body Text
-  static TextStyle get bodyLarge =>
-      GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w400, height: 1.5);
+  // Body Text - Police plus lisible
+  static TextStyle get bodyLarge => GoogleFonts.inter(
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    height: 1.5,
+  );
 
   static TextStyle get bodyMedium => GoogleFonts.inter(
     fontSize: 14,
@@ -49,7 +62,7 @@ class AppTextStyles {
     height: 1.33,
   );
 
-  // Labels
+  // Labels - Police plus moderne
   static TextStyle get labelLarge => GoogleFonts.inter(
     fontSize: 14,
     fontWeight: FontWeight.w500,
@@ -68,23 +81,26 @@ class AppTextStyles {
     height: 1.45,
   );
 
-  // Buttons
+  // Buttons - Police plus impactante
   static TextStyle get buttonLarge => GoogleFonts.inter(
     fontSize: 16,
     fontWeight: FontWeight.w600,
     height: 1.25,
+    letterSpacing: 0.1,
   );
 
   static TextStyle get buttonMedium => GoogleFonts.inter(
     fontSize: 14,
     fontWeight: FontWeight.w600,
     height: 1.29,
+    letterSpacing: 0.1,
   );
 
   static TextStyle get buttonSmall => GoogleFonts.inter(
     fontSize: 12,
     fontWeight: FontWeight.w600,
     height: 1.33,
+    letterSpacing: 0.1,
   );
 
   // Caption
@@ -99,5 +115,30 @@ class AppTextStyles {
     fontWeight: FontWeight.w500,
     height: 1.6,
     letterSpacing: 1.5,
+  );
+
+  // Styles spéciaux pour l'UI moderne
+  static TextStyle get cardTitle => GoogleFonts.poppins(
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    height: 1.25,
+  );
+
+  static TextStyle get cardSubtitle => GoogleFonts.inter(
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+    height: 1.33,
+  );
+
+  static TextStyle get activityTime => GoogleFonts.inter(
+    fontSize: 11,
+    fontWeight: FontWeight.w400,
+    height: 1.27,
+  );
+
+  static TextStyle get activityContent => GoogleFonts.inter(
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
+    height: 1.43,
   );
 }

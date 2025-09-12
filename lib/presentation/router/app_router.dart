@@ -12,6 +12,8 @@ import '../screens/messages/messages_screen.dart';
 import '../screens/messages/chat_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import 'app_routes.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -160,7 +162,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-// Wrapper pour les routes principales avec bottom navigation
+// Wrapper pour les routes principales avec bottom navigation moderne
 class MainWrapper extends ConsumerWidget {
   final Widget child;
 
@@ -169,16 +171,104 @@ class MainWrapper extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
+      backgroundColor: AppColors.lightGray,
       body: child,
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _getCurrentIndex(context),
-        onTap: (index) => _onTap(context, index),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
-          BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Messages'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(
+                  context: context,
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home,
+                  label: 'Home',
+                  isActive: _getCurrentIndex(context) == 0,
+                  onTap: () => context.go(AppRoutes.home),
+                ),
+                _buildNavItem(
+                  context: context,
+                  icon: Icons.work_outline,
+                  activeIcon: Icons.work,
+                  label: 'Jobs',
+                  isActive: _getCurrentIndex(context) == 1,
+                  onTap: () {
+                    // TODO: Naviguer vers les jobs
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Jobs section - Coming soon')),
+                    );
+                  },
+                ),
+                _buildNavItem(
+                  context: context,
+                  icon: Icons.message_outlined,
+                  activeIcon: Icons.message,
+                  label: 'Message',
+                  isActive: _getCurrentIndex(context) == 2,
+                  onTap: () => context.go(AppRoutes.messages),
+                ),
+                _buildNavItem(
+                  context: context,
+                  icon: Icons.more_horiz_outlined,
+                  activeIcon: Icons.more_horiz,
+                  label: 'More',
+                  isActive: _getCurrentIndex(context) == 3,
+                  onTap: () => context.go(AppRoutes.profile),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required BuildContext context,
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.purple.withOpacity(0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isActive ? activeIcon : icon,
+              color: isActive ? AppColors.purple : AppColors.activityTextSecondary,
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: AppTextStyles.labelSmall.copyWith(
+                color: isActive ? AppColors.purple : AppColors.activityTextSecondary,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -186,22 +276,8 @@ class MainWrapper extends ConsumerWidget {
   int _getCurrentIndex(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
 
-    if (location.startsWith(AppRoutes.messages)) return 1;
-    if (location == AppRoutes.profile) return 2;
+    if (location.startsWith(AppRoutes.messages)) return 2;
+    if (location == AppRoutes.profile) return 3;
     return 0; // home par défaut
-  }
-
-  void _onTap(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        context.go(AppRoutes.home);
-        break;
-      case 1:
-        context.go(AppRoutes.messages);
-        break;
-      case 2:
-        context.go(AppRoutes.profile);
-        break;
-    }
   }
 }

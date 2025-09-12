@@ -14,13 +14,23 @@ class PrestataireRepositoryImpl implements PrestataireRepository {
   @override
   Future<Either<Failure, List<Prestataire>>> getAllPrestataires() async {
     try {
-      final prestatairesList = await localDataSource.loadAssetJson(
+      final prestatairesData = await localDataSource.loadAssetJson(
         'assets/mock/prestataires.json',
       );
-      final prestataires =
-          (prestatairesList as List<dynamic>)
-              .map((json) => Prestataire.fromJson(json as Map<String, dynamic>))
-              .toList();
+      
+      // Gérer les deux cas : array direct ou object avec array
+      List<dynamic> prestatairesList;
+      if (prestatairesData is List) {
+        prestatairesList = prestatairesData;
+      } else if (prestatairesData is Map<String, dynamic>) {
+        prestatairesList = prestatairesData['prestataires'] as List<dynamic>? ?? [];
+      } else {
+        throw const CacheException(message: 'Format de données invalide');
+      }
+      
+      final prestataires = prestatairesList
+          .map((json) => Prestataire.fromJson(json as Map<String, dynamic>))
+          .toList();
 
       return Right(prestataires);
     } on CacheException catch (e) {
@@ -37,14 +47,13 @@ class PrestataireRepositoryImpl implements PrestataireRepository {
     try {
       final result = await getAllPrestataires();
       return result.fold((failure) => Left(failure), (prestataires) {
-        final filtered =
-            prestataires
-                .where(
-                  (p) => p.category.toLowerCase().contains(
-                    categoryId.toLowerCase(),
-                  ),
-                )
-                .toList();
+        final filtered = prestataires
+            .where(
+              (p) => p.category.toLowerCase().contains(
+                categoryId.toLowerCase(),
+              ),
+            )
+            .toList();
         return Right(filtered);
       });
     } catch (e) {
@@ -59,18 +68,17 @@ class PrestataireRepositoryImpl implements PrestataireRepository {
     try {
       final result = await getAllPrestataires();
       return result.fold((failure) => Left(failure), (prestataires) {
-        final filtered =
-            prestataires
-                .where(
-                  (p) =>
-                      p.name.toLowerCase().contains(query.toLowerCase()) ||
-                      p.category.toLowerCase().contains(query.toLowerCase()) ||
-                      p.skills.any(
-                        (skill) =>
-                            skill.toLowerCase().contains(query.toLowerCase()),
-                      ),
-                )
-                .toList();
+        final filtered = prestataires
+            .where(
+              (p) =>
+                  p.name.toLowerCase().contains(query.toLowerCase()) ||
+                  p.category.toLowerCase().contains(query.toLowerCase()) ||
+                  p.skills.any(
+                    (skill) =>
+                        skill.toLowerCase().contains(query.toLowerCase()),
+                  ),
+            )
+            .toList();
         return Right(filtered);
       });
     } catch (e) {
@@ -85,9 +93,8 @@ class PrestataireRepositoryImpl implements PrestataireRepository {
       return result.fold((failure) => Left(failure), (prestataires) {
         final prestataire = prestataires.firstWhere(
           (p) => p.id == id,
-          orElse:
-              () =>
-                  throw const CacheException(message: 'Prestataire non trouvé'),
+          orElse: () =>
+              throw const CacheException(message: 'Prestataire non trouvé'),
         );
         return Right(prestataire);
       });
@@ -101,13 +108,23 @@ class PrestataireRepositoryImpl implements PrestataireRepository {
   @override
   Future<Either<Failure, List<Category>>> getCategories() async {
     try {
-      final categoriesList = await localDataSource.loadAssetJson(
+      final categoriesData = await localDataSource.loadAssetJson(
         'assets/mock/categories.json',
       );
-      final categories =
-          (categoriesList as List<dynamic>)
-              .map((json) => Category.fromJson(json as Map<String, dynamic>))
-              .toList();
+      
+      // Gérer les deux cas : array direct ou object avec array
+      List<dynamic> categoriesList;
+      if (categoriesData is List) {
+        categoriesList = categoriesData;
+      } else if (categoriesData is Map<String, dynamic>) {
+        categoriesList = categoriesData['categories'] as List<dynamic>? ?? [];
+      } else {
+        throw const CacheException(message: 'Format de données invalide');
+      }
+      
+      final categories = categoriesList
+          .map((json) => Category.fromJson(json as Map<String, dynamic>))
+          .toList();
 
       return Right(categories);
     } on CacheException catch (e) {

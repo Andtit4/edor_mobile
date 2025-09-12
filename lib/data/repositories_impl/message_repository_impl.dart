@@ -14,15 +14,23 @@ class MessageRepositoryImpl implements MessageRepository {
   @override
   Future<Either<Failure, List<Conversation>>> getConversations() async {
     try {
-      final conversationsList = await localDataSource.loadAssetJson(
+      final conversationsData = await localDataSource.loadAssetJson(
         'assets/mock/conversations.json',
       );
-      final conversations =
-          (conversationsList as List<dynamic>)
-              .map(
-                (json) => Conversation.fromJson(json as Map<String, dynamic>),
-              )
-              .toList();
+      
+      // Gérer les deux cas : array direct ou object avec array
+      List<dynamic> conversationsList;
+      if (conversationsData is List) {
+        conversationsList = conversationsData;
+      } else if (conversationsData is Map<String, dynamic>) {
+        conversationsList = conversationsData['conversations'] as List<dynamic>? ?? [];
+      } else {
+        throw const CacheException(message: 'Format de données invalide');
+      }
+      
+      final conversations = conversationsList
+          .map((json) => Conversation.fromJson(json as Map<String, dynamic>))
+          .toList();
 
       return Right(conversations);
     } on CacheException catch (e) {
@@ -41,11 +49,10 @@ class MessageRepositoryImpl implements MessageRepository {
       return result.fold((failure) => Left(failure), (conversations) {
         final conversation = conversations.firstWhere(
           (c) => c.id == conversationId,
-          orElse:
-              () =>
-                  throw const CacheException(
-                    message: 'Conversation non trouvée',
-                  ),
+          orElse: () =>
+              throw const CacheException(
+                message: 'Conversation non trouvée',
+              ),
         );
         return Right(conversation);
       });
@@ -78,20 +85,18 @@ class MessageRepositoryImpl implements MessageRepository {
     required MessageType type,
   }) async {
     try {
-      // Pour le MVP, créer un nouveau message temporaire
-      final newMessage = Message(
+      // Pour le MVP, créer un message temporaire
+      final message = Message(
         id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
         conversationId: conversationId,
-        senderId: 'current_user', // Récupérer depuis le cache plus tard
+        senderId: 'current_user',
         content: content,
         type: type,
         isRead: false,
         createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
       );
 
-      // Dans une vraie implémentation, on sauvegarderait en cache ou enverrait au serveur
-      return Right(newMessage);
+      return Right(message);
     } catch (e) {
       return Left(Failure.unknown(message: e.toString()));
     }
@@ -100,9 +105,33 @@ class MessageRepositoryImpl implements MessageRepository {
   @override
   Future<Either<Failure, void>> markMessageAsRead(String messageId) async {
     try {
-      // Pour le MVP, simuler la mise à jour
-      await Future.delayed(const Duration(milliseconds: 100));
-      return const Right(null);
+      // Pour le MVP, on simule juste le marquage comme lu
+      // Dans une vraie app, on ferait une requête API ou on mettrait à jour la base de données locale
+      
+      // Récupérer toutes les conversations
+      final result = await getConversations();
+      return result.fold(
+        (failure) => Left(failure),
+        (conversations) {
+          // Chercher le message dans toutes les conversations
+          for (final conversation in conversations) {
+            final messageIndex = conversation.messages.indexWhere(
+              (msg) => msg.id == messageId,
+            );
+            
+            if (messageIndex != -1) {
+              // Message trouvé - dans une vraie app, on le marquerait comme lu
+              // Pour le MVP, on retourne juste un succès
+              return const Right(null);
+            }
+          }
+          
+          // Message non trouvé
+          return const Left(
+            Failure.cache(message: 'Message non trouvé'),
+          );
+        },
+      );
     } catch (e) {
       return Left(Failure.unknown(message: e.toString()));
     }
