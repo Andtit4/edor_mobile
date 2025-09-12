@@ -44,59 +44,59 @@ class AppTextStyles {
   );
 
   // Body Text - Police plus lisible
-  static TextStyle get bodyLarge => GoogleFonts.inter(
+  static TextStyle get bodyLarge => GoogleFonts.poppins(
     fontSize: 16,
     fontWeight: FontWeight.w400,
     height: 1.5,
   );
 
-  static TextStyle get bodyMedium => GoogleFonts.inter(
+  static TextStyle get bodyMedium => GoogleFonts.poppins(
     fontSize: 14,
     fontWeight: FontWeight.w400,
     height: 1.43,
   );
 
-  static TextStyle get bodySmall => GoogleFonts.inter(
+  static TextStyle get bodySmall => GoogleFonts.poppins(
     fontSize: 12,
     fontWeight: FontWeight.w400,
     height: 1.33,
   );
 
   // Labels - Police plus moderne
-  static TextStyle get labelLarge => GoogleFonts.inter(
+  static TextStyle get labelLarge => GoogleFonts.poppins(
     fontSize: 14,
     fontWeight: FontWeight.w500,
     height: 1.43,
   );
 
-  static TextStyle get labelMedium => GoogleFonts.inter(
+  static TextStyle get labelMedium => GoogleFonts.poppins(
     fontSize: 12,
     fontWeight: FontWeight.w500,
     height: 1.33,
   );
 
-  static TextStyle get labelSmall => GoogleFonts.inter(
+  static TextStyle get labelSmall => GoogleFonts.poppins(
     fontSize: 11,
     fontWeight: FontWeight.w500,
     height: 1.45,
   );
 
   // Buttons - Police plus impactante
-  static TextStyle get buttonLarge => GoogleFonts.inter(
+  static TextStyle get buttonLarge => GoogleFonts.poppins(
     fontSize: 16,
     fontWeight: FontWeight.w600,
     height: 1.25,
     letterSpacing: 0.1,
   );
 
-  static TextStyle get buttonMedium => GoogleFonts.inter(
+  static TextStyle get buttonMedium => GoogleFonts.poppins(
     fontSize: 14,
     fontWeight: FontWeight.w600,
     height: 1.29,
     letterSpacing: 0.1,
   );
 
-  static TextStyle get buttonSmall => GoogleFonts.inter(
+  static TextStyle get buttonSmall => GoogleFonts.poppins(
     fontSize: 12,
     fontWeight: FontWeight.w600,
     height: 1.33,
@@ -104,13 +104,13 @@ class AppTextStyles {
   );
 
   // Caption
-  static TextStyle get caption => GoogleFonts.inter(
+  static TextStyle get caption => GoogleFonts.poppins(
     fontSize: 12,
     fontWeight: FontWeight.w400,
     height: 1.33,
   );
 
-  static TextStyle get overline => GoogleFonts.inter(
+  static TextStyle get overline => GoogleFonts.poppins(
     fontSize: 10,
     fontWeight: FontWeight.w500,
     height: 1.6,
@@ -124,19 +124,19 @@ class AppTextStyles {
     height: 1.25,
   );
 
-  static TextStyle get cardSubtitle => GoogleFonts.inter(
+  static TextStyle get cardSubtitle => GoogleFonts.poppins(
     fontSize: 12,
     fontWeight: FontWeight.w400,
     height: 1.33,
   );
 
-  static TextStyle get activityTime => GoogleFonts.inter(
+  static TextStyle get activityTime => GoogleFonts.poppins(
     fontSize: 11,
     fontWeight: FontWeight.w400,
     height: 1.27,
   );
 
-  static TextStyle get activityContent => GoogleFonts.inter(
+  static TextStyle get activityContent => GoogleFonts.poppins(
     fontSize: 14,
     fontWeight: FontWeight.w400,
     height: 1.43,

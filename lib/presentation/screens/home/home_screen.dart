@@ -46,7 +46,7 @@ class HomeScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Activity',
+                                'Activités',
                                 style: AppTextStyles.h1.copyWith(
                                   color: AppColors.activityText,
                                   fontWeight: FontWeight.bold,
@@ -54,8 +54,8 @@ class HomeScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Stay updated with your latest activities',
-                                style: AppTextStyles.bodyMedium.copyWith(
+                                'Restez informé de vos dernières activités',
+                                style: AppTextStyles.bodySmall.copyWith(
                                   color: AppColors.activityTextSecondary,
                                 ),
                               ),
