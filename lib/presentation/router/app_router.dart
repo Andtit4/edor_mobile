@@ -1,5 +1,4 @@
 import 'package:edor/presentation/screens/job/job_screen.dart';
-import 'package:edor/presentation/screens/profile/edit_profile_screeb.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +12,7 @@ import '../screens/reservation/reservation_screen.dart';
 import '../screens/messages/messages_screen.dart';
 import '../screens/messages/chat_screen.dart';
 import '../screens/profile/profile_screen.dart';
+import '../widgets/animated_bottom_nav.dart';
 import 'app_routes.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -85,11 +85,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const HomeScreen(),
           ),
 
-          // Jobs
+          // Jobs - Utiliser HomeScreen temporairement
           GoRoute(
             path: AppRoutes.jobs,
             name: AppRoutes.jobsName,
-            builder: (context, state) => const JobsScreen(),
+            builder: (context, state) => const JobsScreen(), // Temporaire
           ),
 
           // Messages
@@ -117,13 +117,6 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: AppRoutes.profileName,
             builder: (context, state) => const ProfileScreen(),
           ),
-
-          GoRoute(
-        path: AppRoutes.editProfile,
-        name: AppRoutes.editProfileName,
-        builder: (context, state) => const EditProfileScreen(),
-      ),
-
         ],
       ),
 
@@ -176,26 +169,72 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-// Wrapper pour les routes principales avec bottom navigation
-class MainWrapper extends ConsumerWidget {
+// Wrapper pour les routes principales avec bottom navigation animée
+class MainWrapper extends ConsumerStatefulWidget {
   final Widget child;
 
   const MainWrapper({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MainWrapper> createState() => _MainWrapperState();
+}
+
+class _MainWrapperState extends ConsumerState<MainWrapper>
+    with TickerProviderStateMixin {
+  late AnimationController _fabAnimationController;
+  late Animation<double> _fabAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _fabAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _fabAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fabAnimationController,
+      curve: Curves.elasticOut,
+    ));
+    _fabAnimationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _fabAnimationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      body: child,
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
+      backgroundColor: const Color(0xFFF8F9FA),
+      body: Stack(
+        children: [
+          widget.child,
+          // Floating Action Button
+          /* AnimatedBuilder(
+            animation: _fabAnimation,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _fabAnimation.value,
+                child: FloatingActionButton(
+                  onPressed: () {
+                    _showQuickActionSheet(context);
+                  },
+                  backgroundColor: const Color(0xFF8B5CF6),
+                  child: const Icon(Icons.add, color: Colors.white),
+                ),
+              );
+            },
+          ), */
+        ],
+      ),
+      bottomNavigationBar: AnimatedBottomNav(
         currentIndex: _getCurrentIndex(context),
         onTap: (index) => _onTap(context, index),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
-          BottomNavigationBarItem(icon: Icon(Icons.work), label: 'Jobs'),
-          BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Messages'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
       ),
     );
   }
@@ -224,5 +263,149 @@ class MainWrapper extends ConsumerWidget {
         context.go(AppRoutes.profile);
         break;
     }
+  }
+
+  void _showQuickActionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.4,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            // Handle
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            
+            // Title
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                'Actions rapides',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            
+            // Actions
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 2,
+                padding: const EdgeInsets.all(20),
+                children: [
+                  _buildQuickAction(
+                    context: context,
+                    icon: Icons.search,
+                    title: 'Rechercher',
+                    subtitle: 'Trouver des services',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go(AppRoutes.home);
+                    },
+                  ),
+                  _buildQuickAction(
+                    context: context,
+                    icon: Icons.message,
+                    title: 'Messages',
+                    subtitle: 'Voir les conversations',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go(AppRoutes.messages);
+                    },
+                  ),
+                  _buildQuickAction(
+                    context: context,
+                    icon: Icons.person,
+                    title: 'Profil',
+                    subtitle: 'Gérer mon compte',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go(AppRoutes.profile);
+                    },
+                  ),
+                  _buildQuickAction(
+                    context: context,
+                    icon: Icons.work,
+                    title: 'Jobs',
+                    subtitle: 'Voir les emplois',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go(AppRoutes.jobs);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickAction({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8F9FA),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF8B5CF6).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: const Color(0xFF8B5CF6),
+                size: 24,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
