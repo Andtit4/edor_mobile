@@ -22,15 +22,22 @@ User _$UserFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$User {
   String get id => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
+  String get firstName => throw _privateConstructorUsedError;
+  String get lastName => throw _privateConstructorUsedError;
+  String get phone => throw _privateConstructorUsedError;
   UserRole get role => throw _privateConstructorUsedError;
-  String? get avatar => throw _privateConstructorUsedError;
-  String? get phone => throw _privateConstructorUsedError;
-  String? get location => throw _privateConstructorUsedError;
-  String? get description => throw _privateConstructorUsedError;
-  bool get isOnline => throw _privateConstructorUsedError;
-  DateTime? get lastSeen => throw _privateConstructorUsedError;
+  String? get profileImage => throw _privateConstructorUsedError;
+  String? get address => throw _privateConstructorUsedError;
+  String? get city => throw _privateConstructorUsedError;
+  String? get postalCode => throw _privateConstructorUsedError;
+  String? get bio => throw _privateConstructorUsedError;
+  double? get rating => throw _privateConstructorUsedError;
+  int? get reviewCount => throw _privateConstructorUsedError;
+  List<String>? get skills =>
+      throw _privateConstructorUsedError; // Pour les prestataires
+  List<String>? get categories =>
+      throw _privateConstructorUsedError; // Pour les prestataires
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -50,15 +57,20 @@ abstract class $UserCopyWith<$Res> {
   @useResult
   $Res call({
     String id,
-    String name,
     String email,
+    String firstName,
+    String lastName,
+    String phone,
     UserRole role,
-    String? avatar,
-    String? phone,
-    String? location,
-    String? description,
-    bool isOnline,
-    DateTime? lastSeen,
+    String? profileImage,
+    String? address,
+    String? city,
+    String? postalCode,
+    String? bio,
+    double? rating,
+    int? reviewCount,
+    List<String>? skills,
+    List<String>? categories,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -80,15 +92,20 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
   @override
   $Res call({
     Object? id = null,
-    Object? name = null,
     Object? email = null,
+    Object? firstName = null,
+    Object? lastName = null,
+    Object? phone = null,
     Object? role = null,
-    Object? avatar = freezed,
-    Object? phone = freezed,
-    Object? location = freezed,
-    Object? description = freezed,
-    Object? isOnline = null,
-    Object? lastSeen = freezed,
+    Object? profileImage = freezed,
+    Object? address = freezed,
+    Object? city = freezed,
+    Object? postalCode = freezed,
+    Object? bio = freezed,
+    Object? rating = freezed,
+    Object? reviewCount = freezed,
+    Object? skills = freezed,
+    Object? categories = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -99,51 +116,76 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
                     ? _value.id
                     : id // ignore: cast_nullable_to_non_nullable
                         as String,
-            name:
-                null == name
-                    ? _value.name
-                    : name // ignore: cast_nullable_to_non_nullable
-                        as String,
             email:
                 null == email
                     ? _value.email
                     : email // ignore: cast_nullable_to_non_nullable
+                        as String,
+            firstName:
+                null == firstName
+                    ? _value.firstName
+                    : firstName // ignore: cast_nullable_to_non_nullable
+                        as String,
+            lastName:
+                null == lastName
+                    ? _value.lastName
+                    : lastName // ignore: cast_nullable_to_non_nullable
+                        as String,
+            phone:
+                null == phone
+                    ? _value.phone
+                    : phone // ignore: cast_nullable_to_non_nullable
                         as String,
             role:
                 null == role
                     ? _value.role
                     : role // ignore: cast_nullable_to_non_nullable
                         as UserRole,
-            avatar:
-                freezed == avatar
-                    ? _value.avatar
-                    : avatar // ignore: cast_nullable_to_non_nullable
+            profileImage:
+                freezed == profileImage
+                    ? _value.profileImage
+                    : profileImage // ignore: cast_nullable_to_non_nullable
                         as String?,
-            phone:
-                freezed == phone
-                    ? _value.phone
-                    : phone // ignore: cast_nullable_to_non_nullable
+            address:
+                freezed == address
+                    ? _value.address
+                    : address // ignore: cast_nullable_to_non_nullable
                         as String?,
-            location:
-                freezed == location
-                    ? _value.location
-                    : location // ignore: cast_nullable_to_non_nullable
+            city:
+                freezed == city
+                    ? _value.city
+                    : city // ignore: cast_nullable_to_non_nullable
                         as String?,
-            description:
-                freezed == description
-                    ? _value.description
-                    : description // ignore: cast_nullable_to_non_nullable
+            postalCode:
+                freezed == postalCode
+                    ? _value.postalCode
+                    : postalCode // ignore: cast_nullable_to_non_nullable
                         as String?,
-            isOnline:
-                null == isOnline
-                    ? _value.isOnline
-                    : isOnline // ignore: cast_nullable_to_non_nullable
-                        as bool,
-            lastSeen:
-                freezed == lastSeen
-                    ? _value.lastSeen
-                    : lastSeen // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
+            bio:
+                freezed == bio
+                    ? _value.bio
+                    : bio // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            rating:
+                freezed == rating
+                    ? _value.rating
+                    : rating // ignore: cast_nullable_to_non_nullable
+                        as double?,
+            reviewCount:
+                freezed == reviewCount
+                    ? _value.reviewCount
+                    : reviewCount // ignore: cast_nullable_to_non_nullable
+                        as int?,
+            skills:
+                freezed == skills
+                    ? _value.skills
+                    : skills // ignore: cast_nullable_to_non_nullable
+                        as List<String>?,
+            categories:
+                freezed == categories
+                    ? _value.categories
+                    : categories // ignore: cast_nullable_to_non_nullable
+                        as List<String>?,
             createdAt:
                 freezed == createdAt
                     ? _value.createdAt
@@ -170,15 +212,20 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
   @useResult
   $Res call({
     String id,
-    String name,
     String email,
+    String firstName,
+    String lastName,
+    String phone,
     UserRole role,
-    String? avatar,
-    String? phone,
-    String? location,
-    String? description,
-    bool isOnline,
-    DateTime? lastSeen,
+    String? profileImage,
+    String? address,
+    String? city,
+    String? postalCode,
+    String? bio,
+    double? rating,
+    int? reviewCount,
+    List<String>? skills,
+    List<String>? categories,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -197,15 +244,20 @@ class __$$UserImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? name = null,
     Object? email = null,
+    Object? firstName = null,
+    Object? lastName = null,
+    Object? phone = null,
     Object? role = null,
-    Object? avatar = freezed,
-    Object? phone = freezed,
-    Object? location = freezed,
-    Object? description = freezed,
-    Object? isOnline = null,
-    Object? lastSeen = freezed,
+    Object? profileImage = freezed,
+    Object? address = freezed,
+    Object? city = freezed,
+    Object? postalCode = freezed,
+    Object? bio = freezed,
+    Object? rating = freezed,
+    Object? reviewCount = freezed,
+    Object? skills = freezed,
+    Object? categories = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -216,51 +268,76 @@ class __$$UserImplCopyWithImpl<$Res>
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
                     as String,
-        name:
-            null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                    as String,
         email:
             null == email
                 ? _value.email
                 : email // ignore: cast_nullable_to_non_nullable
+                    as String,
+        firstName:
+            null == firstName
+                ? _value.firstName
+                : firstName // ignore: cast_nullable_to_non_nullable
+                    as String,
+        lastName:
+            null == lastName
+                ? _value.lastName
+                : lastName // ignore: cast_nullable_to_non_nullable
+                    as String,
+        phone:
+            null == phone
+                ? _value.phone
+                : phone // ignore: cast_nullable_to_non_nullable
                     as String,
         role:
             null == role
                 ? _value.role
                 : role // ignore: cast_nullable_to_non_nullable
                     as UserRole,
-        avatar:
-            freezed == avatar
-                ? _value.avatar
-                : avatar // ignore: cast_nullable_to_non_nullable
+        profileImage:
+            freezed == profileImage
+                ? _value.profileImage
+                : profileImage // ignore: cast_nullable_to_non_nullable
                     as String?,
-        phone:
-            freezed == phone
-                ? _value.phone
-                : phone // ignore: cast_nullable_to_non_nullable
+        address:
+            freezed == address
+                ? _value.address
+                : address // ignore: cast_nullable_to_non_nullable
                     as String?,
-        location:
-            freezed == location
-                ? _value.location
-                : location // ignore: cast_nullable_to_non_nullable
+        city:
+            freezed == city
+                ? _value.city
+                : city // ignore: cast_nullable_to_non_nullable
                     as String?,
-        description:
-            freezed == description
-                ? _value.description
-                : description // ignore: cast_nullable_to_non_nullable
+        postalCode:
+            freezed == postalCode
+                ? _value.postalCode
+                : postalCode // ignore: cast_nullable_to_non_nullable
                     as String?,
-        isOnline:
-            null == isOnline
-                ? _value.isOnline
-                : isOnline // ignore: cast_nullable_to_non_nullable
-                    as bool,
-        lastSeen:
-            freezed == lastSeen
-                ? _value.lastSeen
-                : lastSeen // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
+        bio:
+            freezed == bio
+                ? _value.bio
+                : bio // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        rating:
+            freezed == rating
+                ? _value.rating
+                : rating // ignore: cast_nullable_to_non_nullable
+                    as double?,
+        reviewCount:
+            freezed == reviewCount
+                ? _value.reviewCount
+                : reviewCount // ignore: cast_nullable_to_non_nullable
+                    as int?,
+        skills:
+            freezed == skills
+                ? _value._skills
+                : skills // ignore: cast_nullable_to_non_nullable
+                    as List<String>?,
+        categories:
+            freezed == categories
+                ? _value._categories
+                : categories // ignore: cast_nullable_to_non_nullable
+                    as List<String>?,
         createdAt:
             freezed == createdAt
                 ? _value.createdAt
@@ -281,18 +358,24 @@ class __$$UserImplCopyWithImpl<$Res>
 class _$UserImpl implements _User {
   const _$UserImpl({
     required this.id,
-    required this.name,
     required this.email,
+    required this.firstName,
+    required this.lastName,
+    required this.phone,
     required this.role,
-    this.avatar,
-    this.phone,
-    this.location,
-    this.description,
-    this.isOnline = false,
-    this.lastSeen,
+    this.profileImage,
+    this.address,
+    this.city,
+    this.postalCode,
+    this.bio,
+    this.rating,
+    this.reviewCount,
+    final List<String>? skills,
+    final List<String>? categories,
     this.createdAt,
     this.updatedAt,
-  });
+  }) : _skills = skills,
+       _categories = categories;
 
   factory _$UserImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserImplFromJson(json);
@@ -300,24 +383,52 @@ class _$UserImpl implements _User {
   @override
   final String id;
   @override
-  final String name;
-  @override
   final String email;
+  @override
+  final String firstName;
+  @override
+  final String lastName;
+  @override
+  final String phone;
   @override
   final UserRole role;
   @override
-  final String? avatar;
+  final String? profileImage;
   @override
-  final String? phone;
+  final String? address;
   @override
-  final String? location;
+  final String? city;
   @override
-  final String? description;
+  final String? postalCode;
   @override
-  @JsonKey()
-  final bool isOnline;
+  final String? bio;
   @override
-  final DateTime? lastSeen;
+  final double? rating;
+  @override
+  final int? reviewCount;
+  final List<String>? _skills;
+  @override
+  List<String>? get skills {
+    final value = _skills;
+    if (value == null) return null;
+    if (_skills is EqualUnmodifiableListView) return _skills;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
+  // Pour les prestataires
+  final List<String>? _categories;
+  // Pour les prestataires
+  @override
+  List<String>? get categories {
+    final value = _categories;
+    if (value == null) return null;
+    if (_categories is EqualUnmodifiableListView) return _categories;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
+  // Pour les prestataires
   @override
   final DateTime? createdAt;
   @override
@@ -325,7 +436,7 @@ class _$UserImpl implements _User {
 
   @override
   String toString() {
-    return 'User(id: $id, name: $name, email: $email, role: $role, avatar: $avatar, phone: $phone, location: $location, description: $description, isOnline: $isOnline, lastSeen: $lastSeen, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'User(id: $id, email: $email, firstName: $firstName, lastName: $lastName, phone: $phone, role: $role, profileImage: $profileImage, address: $address, city: $city, postalCode: $postalCode, bio: $bio, rating: $rating, reviewCount: $reviewCount, skills: $skills, categories: $categories, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -334,19 +445,28 @@ class _$UserImpl implements _User {
         (other.runtimeType == runtimeType &&
             other is _$UserImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name) &&
             (identical(other.email, email) || other.email == email) &&
-            (identical(other.role, role) || other.role == role) &&
-            (identical(other.avatar, avatar) || other.avatar == avatar) &&
+            (identical(other.firstName, firstName) ||
+                other.firstName == firstName) &&
+            (identical(other.lastName, lastName) ||
+                other.lastName == lastName) &&
             (identical(other.phone, phone) || other.phone == phone) &&
-            (identical(other.location, location) ||
-                other.location == location) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
-            (identical(other.isOnline, isOnline) ||
-                other.isOnline == isOnline) &&
-            (identical(other.lastSeen, lastSeen) ||
-                other.lastSeen == lastSeen) &&
+            (identical(other.role, role) || other.role == role) &&
+            (identical(other.profileImage, profileImage) ||
+                other.profileImage == profileImage) &&
+            (identical(other.address, address) || other.address == address) &&
+            (identical(other.city, city) || other.city == city) &&
+            (identical(other.postalCode, postalCode) ||
+                other.postalCode == postalCode) &&
+            (identical(other.bio, bio) || other.bio == bio) &&
+            (identical(other.rating, rating) || other.rating == rating) &&
+            (identical(other.reviewCount, reviewCount) ||
+                other.reviewCount == reviewCount) &&
+            const DeepCollectionEquality().equals(other._skills, _skills) &&
+            const DeepCollectionEquality().equals(
+              other._categories,
+              _categories,
+            ) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -358,15 +478,20 @@ class _$UserImpl implements _User {
   int get hashCode => Object.hash(
     runtimeType,
     id,
-    name,
     email,
-    role,
-    avatar,
+    firstName,
+    lastName,
     phone,
-    location,
-    description,
-    isOnline,
-    lastSeen,
+    role,
+    profileImage,
+    address,
+    city,
+    postalCode,
+    bio,
+    rating,
+    reviewCount,
+    const DeepCollectionEquality().hash(_skills),
+    const DeepCollectionEquality().hash(_categories),
     createdAt,
     updatedAt,
   );
@@ -388,15 +513,20 @@ class _$UserImpl implements _User {
 abstract class _User implements User {
   const factory _User({
     required final String id,
-    required final String name,
     required final String email,
+    required final String firstName,
+    required final String lastName,
+    required final String phone,
     required final UserRole role,
-    final String? avatar,
-    final String? phone,
-    final String? location,
-    final String? description,
-    final bool isOnline,
-    final DateTime? lastSeen,
+    final String? profileImage,
+    final String? address,
+    final String? city,
+    final String? postalCode,
+    final String? bio,
+    final double? rating,
+    final int? reviewCount,
+    final List<String>? skills,
+    final List<String>? categories,
     final DateTime? createdAt,
     final DateTime? updatedAt,
   }) = _$UserImpl;
@@ -406,23 +536,33 @@ abstract class _User implements User {
   @override
   String get id;
   @override
-  String get name;
-  @override
   String get email;
+  @override
+  String get firstName;
+  @override
+  String get lastName;
+  @override
+  String get phone;
   @override
   UserRole get role;
   @override
-  String? get avatar;
+  String? get profileImage;
   @override
-  String? get phone;
+  String? get address;
   @override
-  String? get location;
+  String? get city;
   @override
-  String? get description;
+  String? get postalCode;
   @override
-  bool get isOnline;
+  String? get bio;
   @override
-  DateTime? get lastSeen;
+  double? get rating;
+  @override
+  int? get reviewCount;
+  @override
+  List<String>? get skills; // Pour les prestataires
+  @override
+  List<String>? get categories; // Pour les prestataires
   @override
   DateTime? get createdAt;
   @override

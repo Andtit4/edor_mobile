@@ -3,15 +3,18 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../router/app_routes.dart';
+import '../../domain/entities/user.dart';
 
 class AnimatedBottomNav extends StatefulWidget {
   final int currentIndex;
   final Function(int) onTap;
+  final User? user;
 
   const AnimatedBottomNav({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    this.user,
   });
 
   @override
@@ -23,38 +26,11 @@ class _AnimatedBottomNavState extends State<AnimatedBottomNav>
   late List<AnimationController> _controllers;
   late List<Animation<double>> _animations;
 
-  final List<NavItem> _navItems = [
-    NavItem(
-      icon: Icons.home_outlined,
-      activeIcon: Icons.home,
-      label: 'Accueil',
-      route: AppRoutes.home,
-    ),
-    NavItem(
-      icon: Icons.work_outline,
-      activeIcon: Icons.work,
-      label: 'Jobs',
-      route: AppRoutes.jobs,
-    ),
-    NavItem(
-      icon: Icons.message_outlined,
-      activeIcon: Icons.message,
-      label: 'Messages',
-      route: AppRoutes.messages,
-    ),
-    NavItem(
-      icon: Icons.person_outline,
-      activeIcon: Icons.person,
-      label: 'Profil',
-      route: AppRoutes.profile,
-    ),
-  ];
-
   @override
   void initState() {
     super.initState();
     _controllers = List.generate(
-      _navItems.length,
+      _getNavItems().length,
       (index) => AnimationController(
         duration: const Duration(milliseconds: 200),
         vsync: this,
@@ -74,8 +50,68 @@ class _AnimatedBottomNavState extends State<AnimatedBottomNav>
     super.dispose();
   }
 
+  List<NavItem> _getNavItems() {
+    if (widget.user?.role == UserRole.prestataire) {
+      return [
+        NavItem(
+          icon: Icons.home_outlined,
+          activeIcon: Icons.home,
+          label: 'Accueil',
+          route: AppRoutes.home,
+        ),
+        NavItem(
+          icon: Icons.request_quote_outlined,
+          activeIcon: Icons.request_quote,
+          label: 'Demandes',
+          route: AppRoutes.serviceRequests,
+        ),
+        NavItem(
+          icon: Icons.message_outlined,
+          activeIcon: Icons.message,
+          label: 'Messages',
+          route: AppRoutes.messages,
+        ),
+        NavItem(
+          icon: Icons.person_outline,
+          activeIcon: Icons.person,
+          label: 'Profil',
+          route: AppRoutes.profile,
+        ),
+      ];
+    } else {
+      return [
+        NavItem(
+          icon: Icons.home_outlined,
+          activeIcon: Icons.home,
+          label: 'Accueil',
+          route: AppRoutes.home,
+        ),
+        NavItem(
+          icon: Icons.search_outlined,
+          activeIcon: Icons.search,
+          label: 'Rechercher',
+          route: AppRoutes.serviceOffers,
+        ),
+        NavItem(
+          icon: Icons.message_outlined,
+          activeIcon: Icons.message,
+          label: 'Messages',
+          route: AppRoutes.messages,
+        ),
+        NavItem(
+          icon: Icons.person_outline,
+          activeIcon: Icons.person,
+          label: 'Profil',
+          route: AppRoutes.profile,
+        ),
+      ];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final navItems = _getNavItems();
+    
     return Container(
       height: 80,
       decoration: BoxDecoration(
@@ -90,7 +126,7 @@ class _AnimatedBottomNavState extends State<AnimatedBottomNav>
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(_navItems.length, (index) {
+        children: List.generate(navItems.length, (index) {
           final isActive = widget.currentIndex == index;
           return Expanded(
             child: GestureDetector(
@@ -114,7 +150,7 @@ class _AnimatedBottomNavState extends State<AnimatedBottomNav>
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
-                        isActive ? _navItems[index].activeIcon : _navItems[index].icon,
+                        isActive ? navItems[index].activeIcon : navItems[index].icon,
                         color: isActive ? const Color(0xFF8B5CF6) : Colors.grey[600],
                         size: 24,
                       ),
@@ -127,7 +163,7 @@ class _AnimatedBottomNavState extends State<AnimatedBottomNav>
                         fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                         color: isActive ? const Color(0xFF8B5CF6) : Colors.grey[600],
                       ),
-                      child: Text(_navItems[index].label),
+                      child: Text(navItems[index].label),
                     ),
                   ],
                 ),

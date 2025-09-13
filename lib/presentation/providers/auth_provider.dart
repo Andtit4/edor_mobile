@@ -109,7 +109,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> register({
-    required String name,
+    required String firstName,
+    required String lastName,
+    required String phone,
     required String email,
     required String password,
     required UserRole role,
@@ -117,7 +119,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
 
     final result = await _authRepository.register(
-      name: name,
+      firstName: firstName,
+      lastName: lastName,
+      phone: phone,
       email: email,
       password: password,
       role: role,

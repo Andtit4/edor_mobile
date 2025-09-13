@@ -1,136 +1,103 @@
 import 'package:flutter/material.dart';
-
-enum ButtonVariant { primary, secondary, outline, text }
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 
 class CustomButton extends StatelessWidget {
-  final Widget child;
+  final String text;
   final VoidCallback? onPressed;
-  final ButtonVariant variant;
   final bool isLoading;
-  final bool isExpanded;
-  final EdgeInsetsGeometry? padding;
-  final Size? minimumSize;
+  final Color? backgroundColor;
+  final Color? textColor;
+  final double? width;
+  final double? height;
+  final ButtonSize size;
 
   const CustomButton({
     super.key,
-    required this.child,
+    required this.text,
     this.onPressed,
-    this.variant = ButtonVariant.primary,
     this.isLoading = false,
-    this.isExpanded = true,
-    this.padding,
-    this.minimumSize,
+    this.backgroundColor,
+    this.textColor,
+    this.width,
+    this.height,
+    this.size = ButtonSize.medium,
   });
 
   @override
   Widget build(BuildContext context) {
-    Widget button;
-
-    if (isLoading) {
-      final loadingIndicator = SizedBox(
-        width: 20,
-        height: 20,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(
-            variant == ButtonVariant.primary
-                ? Colors.white
-                : Theme.of(context).colorScheme.primary,
+    return SizedBox(
+      width: width ?? double.infinity,
+      height: height ?? _getHeight(),
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor ?? AppColors.primaryBlue,
+          foregroundColor: textColor ?? Colors.white,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
+          padding: _getPadding(),
         ),
-      );
+        child: isLoading
+            ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    textColor ?? Colors.white,
+                  ),
+                ),
+              )
+            : Text(
+                text,
+                style: _getTextStyle(),
+              ),
+      ),
+    );
+  }
 
-      switch (variant) {
-        case ButtonVariant.primary:
-          button = ElevatedButton(
-            onPressed: null,
-            style: ElevatedButton.styleFrom(
-              padding: padding,
-              minimumSize: minimumSize,
-            ),
-            child: loadingIndicator,
-          );
-          break;
-        case ButtonVariant.secondary:
-          button = ElevatedButton(
-            onPressed: null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.secondary,
-              padding: padding,
-              minimumSize: minimumSize,
-            ),
-            child: loadingIndicator,
-          );
-          break;
-        case ButtonVariant.outline:
-          button = OutlinedButton(
-            onPressed: null,
-            style: OutlinedButton.styleFrom(
-              padding: padding,
-              minimumSize: minimumSize,
-            ),
-            child: loadingIndicator,
-          );
-          break;
-        case ButtonVariant.text:
-          button = TextButton(
-            onPressed: null,
-            style: TextButton.styleFrom(
-              padding: padding,
-              minimumSize: minimumSize,
-            ),
-            child: loadingIndicator,
-          );
-          break;
-      }
-    } else {
-      switch (variant) {
-        case ButtonVariant.primary:
-          button = ElevatedButton(
-            onPressed: onPressed,
-            style: ElevatedButton.styleFrom(
-              padding: padding,
-              minimumSize: minimumSize,
-            ),
-            child: child,
-          );
-          break;
-        case ButtonVariant.secondary:
-          button = ElevatedButton(
-            onPressed: onPressed,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.secondary,
-              padding: padding,
-              minimumSize: minimumSize,
-            ),
-            child: child,
-          );
-          break;
-        case ButtonVariant.outline:
-          button = OutlinedButton(
-            onPressed: onPressed,
-            style: OutlinedButton.styleFrom(
-              padding: padding,
-              minimumSize: minimumSize,
-            ),
-            child: child,
-          );
-          break;
-        case ButtonVariant.text:
-          button = TextButton(
-            onPressed: onPressed,
-            style: TextButton.styleFrom(
-              padding: padding,
-              minimumSize: minimumSize,
-            ),
-            child: child,
-          );
-          break;
-      }
+  double _getHeight() {
+    switch (size) {
+      case ButtonSize.small:
+        return 40;
+      case ButtonSize.medium:
+        return 48;
+      case ButtonSize.large:
+        return 56;
     }
+  }
 
-    return isExpanded
-        ? SizedBox(width: double.infinity, child: button)
-        : button;
+  EdgeInsets _getPadding() {
+    switch (size) {
+      case ButtonSize.small:
+        return const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
+      case ButtonSize.medium:
+        return const EdgeInsets.symmetric(horizontal: 20, vertical: 12);
+      case ButtonSize.large:
+        return const EdgeInsets.symmetric(horizontal: 24, vertical: 16);
+    }
+  }
+
+  TextStyle _getTextStyle() {
+    switch (size) {
+      case ButtonSize.small:
+        return AppTextStyles.buttonSmall.copyWith(
+          color: textColor ?? Colors.white,
+        );
+      case ButtonSize.medium:
+        return AppTextStyles.buttonMedium.copyWith(
+          color: textColor ?? Colors.white,
+        );
+      case ButtonSize.large:
+        return AppTextStyles.buttonLarge.copyWith(
+          color: textColor ?? Colors.white,
+        );
+    }
   }
 }
+
+enum ButtonSize { small, medium, large }

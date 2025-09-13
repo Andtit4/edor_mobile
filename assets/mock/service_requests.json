@@ -1,0 +1,48 @@
+[{
+        "id": "req_1",
+        "title": "Réparation de robinet qui fuit",
+        "description": "J'ai un robinet dans ma cuisine qui fuit constamment. J'ai besoin d'un plombier pour le réparer rapidement.",
+        "category": "Plomberie",
+        "clientId": "user_1",
+        "clientName": "Marie Dubois",
+        "clientPhone": "+33 6 12 34 56 78",
+        "location": "Paris 15ème",
+        "budget": 80.0,
+        "createdAt": "2024-01-15T10:30:00Z",
+        "deadline": "2024-01-20T18:00:00Z",
+        "status": "pending",
+        "notes": "Urgent, eau qui coule partout"
+    },
+    {
+        "id": "req_2",
+        "title": "Installation de prises électriques",
+        "description": "Besoin d'installer 3 nouvelles prises électriques dans le salon. Câblage déjà préparé.",
+        "category": "Électricité",
+        "clientId": "user_2",
+        "clientName": "Pierre Martin",
+        "clientPhone": "+33 6 98 76 54 32",
+        "location": "Lyon 3ème",
+        "budget": 150.0,
+        "createdAt": "2024-01-14T14:20:00Z",
+        "deadline": "2024-01-25T17:00:00Z",
+        "status": "pending",
+        "notes": "Prévoir certificat de conformité"
+    },
+    {
+        "id": "req_3",
+        "title": "Peinture d'une chambre",
+        "description": "Peinture complète d'une chambre de 12m². Murs et plafond. Couleur choisie : blanc cassé.",
+        "category": "Peinture",
+        "clientId": "user_3",
+        "clientName": "Sophie Leroy",
+        "clientPhone": "+33 6 55 44 33 22",
+        "location": "Marseille 8ème",
+        "budget": 200.0,
+        "createdAt": "2024-01-13T09:15:00Z",
+        "deadline": "2024-01-30T16:00:00Z",
+        "status": "in_progress",
+        "assignedPrestataireId": "prest_1",
+        "prestataireName": "Jean Plombier",
+        "notes": "Matériel fourni par le client"
+    }
+]

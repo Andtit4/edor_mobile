@@ -63,17 +63,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           width: 2,
                         ),
                       ),
-                      child: currentUser?.avatar != null
+                      child: currentUser?.email != null
                           ? ClipOval(
                               child: Image.network(
-                                currentUser!.avatar!,
+                                currentUser!.email!,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
-                                  return _buildAvatarFallback(currentUser.name);
+                                  return _buildAvatarFallback(currentUser.firstName);
                                 },
                               ),
                             )
-                          : _buildAvatarFallback(currentUser?.name ?? 'U'),
+                          : _buildAvatarFallback(currentUser?.firstName ?? 'U'),
                     ),
                     const SizedBox(width: 16),
                     
@@ -83,7 +83,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            currentUser?.name ?? 'Scarlett Davis',
+                            currentUser?.firstName ?? 'Scarlett Davis',
                             style: AppTextStyles.h5.copyWith(
                               color: AppColors.activityText,
                               fontWeight: FontWeight.bold,

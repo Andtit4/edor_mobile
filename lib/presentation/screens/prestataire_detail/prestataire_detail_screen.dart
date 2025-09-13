@@ -372,8 +372,9 @@ class PrestataireDetailScreen extends ConsumerWidget {
                           const SnackBar(content: Text('Chat à venir')),
                         );
                       },
-                      variant: ButtonVariant.outline,
-                      child: const Text('Contacter'),
+                      // variant: ButtonVariant.outline,
+                      text: 'Contacter',
+                      // child: const Text('Contacter'),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -388,9 +389,8 @@ class PrestataireDetailScreen extends ConsumerWidget {
                                 );
                               }
                               : null,
-                      child: Text(
-                        prestataire.isAvailable ? 'Réserver' : 'Non disponible',
-                      ),
+                      text: prestataire.isAvailable ? 'Réserver' : 'Non disponible',
+                      
                     ),
                   ),
                 ],

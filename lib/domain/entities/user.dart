@@ -9,15 +9,20 @@ enum UserRole { client, prestataire }
 class User with _$User {
   const factory User({
     required String id,
-    required String name,
     required String email,
+    required String firstName,
+    required String lastName,
+    required String phone,
     required UserRole role,
-    String? avatar,
-    String? phone,
-    String? location,
-    String? description,
-    @Default(false) bool isOnline,
-    DateTime? lastSeen,
+    String? profileImage,
+    String? address,
+    String? city,
+    String? postalCode,
+    String? bio,
+    double? rating,
+    int? reviewCount,
+    List<String>? skills, // Pour les prestataires
+    List<String>? categories, // Pour les prestataires
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _User;

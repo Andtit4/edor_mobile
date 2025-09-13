@@ -5,10 +5,14 @@ class AppRoutes {
   static const String register = '/register';
   static const String home = '/';
   static const String jobs = '/jobs';
-  static const String prestataireDetail = '/prestataire';
+  static const String jobDetail = '/job';
+  static const String serviceOffers = '/offers';
+  static const String serviceRequests = '/requests';
+  static const String createRequest = '/create-request';
+  static const String prestataireDetail = '/prestataire/:id';
   static const String reservation = '/reservation';
   static const String messages = '/messages';
-  static const String chat = '/messages/chat';
+  static const String chat = '/messages/chat/:id';
   static const String profile = '/profile';
   static const String editProfile = '/profile/edit';
 
@@ -18,10 +22,14 @@ class AppRoutes {
   static const String registerName = 'register';
   static const String homeName = 'home';
   static const String jobsName = 'jobs';
+  static const String jobDetailName = 'jobDetail';
+  static const String serviceOffersName = 'serviceOffers';
+  static const String serviceRequestsName = 'serviceRequests';
+  static const String createRequestName = 'createRequest';
   static const String prestataireDetailName = 'prestataireDetail';
   static const String reservationName = 'reservation';
   static const String messagesName = 'messages';
   static const String chatName = 'chat';
-  static const String profileName = 'profile';  
+  static const String profileName = 'profile';
   static const String editProfileName = 'editProfile';
 }

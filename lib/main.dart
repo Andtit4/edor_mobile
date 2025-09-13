@@ -1,23 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'presentation/router/app_router.dart';
-import 'presentation/providers/auth_provider.dart';
-import 'presentation/providers/theme_provider.dart';
+import 'presentation/router/app_router.dart'; // Ajouter cet import
 import 'core/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Configurer la barre de statut
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
-  );
-
-  // Initialiser SharedPreferences
+  
   final sharedPreferences = await SharedPreferences.getInstance();
-
+  
   runApp(
     ProviderScope(
       overrides: [
@@ -28,29 +19,22 @@ void main() async {
   );
 }
 
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError();
+});
+
 class EdorApp extends ConsumerWidget {
   const EdorApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(routerProvider);
-    final themeMode = ref.watch(themeModeProvider);
-
+    final router = ref.watch(appRouterProvider); 
+    
     return MaterialApp.router(
-      title: 'EDOR',
-      debugShowCheckedModeBanner: false,
-
-      // Themes
+      title: 'Edor',
       theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode,
-
-      // Navigation
       routerConfig: router,
-
-      // Localisation - À configurer plus tard avec flutter_localizations
-      // locale: const Locale('fr'),
-      // supportedLocales: const [Locale('fr'), Locale('en')],
+      debugShowCheckedModeBanner: false,
     );
   }
 }

@@ -382,7 +382,8 @@ class _ReservationScreenState extends ConsumerState<ReservationScreen> {
                   // Bouton de réservation
                   CustomButton(
                     onPressed: _makeReservation,
-                    child: const Text('Confirmer la réservation'),
+                    text: 'Confirmer la réservation',
+                    // child: const Text('Confirmer la réservation'),
                   ),
 
                   const SizedBox(height: 32),

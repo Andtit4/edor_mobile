@@ -1,4 +1,9 @@
+import 'package:edor/domain/entities/user.dart';
+import 'package:edor/presentation/screens/job/job_detail_screen.dart';
 import 'package:edor/presentation/screens/job/job_screen.dart';
+import 'package:edor/presentation/screens/profile/edit_profile_screeb.dart';
+import 'package:edor/presentation/screens/service_offers/service_offers_screen.dart';
+import 'package:edor/presentation/screens/service_requests/service_requests_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,10 +17,11 @@ import '../screens/reservation/reservation_screen.dart';
 import '../screens/messages/messages_screen.dart';
 import '../screens/messages/chat_screen.dart';
 import '../screens/profile/profile_screen.dart';
+// import '../screens/profile/edit_profile_screen.dart';
 import '../widgets/animated_bottom_nav.dart';
 import 'app_routes.dart';
 
-final routerProvider = Provider<GoRouter>((ref) {
+final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
 
   return GoRouter(
@@ -130,6 +136,36 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
 
+       GoRoute(
+        path: AppRoutes.jobs,
+        name: AppRoutes.jobsName,
+        builder: (context, state) => const JobsScreen(),
+      ),
+
+      // Job Detail (Full Screen)
+      GoRoute(
+        path: '${AppRoutes.jobDetail}/:jobId',
+        name: AppRoutes.jobDetailName,
+        builder: (context, state) {
+          final jobId = state.pathParameters['jobId']!;
+          return JobDetailScreen(jobId: jobId);
+        },
+      ),
+
+       // Service Requests (for prestataires)
+          GoRoute(
+            path: AppRoutes.serviceRequests,
+            name: AppRoutes.serviceRequestsName,
+            builder: (context, state) => const ServiceRequestsScreen(),
+          ),
+
+          // Service Offers (for clients)
+          GoRoute(
+            path: AppRoutes.serviceOffers,
+            name: AppRoutes.serviceOffersName,
+            builder: (context, state) => const ServiceOffersScreen(),
+          ),
+
       // Reservation (Full Screen)
       GoRoute(
         path: '${AppRoutes.reservation}/:prestataireId',
@@ -138,6 +174,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           final prestataireId = state.pathParameters['prestataireId']!;
           return ReservationScreen(prestataireId: prestataireId);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.editProfile,
+        name: AppRoutes.editProfileName,
+        builder: (context, state) => const EditProfileScreen(),
       ),
     ],
     errorBuilder:
@@ -209,59 +250,89 @@ class _MainWrapperState extends ConsumerState<MainWrapper>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: Stack(
-        children: [
-          widget.child,
-          // Floating Action Button
-          /* AnimatedBuilder(
-            animation: _fabAnimation,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: _fabAnimation.value,
-                child: FloatingActionButton(
-                  onPressed: () {
-                    _showQuickActionSheet(context);
+    return Consumer(
+      builder: (context, ref, child) {
+        final authState = ref.watch(authProvider);
+        final user = authState.user;
+        
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8F9FA),
+          body: Stack(
+            children: [
+              widget.child,
+              // Floating Action Button (only for clients)
+              if (user?.role == UserRole.client)
+                AnimatedBuilder(
+                  animation: _fabAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _fabAnimation.value,
+                      child: FloatingActionButton(
+                        onPressed: () {
+                          context.push(AppRoutes.createRequest);
+                        },
+                        backgroundColor: const Color(0xFF8B5CF6),
+                        child: const Icon(Icons.add, color: Colors.white),
+                      ),
+                    );
                   },
-                  backgroundColor: const Color(0xFF8B5CF6),
-                  child: const Icon(Icons.add, color: Colors.white),
                 ),
-              );
-            },
-          ), */
-        ],
-      ),
-      bottomNavigationBar: AnimatedBottomNav(
-        currentIndex: _getCurrentIndex(context),
-        onTap: (index) => _onTap(context, index),
-      ),
+            ],
+          ),
+          bottomNavigationBar: AnimatedBottomNav(
+            currentIndex: _getCurrentIndex(context),
+            onTap: (index) => _onTap(context, index),
+            user: user,
+          ),
+        );
+      },
     );
   }
 
   int _getCurrentIndex(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
 
-    if (location == AppRoutes.jobs) return 1;
+    if (location == AppRoutes.serviceRequests) return 1;
+    if (location == AppRoutes.serviceOffers) return 1;
     if (location.startsWith(AppRoutes.messages)) return 2;
     if (location == AppRoutes.profile) return 3;
     return 0; // home par défaut
   }
 
   void _onTap(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        context.go(AppRoutes.home);
-        break;
-      case 1:
-        context.go(AppRoutes.jobs);
-        break;
-      case 2:
-        context.go(AppRoutes.messages);
-        break;
-      case 3:
-        context.go(AppRoutes.profile);
-        break;
+    final authState = ref.read(authProvider);
+    final user = authState.user;
+    
+    if (user?.role == UserRole.prestataire) {
+      switch (index) {
+        case 0:
+          context.go(AppRoutes.home);
+          break;
+        case 1:
+          context.go(AppRoutes.serviceRequests);
+          break;
+        case 2:
+          context.go(AppRoutes.messages);
+          break;
+        case 3:
+          context.go(AppRoutes.profile);
+          break;
+      }
+    } else {
+      switch (index) {
+        case 0:
+          context.go(AppRoutes.home);
+          break;
+        case 1:
+          context.go(AppRoutes.serviceOffers);
+          break;
+        case 2:
+          context.go(AppRoutes.messages);
+          break;
+        case 3:
+          context.go(AppRoutes.profile);
+          break;
+      }
     }
   }
 

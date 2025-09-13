@@ -9,7 +9,9 @@ abstract class AuthRepository {
   });
 
   Future<Either<Failure, User>> register({
-    required String name,
+    required String firstName,
+    required String lastName,
+    required String phone,
     required String email,
     required String password,
     required UserRole role,

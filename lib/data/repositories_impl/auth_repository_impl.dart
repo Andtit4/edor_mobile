@@ -52,7 +52,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, User>> register({
-    required String name,
+    required String firstName,
+    required String lastName,
+    required String phone,
     required String email,
     required String password,
     required UserRole role,
@@ -61,10 +63,12 @@ class AuthRepositoryImpl implements AuthRepository {
       // Pour le MVP, créer un nouvel utilisateur temporaire
       final newUser = User(
         id: 'user_${DateTime.now().millisecondsSinceEpoch}',
-        name: name,
+        firstName: firstName,
+        lastName: lastName,
+        phone: phone,
         email: email,
         role: role,
-        isOnline: true,
+        // isOnline: true,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );

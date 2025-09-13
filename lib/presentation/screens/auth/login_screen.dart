@@ -248,16 +248,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: CustomButton(
                           onPressed: authState.isLoading ? null : _login,
                           isLoading: authState.isLoading,
-                          variant: ButtonVariant.primary,
-                          isExpanded: true,
-                          padding: EdgeInsets.zero,
-                          child: Text(
+                          // variant: ButtonVariant.primary,
+                          // isExpanded: true,
+                          // padding: EdgeInsets.zero,
+                          text: 'Sign in',
+                          /* child: Text(
                             'Sign in',
                             style: AppTextStyles.buttonLarge.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
                             ),
-                          ),
+                          ), */
                         ),
                       ),
 
