@@ -1,23 +1,20 @@
 // lib/presentation/providers/auth_provider.dart
+import 'dart:async';
+import 'package:edor/domain/repositories/auth_repository.dart';
+import 'package:edor/main.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import '../../data/repositories_impl/auth_repository_impl.dart';
 import '../../data/datasources/local/local_data_source.dart';
 import '../../data/datasources/remote/auth_remote_data_source.dart';
-import '../../data/repositories_impl/auth_repository_impl.dart';
 import '../../domain/entities/user.dart';
-import '../../domain/repositories/auth_repository.dart';
 import '../../core/network/network_info.dart';
-import '../../main.dart';
+import '../../core/errors/failures.dart';
 
 // Providers pour les dépendances
 final localDataSourceProvider = Provider<LocalDataSource>((ref) {
   final sharedPreferences = ref.watch(sharedPreferencesProvider);
   return LocalDataSourceImpl(sharedPreferences: sharedPreferences);
-});
-
-final networkInfoProvider = Provider<NetworkInfo>((ref) {
-  return NetworkInfoImpl();
 });
 
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
@@ -27,11 +24,13 @@ final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  final localDataSource = ref.watch(localDataSourceProvider);
   final remoteDataSource = ref.watch(authRemoteDataSourceProvider);
+  final localDataSource = ref.watch(localDataSourceProvider);
+  final networkInfo = ref.watch(networkInfoProvider);
   return AuthRepositoryImpl(
-    localDataSource: localDataSource,
     remoteDataSource: remoteDataSource,
+    localDataSource: localDataSource,
+    networkInfo: networkInfo,
   );
 });
 

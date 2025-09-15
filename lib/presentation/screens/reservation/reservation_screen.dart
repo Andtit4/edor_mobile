@@ -1,15 +1,18 @@
+// lib/presentation/screens/reservation/reservation_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../providers/prestataire_provider.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../widgets/custom_button.dart';
-import '../../widgets/custom_text_field.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../providers/prestataire_provider.dart';
 
 class ReservationScreen extends ConsumerStatefulWidget {
   final String prestataireId;
 
-  const ReservationScreen({super.key, required this.prestataireId});
+  const ReservationScreen({
+    super.key,
+    required this.prestataireId,
+  });
 
   @override
   ConsumerState<ReservationScreen> createState() => _ReservationScreenState();
@@ -17,28 +20,31 @@ class ReservationScreen extends ConsumerStatefulWidget {
 
 class _ReservationScreenState extends ConsumerState<ReservationScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _descriptionController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
-
-  DateTime? _selectedDate;
-  TimeOfDay? _selectedTime;
-  int _duration = 1; // heures
+  final _descriptionController = TextEditingController();
+  
+  DateTime _selectedDate = DateTime.now();
+  TimeOfDay _selectedTime = TimeOfDay.now();
+  int _duration = 2;
 
   @override
   void dispose() {
-    _descriptionController.dispose();
+    _nameController.dispose();
+    _phoneController.dispose();
     _addressController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
   Future<void> _selectDate() async {
     final date = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().add(const Duration(days: 1)),
+      initialDate: _selectedDate,
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 30)),
     );
-
     if (date != null) {
       setState(() {
         _selectedDate = date;
@@ -49,9 +55,8 @@ class _ReservationScreenState extends ConsumerState<ReservationScreen> {
   Future<void> _selectTime() async {
     final time = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: _selectedTime,
     );
-
     if (time != null) {
       setState(() {
         _selectedTime = time;
@@ -59,339 +64,368 @@ class _ReservationScreenState extends ConsumerState<ReservationScreen> {
     }
   }
 
-  void _makeReservation() {
-    if (_formKey.currentState?.validate() ?? false) {
-      if (_selectedDate == null || _selectedTime == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Veuillez sélectionner une date et une heure'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-        return;
-      }
-
-      // Simuler la réservation
-      showDialog(
-        context: context,
-        builder:
-            (context) => AlertDialog(
-              title: const Text('Réservation confirmée !'),
-              content: const Text(
-                'Votre demande de réservation a été envoyée au prestataire. '
-                'Vous recevrez une confirmation sous peu.',
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    context.pop(); // Retour à l'écran précédent
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
+  void _submitReservation() {
+    if (_formKey.currentState!.validate()) {
+      // Logique de réservation
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Réservation envoyée avec succès!'),
+          backgroundColor: Colors.green,
+        ),
       );
+      context.pop();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final prestataireAsync = ref.watch(
+    final prestataireState = ref.watch(
       prestataireProvider(widget.prestataireId),
     );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Réservation')),
-      body: prestataireAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Erreur: $error')),
-        data: (prestataire) {
-          if (prestataire == null) {
-            return const Center(child: Text('Prestataire non trouvé'));
-          }
+      body: _buildBody(context, prestataireState),
+    );
+  }
 
-          final totalPrice = prestataire.pricePerHour * _duration;
+  Widget _buildBody(BuildContext context, PrestataireState state) {
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Info prestataire
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundColor: AppColors.primaryBlue.withOpacity(
-                              0.1,
-                            ),
-                            child: Text(
-                              prestataire.name.isNotEmpty
-                                  ? prestataire.name[0].toUpperCase()
-                                  : '?',
+    if (state.error != null) {
+      return Center(child: Text('Erreur: ${state.error}'));
+    }
+
+    final prestataire = state.prestataire;
+    if (prestataire == null) {
+      return const Center(child: Text('Prestataire non trouvé'));
+    }
+
+    final totalPrice = prestataire.pricePerHour * _duration;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Info prestataire
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundImage: prestataire.avatar != null 
+                          ? NetworkImage(prestataire.avatar!) 
+                          : null,
+                      child: prestataire.avatar == null 
+                          ? Text(
+                              prestataire.name.isNotEmpty ? prestataire.name[0].toUpperCase() : 'P',
                               style: const TextStyle(
-                                fontSize: 24,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.primaryBlue,
+                                color: Colors.white,
                               ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  prestataire.name,
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  prestataire.category,
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(color: AppColors.gray600),
-                                ),
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.star,
-                                      size: 16,
-                                      color: AppColors.accentYellow,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      '${prestataire.rating} (${prestataire.totalReviews} avis)',
-                                      style:
-                                          Theme.of(context).textTheme.bodySmall,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                            )
+                          : null,
                     ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Date et heure
-                  Text(
-                    'Date et heure',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Card(
-                          child: ListTile(
-                            leading: const Icon(Icons.calendar_today),
-                            title: Text(
-                              _selectedDate != null
-                                  ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
-                                  : 'Sélectionner une date',
-                            ),
-                            onTap: _selectDate,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Card(
-                          child: ListTile(
-                            leading: const Icon(Icons.access_time),
-                            title: Text(
-                              _selectedTime != null
-                                  ? '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}'
-                                  : 'Sélectionner l\'heure',
-                            ),
-                            onTap: _selectTime,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Durée
-                  Text(
-                    'Durée',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Nombre d\'heures :'),
-                              Row(
-                                children: [
-                                  IconButton(
-                                    onPressed:
-                                        _duration > 1
-                                            ? () => setState(() => _duration--)
-                                            : null,
-                                    icon: const Icon(Icons.remove),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 8,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: AppColors.gray300,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      '$_duration h',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    onPressed:
-                                        _duration < 8
-                                            ? () => setState(() => _duration++)
-                                            : null,
-                                    icon: const Icon(Icons.add),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Description
-                  CustomTextField(
-                    controller: _descriptionController,
-                    label: 'Description du travail',
-                    hint: 'Décrivez précisément le travail à effectuer...',
-                    maxLines: 4,
-                    validator: (value) {
-                      if (value?.isEmpty ?? true) {
-                        return 'Veuillez décrire le travail à effectuer';
-                      }
-                      return null;
-                    },
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Adresse
-                  CustomTextField(
-                    controller: _addressController,
-                    label: 'Adresse',
-                    hint: 'Où le travail doit-il être effectué ?',
-                    validator: (value) {
-                      if (value?.isEmpty ?? true) {
-                        return 'Veuillez indiquer l\'adresse';
-                      }
-                      return null;
-                    },
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Récapitulatif des coûts
-                  Card(
-                    color: AppColors.primaryBlue.withOpacity(0.05),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
+                    const SizedBox(width: 16),
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Récapitulatif',
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
+                            prestataire.name,
+                            style: AppTextStyles.h4.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Tarif horaire:'),
-                              Text('${prestataire.pricePerHour} FCFA'),
-                            ],
+                          Text(
+                            prestataire.category,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: Colors.grey[600],
+                            ),
                           ),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Durée:'),
-                              Text(
-                                '$_duration heure${_duration > 1 ? 's' : ''}',
-                              ),
-                            ],
+                          Text(
+                            '${prestataire.pricePerHour}€/h',
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              color: const Color(0xFF8B5CF6),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                          const Divider(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Total:',
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                '$totalPrice FCFA',
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primaryBlue,
-                                ),
-                              ),
-                            ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Informations personnelles
+            Text(
+              'Informations personnelles',
+              style: AppTextStyles.h4.copyWith(
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1F2937),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Nom complet',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez entrer votre nom';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _phoneController,
+              decoration: const InputDecoration(
+                labelText: 'Téléphone',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.phone,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez entrer votre téléphone';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _addressController,
+              decoration: const InputDecoration(
+                labelText: 'Adresse',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 2,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez entrer votre adresse';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+
+            // Date et heure
+            Text(
+              'Date et heure',
+              style: AppTextStyles.h4.copyWith(
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1F2937),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: _selectDate,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[300]!),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.calendar_today),
+                          const SizedBox(width: 12),
+                          Text(
+                            '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                            style: AppTextStyles.bodyMedium,
                           ),
                         ],
                       ),
                     ),
                   ),
-
-                  const SizedBox(height: 32),
-
-                  // Bouton de réservation
-                  CustomButton(
-                    onPressed: _makeReservation,
-                    text: 'Confirmer la réservation',
-                    // child: const Text('Confirmer la réservation'),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: InkWell(
+                    onTap: _selectTime,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[300]!),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.access_time),
+                          const SizedBox(width: 12),
+                          Text(
+                            _selectedTime.format(context),
+                            style: AppTextStyles.bodyMedium,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
 
-                  const SizedBox(height: 32),
+            // Durée
+            Text(
+              'Durée',
+              style: AppTextStyles.h4.copyWith(
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1F2937),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: _duration > 1 ? () => setState(() => _duration--) : null,
+                  icon: const Icon(Icons.remove_circle_outline),
+                ),
+                Text(
+                  '$_duration heures',
+                  style: AppTextStyles.h4.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                IconButton(
+                  onPressed: _duration < 8 ? () => setState(() => _duration++) : null,
+                  icon: const Icon(Icons.add_circle_outline),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Description
+            Text(
+              'Description du service',
+              style: AppTextStyles.h4.copyWith(
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1F2937),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _descriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Décrivez vos besoins...',
+                border: OutlineInputBorder(),
+                alignLabelWithHint: true,
+              ),
+              maxLines: 4,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez décrire vos besoins';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+
+            // Résumé et prix
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[200]!),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Durée:',
+                        style: AppTextStyles.bodyMedium,
+                      ),
+                      Text(
+                        '$_duration heures',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Prix par heure:',
+                        style: AppTextStyles.bodyMedium,
+                      ),
+                      Text(
+                        '${prestataire.pricePerHour}€',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total:',
+                        style: AppTextStyles.h4.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        '${totalPrice}€',
+                        style: AppTextStyles.h4.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF8B5CF6),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
-          );
-        },
+            const SizedBox(height: 24),
+
+            // Bouton de réservation
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _submitReservation,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF8B5CF6),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Confirmer la réservation',
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }

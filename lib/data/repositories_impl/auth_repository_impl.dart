@@ -1,4 +1,5 @@
 // lib/data/repositories_impl/auth_repository_impl.dart
+import 'package:edor/core/network/network_info.dart';
 import 'package:fpdart/fpdart.dart';
 import '../../core/errors/failures.dart';
 import '../../core/errors/exceptions.dart';
@@ -13,7 +14,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   AuthRepositoryImpl({
     required this.localDataSource,
-    required this.remoteDataSource,
+    required this.remoteDataSource, required NetworkInfo networkInfo,
   });
 
   // lib/data/repositories_impl/auth_repository_impl.dart

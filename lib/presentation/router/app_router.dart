@@ -1,10 +1,12 @@
+// lib/presentation/router/app_router.dart
+import 'dart:async';
 import 'package:edor/domain/entities/user.dart';
 import 'package:edor/presentation/screens/job/job_detail_screen.dart';
 import 'package:edor/presentation/screens/job/job_screen.dart';
 import 'package:edor/presentation/screens/profile/edit_profile_screeb.dart';
 import 'package:edor/presentation/screens/service_offers/service_offers_screen.dart';
 import 'package:edor/presentation/screens/service_requests/service_requests_screen.dart';
-import 'package:edor/presentation/screens/create_request/create_request_screen.dart'; // AJOUT
+import 'package:edor/presentation/screens/create_request/create_request_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,7 +20,6 @@ import '../screens/reservation/reservation_screen.dart';
 import '../screens/messages/messages_screen.dart';
 import '../screens/messages/chat_screen.dart';
 import '../screens/profile/profile_screen.dart';
-// import '../screens/profile/edit_profile_screen.dart';
 import '../widgets/animated_bottom_nav.dart';
 import 'app_routes.dart';
 
@@ -26,10 +27,41 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: AppRoutes.splash,
     redirect: (context, state) {
-      // DÉSACTIVER TOUTES LES REDIRECTIONS
-      print('Router redirect called but disabled');
+      final authState = ref.read(authProvider);
+      final isAuthenticated = authState.isAuthenticated;
+      final isLoading = authState.isLoading;
+      final location = state.matchedLocation;
+
+      print('Router redirect: location=$location, isAuthenticated=$isAuthenticated, isLoading=$isLoading');
+
+      // Si on est en train de charger, ne pas rediriger
+      if (isLoading) {
+        print('Router redirect: Still loading, staying on current route');
+        return null;
+      }
+
+      // Si on est sur splash, laisser le splash gérer la redirection
+      if (location == AppRoutes.splash) {
+        print('Router redirect: On splash screen, letting splash handle redirect');
+        return null;
+      }
+
+      // Si pas authentifié et pas sur une route d'auth, rediriger vers login
+      if (!isAuthenticated && !_isAuthRoute(location)) {
+        print('Router redirect: Not authenticated, redirecting to login');
+        return AppRoutes.login;
+      }
+
+      // Si authentifié et sur une route d'auth, rediriger vers home
+      if (isAuthenticated && _isAuthRoute(location)) {
+        print('Router redirect: Authenticated on auth route, redirecting to home');
+        return AppRoutes.home;
+      }
+
+      print('Router redirect: No redirect needed');
       return null;
     },
+    refreshListenable: GoRouterRefreshStream(ref.watch(authProvider.notifier).stream),
     routes: [
       // Splash Screen
       GoRoute(
@@ -70,14 +102,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const JobsScreen(),
           ),
 
-          // Service Offers (for clients) - DÉPLACÉ DANS LE SHELLROUTE
+          // Service Offers (for clients)
           GoRoute(
             path: AppRoutes.serviceOffers,
             name: AppRoutes.serviceOffersName,
             builder: (context, state) => const ServiceOffersScreen(),
           ),
 
-          // Service Requests (for prestataires) - DÉPLACÉ DANS LE SHELLROUTE
+          // Service Requests (for prestataires)
           GoRoute(
             path: AppRoutes.serviceRequests,
             name: AppRoutes.serviceRequestsName,
@@ -112,7 +144,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      // Prestataire Detail (Full Screen) - RESTE EN DEHORS
+      // Prestataire Detail (Full Screen)
       GoRoute(
         path: '${AppRoutes.prestataireDetail}/:prestataireId',
         name: AppRoutes.prestataireDetailName,
@@ -122,7 +154,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
 
-      // Job Detail (Full Screen) - RESTE EN DEHORS
+      // Job Detail (Full Screen)
       GoRoute(
         path: '${AppRoutes.jobDetail}/:jobId',
         name: AppRoutes.jobDetailName,
@@ -132,7 +164,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
 
-      // Reservation (Full Screen) - RESTE EN DEHORS
+      // Reservation (Full Screen)
       GoRoute(
         path: '${AppRoutes.reservation}/:prestataireId',
         name: AppRoutes.reservationName,
@@ -142,14 +174,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
 
-      // Create Request (Full Screen) - AJOUT
+      // Create Request (Full Screen)
       GoRoute(
         path: AppRoutes.createRequest,
         name: AppRoutes.createRequestName,
         builder: (context, state) => const CreateRequestScreen(),
       ),
 
-      // Edit Profile (Full Screen) - RESTE EN DEHORS
+      // Edit Profile (Full Screen)
       GoRoute(
         path: AppRoutes.editProfile,
         name: AppRoutes.editProfileName,
@@ -183,6 +215,29 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ),
   );
 });
+
+// Helper function to check if a route is an auth route
+bool _isAuthRoute(String location) {
+  return location == AppRoutes.login || location == AppRoutes.register;
+}
+
+// Stream notifier pour GoRouter refresh
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<AuthState> stream) {
+    notifyListeners();
+    _subscription = stream.listen(
+      (AuthState _) => notifyListeners(),
+    );
+  }
+
+  late final StreamSubscription _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
 
 // Wrapper pour les routes principales avec bottom navigation animée
 class MainWrapper extends ConsumerStatefulWidget {
