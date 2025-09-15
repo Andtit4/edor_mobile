@@ -4,12 +4,9 @@ import '../../data/datasources/local/local_data_source.dart';
 import '../../data/repositories_impl/auth_repository_impl.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../main.dart'; // Import du sharedPreferencesProvider depuis main.dart
 
 // Providers pour les dépendances
-final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError('SharedPreferences must be initialized in main()');
-});
-
 final localDataSourceProvider = Provider<LocalDataSource>((ref) {
   final sharedPreferences = ref.watch(sharedPreferencesProvider);
   return LocalDataSourceImpl(sharedPreferences: sharedPreferences);
@@ -109,9 +106,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> register({
-    required String firstName,
     required String lastName,
     required String phone,
+    required String firstName,
     required String email,
     required String password,
     required UserRole role,

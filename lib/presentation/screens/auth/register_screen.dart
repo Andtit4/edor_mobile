@@ -187,7 +187,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                       child: _buildRoleCard(
                         UserRole.prestataire,
                         'Prestataire',
-                        'Je propose des services',
+                        'Je propose mes services',
                         Icons.build,
                       ),
                     ),

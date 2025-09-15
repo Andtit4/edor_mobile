@@ -91,11 +91,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const HomeScreen(),
           ),
 
-          // Jobs - Utiliser HomeScreen temporairement
+          // Jobs
           GoRoute(
             path: AppRoutes.jobs,
             name: AppRoutes.jobsName,
-            builder: (context, state) => const JobsScreen(), // Temporaire
+            builder: (context, state) => const JobsScreen(),
+          ),
+
+          // Service Offers (for clients) - DÉPLACÉ DANS LE SHELLROUTE
+          GoRoute(
+            path: AppRoutes.serviceOffers,
+            name: AppRoutes.serviceOffersName,
+            builder: (context, state) => const ServiceOffersScreen(),
+          ),
+
+          // Service Requests (for prestataires) - DÉPLACÉ DANS LE SHELLROUTE
+          GoRoute(
+            path: AppRoutes.serviceRequests,
+            name: AppRoutes.serviceRequestsName,
+            builder: (context, state) => const ServiceRequestsScreen(),
           ),
 
           // Messages
@@ -126,7 +140,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      // Prestataire Detail (Full Screen)
+      // Prestataire Detail (Full Screen) - RESTE EN DEHORS
       GoRoute(
         path: '${AppRoutes.prestataireDetail}/:prestataireId',
         name: AppRoutes.prestataireDetailName,
@@ -136,13 +150,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
 
-       GoRoute(
-        path: AppRoutes.jobs,
-        name: AppRoutes.jobsName,
-        builder: (context, state) => const JobsScreen(),
-      ),
-
-      // Job Detail (Full Screen)
+      // Job Detail (Full Screen) - RESTE EN DEHORS
       GoRoute(
         path: '${AppRoutes.jobDetail}/:jobId',
         name: AppRoutes.jobDetailName,
@@ -152,21 +160,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
 
-       // Service Requests (for prestataires)
-          GoRoute(
-            path: AppRoutes.serviceRequests,
-            name: AppRoutes.serviceRequestsName,
-            builder: (context, state) => const ServiceRequestsScreen(),
-          ),
-
-          // Service Offers (for clients)
-          GoRoute(
-            path: AppRoutes.serviceOffers,
-            name: AppRoutes.serviceOffersName,
-            builder: (context, state) => const ServiceOffersScreen(),
-          ),
-
-      // Reservation (Full Screen)
+      // Reservation (Full Screen) - RESTE EN DEHORS
       GoRoute(
         path: '${AppRoutes.reservation}/:prestataireId',
         name: AppRoutes.reservationName,
@@ -175,38 +169,41 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return ReservationScreen(prestataireId: prestataireId);
         },
       ),
+
+      // Edit Profile (Full Screen) - RESTE EN DEHORS
       GoRoute(
         path: AppRoutes.editProfile,
         name: AppRoutes.editProfileName,
         builder: (context, state) => const EditProfileScreen(),
       ),
+
+      // SUPPRIMER LA ROUTE JOBS DUPLIQUÉE (lignes 139-143)
     ],
-    errorBuilder:
-        (context, state) => Scaffold(
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                Text(
-                  'Page non trouvée',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'La page que vous cherchez n\'existe pas.',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () => context.go(AppRoutes.home),
-                  child: const Text('Retour à l\'accueil'),
-                ),
-              ],
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              'Page non trouvée',
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
-          ),
+            const SizedBox(height: 8),
+            Text(
+              'La page que vous cherchez n\'existe pas.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => context.go(AppRoutes.home),
+              child: const Text('Retour à l\'accueil'),
+            ),
+          ],
         ),
+      ),
+    ),
   );
 });
 

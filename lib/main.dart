@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'presentation/router/app_router.dart'; // Ajouter cet import
+import 'presentation/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
 void main() async {
@@ -19,8 +19,9 @@ void main() async {
   );
 }
 
+// Provider pour SharedPreferences
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError();
+  throw UnimplementedError('SharedPreferences must be initialized in main()');
 });
 
 class EdorApp extends ConsumerWidget {
