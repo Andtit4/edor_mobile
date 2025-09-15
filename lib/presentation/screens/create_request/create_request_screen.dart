@@ -958,10 +958,6 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
       final tokenData = await localDataSource.getFromCache('auth_token');
       final token = tokenData?['token'] as String?;
       
-      print('=== DEBUG TOKEN ===');
-      print('Token from cache: ${token?.substring(0, 20)}...');
-      print('==================');
-      
       if (token == null || token.isEmpty) {
         throw Exception('Token d\'authentification manquant');
       }
@@ -989,11 +985,13 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
           ),
         );
         
+        // Rafraîchir la liste des demandes
+        ref.read(serviceRequestProvider.notifier).loadMyRequests(token);
+        
         // Retourner à l'écran précédent
         context.pop();
       }
     } catch (e) {
-      print('Error creating request: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

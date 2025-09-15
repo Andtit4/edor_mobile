@@ -45,7 +45,7 @@ class ServiceOfferNotifier extends StateNotifier<ServiceOfferState> {
 
   ServiceOfferNotifier(this._remoteDataSource) : super(ServiceOfferState());
 
-  Future<void> loadOffers() async { // Changé de loadServiceOffers à loadOffers
+  Future<void> loadOffers() async {
     state = state.copyWith(isLoading: true, error: null);
     
     try {
@@ -55,6 +55,33 @@ class ServiceOfferNotifier extends StateNotifier<ServiceOfferState> {
         isLoading: false,
       );
     } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+      );
+    }
+  }
+
+  // Ajouter cette méthode
+  Future<void> loadMyOffers(String token) async {
+    print('=== LOAD MY OFFERS ===');
+    print('Token: ${token.substring(0, 20)}...');
+    
+    state = state.copyWith(isLoading: true, error: null);
+    
+    try {
+      final serviceOffers = await _remoteDataSource.getMyServiceOffers(token);
+      print('Received ${serviceOffers.length} offers');
+      for (var offer in serviceOffers) {
+        print('Offer: ${offer.title} - ${offer.status}');
+      }
+      
+      state = state.copyWith(
+        offers: serviceOffers,
+        isLoading: false,
+      );
+    } catch (e) {
+      print('Error loading my offers: $e');
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),
@@ -76,6 +103,15 @@ class ServiceOfferNotifier extends StateNotifier<ServiceOfferState> {
         isLoading: false,
         error: e.toString(),
       );
+    }
+  }
+
+  Future<ServiceOffer?> getOfferById(String id) async {
+    try {
+      return await _remoteDataSource.getServiceOfferById(id);
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return null;
     }
   }
 

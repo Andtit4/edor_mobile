@@ -512,12 +512,6 @@ class _$UserModelImpl implements _UserModel {
   Map<String, dynamic> toJson() {
     return _$$UserModelImplToJson(this);
   }
-  
-  @override
-  User toEntity() {
-    // TODO: implement toEntity
-    throw UnimplementedError();
-  }
 }
 
 abstract class _UserModel implements UserModel {

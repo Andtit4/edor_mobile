@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../domain/entities/service_offer.dart';
+import '../../../domain/entities/service_request.dart';
+import '../../../domain/entities/user.dart';
 import '../../providers/service_offer_provider.dart';
+import '../../providers/service_request_provider.dart';
+import '../../providers/auth_provider.dart';
 import 'package:go_router/go_router.dart';
 // import '../../../router/app_routes.dart';
 
@@ -24,11 +28,31 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     // Charger les données au démarrage
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(serviceOfferProvider.notifier).loadOffers();
+      _loadMyRequests(); // Charger les demandes du client
+      _loadMyOffers(); // Charger les offres du prestataire
     });
+  }
+
+  void _loadMyRequests() {
+    final authState = ref.read(authProvider);
+    final token = authState.token;
+    
+    if (token != null && authState.user?.role == UserRole.client) {
+      ref.read(serviceRequestProvider.notifier).loadMyRequests(token);
+    }
+  }
+
+  void _loadMyOffers() {
+    final authState = ref.read(authProvider);
+    final token = authState.token;
+    
+    if (token != null && authState.user?.role == UserRole.prestataire) {
+      ref.read(serviceOfferProvider.notifier).loadMyOffers(token);
+    }
   }
 
   @override
@@ -40,6 +64,9 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
   @override
   Widget build(BuildContext context) {
     final offerState = ref.watch(serviceOfferProvider);
+    final requestState = ref.watch(serviceRequestProvider);
+    final authState = ref.watch(authProvider);
+    final user = authState.user;
     
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -63,8 +90,11 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildOffersList(offerState.offers),
-                  _buildMyRequests(),
+                  _buildPrestatairesList(), // Premier onglet
+                  _buildOffersList(offerState.offers), // Deuxième onglet
+                  user?.role == UserRole.prestataire
+                    ? _buildMyOffersList(offerState.offers) // Pour les prestataires
+                    : _buildMyRequestsList(requestState.myRequests), // Pour les clients
                 ],
               ),
             ),
@@ -195,31 +225,66 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
   }
 
   Widget _buildTabBar() {
+    final authState = ref.watch(authProvider);
+    final user = authState.user;
+    
     return Container(
-      margin: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color: const Color(0xFF8B5CF6).withOpacity(0.1),
+          color: const Color(0xFF8B5CF6),
           borderRadius: BorderRadius.circular(12),
         ),
-        labelColor: const Color(0xFF8B5CF6),
+        labelColor: Colors.white,
         unselectedLabelColor: Colors.grey[600],
-        labelStyle: const TextStyle(fontWeight: FontWeight.w600),
-        tabs: const [
-          Tab(text: 'Prestataires disponibles'),
-          Tab(text: 'Mes demandes'),
+        labelStyle: AppTextStyles.bodyMedium.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+        tabs: user?.role == UserRole.prestataire 
+          ? const [
+              Tab(text: 'Prestataires'),
+              Tab(text: 'Offres'),
+              Tab(text: 'Mes offres'), // Pour les prestataires
+            ]
+          : const [
+              Tab(text: 'Prestataires'),
+              Tab(text: 'Offres'),
+              Tab(text: 'Mes demandes'), // Pour les clients
+            ],
+      ),
+    );
+  }
+
+  Widget _buildPrestatairesList() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.person_outline,
+            size: 64,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Liste des prestataires',
+            style: AppTextStyles.h3.copyWith(
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Affichez la liste des prestataires disponibles pour vos besoins.',
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: Colors.grey[500],
+            ),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
@@ -271,46 +336,139 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     );
   }
 
-  Widget _buildMyRequests() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.request_quote_outlined,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Aucune demande',
-            style: AppTextStyles.h3.copyWith(
-              color: Colors.grey[600],
+  Widget _buildMyRequestsList(List<ServiceRequest> requests) {
+    final authState = ref.watch(authProvider);
+    
+    // Vérifier que l'utilisateur est un client
+    if (authState.user?.role != UserRole.client) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.person_outline,
+              size: 64,
+              color: Colors.grey,
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Vous n\'avez pas encore envoyé de demandes',
-            style: AppTextStyles.bodyLarge.copyWith(
-              color: Colors.grey[500],
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () => context.push(AppRoutes.createRequest),
-            icon: const Icon(Icons.add),
-            label: const Text('Créer une demande'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8B5CF6),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+            SizedBox(height: 16),
+            Text(
+              'Cette section est réservée aux clients',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      );
+    }
+    
+    if (requests.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.inbox_outlined,
+              size: 64,
+              color: Colors.grey,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Vous n\'avez envoyé aucune demande',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Créez votre première demande de service',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(20),
+      itemCount: requests.length,
+      itemBuilder: (context, index) {
+        final request = requests[index];
+        return _buildRequestCard(request);
+      },
+    );
+  }
+
+  Widget _buildMyOffersList(List<ServiceOffer> offers) {
+    final authState = ref.watch(authProvider);
+    
+    // Vérifier que l'utilisateur est un prestataire
+    if (authState.user?.role != UserRole.prestataire) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.person_outline,
+              size: 64,
+              color: Colors.grey,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Cette section est réservée aux prestataires',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    if (offers.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.add_business_outlined,
+              size: 64,
+              color: Colors.grey,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Vous n\'avez créé aucune offre',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Créez votre première offre de service',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(20),
+      itemCount: offers.length,
+      itemBuilder: (context, index) {
+        final offer = offers[index];
+        return _buildOfferCard(offer);
+      },
     );
   }
 
@@ -534,6 +692,180 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
         ],
       ),
     );
+  }
+
+  Widget _buildRequestCard(ServiceRequest request) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    request.title,
+                    style: AppTextStyles.h4.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1F2937),
+                    ),
+                  ),
+                ),
+                _buildStatusChip(request.status),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              request.description,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Colors.grey[600],
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  Icons.location_on,
+                  size: 16,
+                  color: Colors.grey[600],
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  request.location,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${request.budget.toStringAsFixed(0)} FCFA',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF8B5CF6),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.schedule,
+                  size: 16,
+                  color: Colors.grey[600],
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Échéance: ${_formatDate(request.deadline)}',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const Spacer(),
+                if (request.assignedPrestataireId != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Assigné',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: Colors.green[700],
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusChip(String status) {
+    Color backgroundColor;
+    Color textColor;
+    
+    switch (status.toLowerCase()) {
+      case 'pending':
+        backgroundColor = Colors.orange.withOpacity(0.1);
+        textColor = Colors.orange[700]!;
+        break;
+      case 'accepted':
+        backgroundColor = Colors.blue.withOpacity(0.1);
+        textColor = Colors.blue[700]!;
+        break;
+      case 'in_progress':
+        backgroundColor = Colors.purple.withOpacity(0.1);
+        textColor = Colors.purple[700]!;
+        break;
+      case 'completed':
+        backgroundColor = Colors.green.withOpacity(0.1);
+        textColor = Colors.green[700]!;
+        break;
+      case 'cancelled':
+        backgroundColor = Colors.red.withOpacity(0.1);
+        textColor = Colors.red[700]!;
+        break;
+      default:
+        backgroundColor = Colors.grey.withOpacity(0.1);
+        textColor = Colors.grey[700]!;
+    }
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        _getStatusText(status),
+        style: AppTextStyles.bodySmall.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  String _getStatusText(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'En attente';
+      case 'accepted':
+        return 'Accepté';
+      case 'in_progress':
+        return 'En cours';
+      case 'completed':
+        return 'Terminé';
+      case 'cancelled':
+        return 'Annulé';
+      default:
+        return status;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 
   void _showOfferDetails(ServiceOffer offer) {

@@ -17,26 +17,34 @@ final serviceRequestProvider = StateNotifierProvider<ServiceRequestNotifier, Ser
 });
 
 class ServiceRequestState {
-  final List<ServiceRequest> requests;
+  final List<ServiceRequest> allRequests; // Toutes les demandes
+  final List<ServiceRequest> myRequests; // Mes demandes
+  final List<ServiceRequest> assignedRequests; // Demandes assignées (pour prestataires)
   final bool isLoading;
   final String? error;
   final bool isCreating;
 
   ServiceRequestState({
-    this.requests = const [],
+    this.allRequests = const [],
+    this.myRequests = const [],
+    this.assignedRequests = const [],
     this.isLoading = false,
     this.error,
     this.isCreating = false,
   });
 
   ServiceRequestState copyWith({
-    List<ServiceRequest>? requests,
+    List<ServiceRequest>? allRequests,
+    List<ServiceRequest>? myRequests,
+    List<ServiceRequest>? assignedRequests,
     bool? isLoading,
     String? error,
     bool? isCreating,
   }) {
     return ServiceRequestState(
-      requests: requests ?? this.requests,
+      allRequests: allRequests ?? this.allRequests,
+      myRequests: myRequests ?? this.myRequests,
+      assignedRequests: assignedRequests ?? this.assignedRequests,
       isLoading: isLoading ?? this.isLoading,
       error: error,
       isCreating: isCreating ?? this.isCreating,
@@ -49,13 +57,13 @@ class ServiceRequestNotifier extends StateNotifier<ServiceRequestState> {
 
   ServiceRequestNotifier(this._remoteDataSource) : super(ServiceRequestState());
 
-  Future<void> loadRequests() async {
+  Future<void> loadAllRequests() async {
     state = state.copyWith(isLoading: true, error: null);
     
     try {
       final serviceRequests = await _remoteDataSource.getAllServiceRequests();
       state = state.copyWith(
-        requests: serviceRequests,
+        allRequests: serviceRequests,
         isLoading: false,
       );
     } catch (e) {
@@ -67,15 +75,24 @@ class ServiceRequestNotifier extends StateNotifier<ServiceRequestState> {
   }
 
   Future<void> loadMyRequests(String token) async {
+    print('=== LOAD MY REQUESTS ===');
+    print('Token: ${token.substring(0, 20)}...');
+    
     state = state.copyWith(isLoading: true, error: null);
     
     try {
       final serviceRequests = await _remoteDataSource.getMyServiceRequests(token);
+      print('Received ${serviceRequests.length} requests');
+      for (var request in serviceRequests) {
+        print('Request: ${request.title} - ${request.status}');
+      }
+      
       state = state.copyWith(
-        requests: serviceRequests,
+        myRequests: serviceRequests,
         isLoading: false,
       );
     } catch (e) {
+      print('Error loading my requests: $e');
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),
@@ -89,7 +106,7 @@ class ServiceRequestNotifier extends StateNotifier<ServiceRequestState> {
     try {
       final serviceRequests = await _remoteDataSource.getAssignedServiceRequests(token);
       state = state.copyWith(
-        requests: serviceRequests,
+        assignedRequests: serviceRequests,
         isLoading: false,
       );
     } catch (e) {
@@ -128,9 +145,9 @@ class ServiceRequestNotifier extends StateNotifier<ServiceRequestState> {
         token,
       );
       
-      // Ajouter la nouvelle demande à la liste
+      // Ajouter la nouvelle demande à la liste des demandes de l'utilisateur
       state = state.copyWith(
-        requests: [newRequest, ...state.requests],
+        myRequests: [newRequest, ...state.myRequests], // ✅ Utiliser myRequests
         isCreating: false,
       );
       
@@ -148,12 +165,24 @@ class ServiceRequestNotifier extends StateNotifier<ServiceRequestState> {
     try {
       final updatedRequest = await _remoteDataSource.updateServiceRequest(id, data, token);
       
-      // Mettre à jour la demande dans la liste
-      final updatedRequests = state.requests.map((request) {
+      // Mettre à jour la demande dans toutes les listes
+      final updatedAllRequests = state.allRequests.map((request) {
         return request.id == id ? updatedRequest : request;
       }).toList();
       
-      state = state.copyWith(requests: updatedRequests);
+      final updatedMyRequests = state.myRequests.map((request) {
+        return request.id == id ? updatedRequest : request;
+      }).toList();
+      
+      final updatedAssignedRequests = state.assignedRequests.map((request) {
+        return request.id == id ? updatedRequest : request;
+      }).toList();
+      
+      state = state.copyWith(
+        allRequests: updatedAllRequests,
+        myRequests: updatedMyRequests,
+        assignedRequests: updatedAssignedRequests,
+      );
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
@@ -163,42 +192,105 @@ class ServiceRequestNotifier extends StateNotifier<ServiceRequestState> {
     try {
       await _remoteDataSource.deleteServiceRequest(id, token);
       
-      // Supprimer la demande de la liste
-      final updatedRequests = state.requests.where((request) => request.id != id).toList();
-      state = state.copyWith(requests: updatedRequests);
+      // Supprimer la demande de toutes les listes
+      final updatedAllRequests = state.allRequests.where((request) => request.id != id).toList();
+      final updatedMyRequests = state.myRequests.where((request) => request.id != id).toList();
+      final updatedAssignedRequests = state.assignedRequests.where((request) => request.id != id).toList();
+      
+      state = state.copyWith(
+        allRequests: updatedAllRequests,
+        myRequests: updatedMyRequests,
+        assignedRequests: updatedAssignedRequests,
+      );
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
   }
 
-  Future<void> acceptRequest(String requestId, String prestataireId, String prestataireName, String token) async {
+  Future<void> acceptRequest(String id, String token) async {
     try {
-      final updatedRequest = await _remoteDataSource.assignPrestataire(requestId, prestataireId, prestataireName, token);
+      final updatedRequest = await _remoteDataSource.updateServiceRequest(
+        id, 
+        {'status': 'accepted'}, 
+        token
+      );
       
-      // Mettre à jour la demande dans la liste
-      final updatedRequests = state.requests.map((request) {
-        return request.id == requestId ? updatedRequest : request;
+      // Mettre à jour la demande dans toutes les listes
+      final updatedAllRequests = state.allRequests.map((request) {
+        return request.id == id ? updatedRequest : request;
       }).toList();
       
-      state = state.copyWith(requests: updatedRequests);
+      final updatedMyRequests = state.myRequests.map((request) {
+        return request.id == id ? updatedRequest : request;
+      }).toList();
+      
+      final updatedAssignedRequests = state.assignedRequests.map((request) {
+        return request.id == id ? updatedRequest : request;
+      }).toList();
+      
+      state = state.copyWith(
+        allRequests: updatedAllRequests,
+        myRequests: updatedMyRequests,
+        assignedRequests: updatedAssignedRequests,
+      );
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
   }
 
-  Future<void> completeRequest(String requestId, String token) async {
+  Future<void> completeRequest(String id, String token) async {
     try {
-      await _remoteDataSource.updateServiceRequest(requestId, {'status': 'completed'}, token);
+      final updatedRequest = await _remoteDataSource.updateServiceRequest(
+        id, 
+        {'status': 'completed'}, 
+        token
+      );
       
-      // Mettre à jour la demande dans la liste
-      final updatedRequests = state.requests.map((request) {
-        if (request.id == requestId) {
-          return request.copyWith(status: 'completed');
-        }
-        return request;
+      // Mettre à jour la demande dans toutes les listes
+      final updatedAllRequests = state.allRequests.map((request) {
+        return request.id == id ? updatedRequest : request;
       }).toList();
       
-      state = state.copyWith(requests: updatedRequests);
+      final updatedMyRequests = state.myRequests.map((request) {
+        return request.id == id ? updatedRequest : request;
+      }).toList();
+      
+      final updatedAssignedRequests = state.assignedRequests.map((request) {
+        return request.id == id ? updatedRequest : request;
+      }).toList();
+      
+      state = state.copyWith(
+        allRequests: updatedAllRequests,
+        myRequests: updatedMyRequests,
+        assignedRequests: updatedAssignedRequests,
+      );
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+    }
+  }
+
+  Future<void> assignPrestataire(String id, String prestataireId, String prestataireName, String token) async {
+    try {
+      final updatedRequest = await _remoteDataSource.assignPrestataire(id, prestataireId, prestataireName, token);
+      
+      // Mettre à jour la demande dans toutes les listes
+      final updatedAllRequests = state.allRequests.map((request) {
+        return request.id == id ? updatedRequest : request;
+      }).toList();
+      
+      final updatedMyRequests = state.myRequests.map((request) {
+        return request.id == id ? updatedRequest : request;
+      }).toList();
+      
+      final updatedAssignedRequests = state.assignedRequests.map((request) {
+        return request.id == id ? updatedRequest : request;
+      }).toList();
+      
+      state = state.copyWith(
+        allRequests: updatedAllRequests,
+        myRequests: updatedMyRequests,
+        assignedRequests: updatedAssignedRequests,
+      );
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }

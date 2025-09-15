@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import '../../../core/errors/exceptions.dart';
 import '../../../core/network/network_info.dart';
 import '../../../domain/entities/service_request.dart';
+import '../../../data/models/service_request_model.dart'; // Ajouter cet import
 
 abstract class ServiceRequestRemoteDataSource {
   Future<List<ServiceRequest>> getAllServiceRequests();
@@ -24,7 +25,7 @@ abstract class ServiceRequestRemoteDataSource {
   );
   Future<ServiceRequest> updateServiceRequest(String id, Map<String, dynamic> data, String token);
   Future<void> deleteServiceRequest(String id, String token);
-  Future<ServiceRequest> assignPrestataire(String requestId, String prestataireId, String prestataireName, String token);
+  Future<ServiceRequest> assignPrestataire(String id, String prestataireId, String prestataireName, String token);
 }
 
 class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSource {
@@ -50,7 +51,7 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      return data.map((json) => ServiceRequest.fromJson(json)).toList();
+      return data.map((json) => ServiceRequestModel.fromJson(json).toEntity()).toList();
     } else {
       throw ServerException(message: 'Erreur du serveur: ${response.statusCode}');
     }
@@ -62,6 +63,10 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
       throw const ServerException(message: 'Pas de connexion internet');
     }
 
+    print('=== API CALL: GET MY REQUESTS ===');
+    print('URL: $baseUrl/service-requests/my-requests');
+    print('Token: ${token.substring(0, 20)}...');
+
     final response = await client.get(
       Uri.parse('$baseUrl/service-requests/my-requests'),
       headers: {
@@ -70,9 +75,13 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
       },
     );
 
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      return data.map((json) => ServiceRequest.fromJson(json)).toList();
+      print('Parsed ${data.length} requests from API');
+      return data.map((json) => ServiceRequestModel.fromJson(json).toEntity()).toList();
     } else {
       throw ServerException(message: 'Erreur du serveur: ${response.statusCode}');
     }
@@ -94,7 +103,7 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      return data.map((json) => ServiceRequest.fromJson(json)).toList();
+      return data.map((json) => ServiceRequestModel.fromJson(json).toEntity()).toList();
     } else {
       throw ServerException(message: 'Erreur du serveur: ${response.statusCode}');
     }
@@ -113,7 +122,7 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return ServiceRequest.fromJson(data);
+      return ServiceRequestModel.fromJson(data).toEntity();
     } else {
       throw ServerException(message: 'Erreur du serveur: ${response.statusCode}');
     }
@@ -136,6 +145,10 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
       throw const ServerException(message: 'Pas de connexion internet');
     }
 
+    print('=== API CALL: CREATE SERVICE REQUEST ===');
+    print('URL: $baseUrl/service-requests');
+    print('Token: ${token.substring(0, 20)}...');
+
     final response = await client.post(
       Uri.parse('$baseUrl/service-requests'),
       headers: {
@@ -151,7 +164,7 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
         'location': location,
         'budget': budget,
         'deadline': deadline.toIso8601String(),
-        if (notes != null) 'notes': notes,
+        'notes': notes,
       }),
     );
 
@@ -160,9 +173,9 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = json.decode(response.body);
-      return ServiceRequest.fromJson(data);
+      return ServiceRequestModel.fromJson(data).toEntity();
     } else {
-      throw ServerException(message: 'Erreur du serveur: ${response.statusCode} - ${response.body}');
+      throw ServerException(message: 'Erreur du serveur: ${response.statusCode}');
     }
   }
 
@@ -183,7 +196,7 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
 
     if (response.statusCode == 200) {
       final responseData = json.decode(response.body);
-      return ServiceRequest.fromJson(responseData);
+      return ServiceRequestModel.fromJson(responseData).toEntity();
     } else {
       throw ServerException(message: 'Erreur du serveur: ${response.statusCode}');
     }
@@ -209,13 +222,13 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
   }
 
   @override
-  Future<ServiceRequest> assignPrestataire(String requestId, String prestataireId, String prestataireName, String token) async {
+  Future<ServiceRequest> assignPrestataire(String id, String prestataireId, String prestataireName, String token) async {
     if (!await networkInfo.isConnected) {
       throw const ServerException(message: 'Pas de connexion internet');
     }
 
     final response = await client.put(
-      Uri.parse('$baseUrl/service-requests/$requestId/assign'),
+      Uri.parse('$baseUrl/service-requests/$id/assign'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -228,7 +241,7 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return ServiceRequest.fromJson(data);
+      return ServiceRequestModel.fromJson(data).toEntity();
     } else {
       throw ServerException(message: 'Erreur du serveur: ${response.statusCode}');
     }

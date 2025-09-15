@@ -43,8 +43,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     // Charger les offres de service
     ref.read(serviceOfferProvider.notifier).loadOffers();
     
-    // Charger les demandes de service
-    ref.read(serviceRequestProvider.notifier).loadRequests();
+    // Charger toutes les demandes de service - CORRECTION
+    ref.read(serviceRequestProvider.notifier).loadAllRequests();
   }
 
   @override
@@ -395,7 +395,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           children: [
             Text('Erreur: ${serviceRequestState.error}'),
             ElevatedButton(
-              onPressed: () => ref.read(serviceRequestProvider.notifier).loadRequests(),
+              onPressed: () => ref.read(serviceRequestProvider.notifier).loadAllRequests(),
               child: const Text('Réessayer'),
             ),
           ],
@@ -403,7 +403,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       );
     }
     
-    if (serviceRequestState.requests.isEmpty) {
+    if (serviceRequestState.allRequests.isEmpty) {
       return const Center(
         child: Text('Aucune demande récente'),
       );
@@ -411,9 +411,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: serviceRequestState.requests.length,
+      itemCount: serviceRequestState.allRequests.length,
       itemBuilder: (context, index) {
-        final request = serviceRequestState.requests[index];
+        final request = serviceRequestState.allRequests[index];
         return _buildRequestCardFromEntity(request);
       },
     );

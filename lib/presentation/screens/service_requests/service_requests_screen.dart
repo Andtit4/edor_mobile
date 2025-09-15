@@ -36,14 +36,46 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     final authState = ref.read(authProvider);
     final token = authState.token;
     
+    print('=== DEBUG SERVICE REQUESTS ===');
+    print('Auth state: ${authState.isAuthenticated}');
+    print('User: ${authState.user?.email}');
+    print('Token: ${token?.substring(0, 20)}...');
+    print('==============================');
+    
     if (token != null) {
-      // Charger toutes les demandes
-      ref.read(serviceRequestProvider.notifier).loadRequests();
+      // Charger toutes les demandes (pour le premier onglet)
+      ref.read(serviceRequestProvider.notifier).loadAllRequests();
+      
+      // ✅ AJOUTER CETTE LIGNE - Charger les demandes de l'utilisateur connecté
+      ref.read(serviceRequestProvider.notifier).loadMyRequests(token);
       
       // Charger les demandes assignées à l'utilisateur (pour les prestataires)
       if (authState.user?.role == UserRole.prestataire) {
         ref.read(serviceRequestProvider.notifier).loadAssignedRequests(token);
       }
+    } else {
+      print('No token available for loading requests');
+      _loadDataFromCache();
+    }
+  }
+
+  void _loadDataFromCache() async {
+    try {
+      final localDataSource = ref.read(localDataSourceProvider);
+      final tokenData = await localDataSource.getFromCache('auth_token');
+      final token = tokenData?['token'] as String?;
+      
+      print('Token from cache: ${token?.substring(0, 20)}...');
+      
+      if (token != null) {
+        // Charger toutes les demandes
+        ref.read(serviceRequestProvider.notifier).loadAllRequests();
+        
+        // ✅ AJOUTER CETTE LIGNE - Charger les demandes de l'utilisateur
+        ref.read(serviceRequestProvider.notifier).loadMyRequests(token);
+      }
+    } catch (e) {
+      print('Error loading token from cache: $e');
     }
   }
 
@@ -79,8 +111,8 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildRequestsList(requestState.requests),
-                  _buildMyAcceptedRequests(requestState.requests),
+                  _buildRequestsList(requestState.allRequests),
+                  _buildMyAcceptedRequests(requestState.myRequests),
                 ],
               ),
             ),
@@ -470,8 +502,6 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     if (user != null && token != null) {
       ref.read(serviceRequestProvider.notifier).acceptRequest(
         request.id,
-        user.id,
-        '${user.firstName} ${user.lastName}',
         token,
       );
     }
