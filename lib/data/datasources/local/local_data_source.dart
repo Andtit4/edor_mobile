@@ -8,6 +8,7 @@ abstract class LocalDataSource {
   Future<void> saveToCache(String key, Map<String, dynamic> data);
   Future<Map<String, dynamic>?> getFromCache(String key);
   Future<void> clearCache();
+  Future<void> removeFromCache(String key); // Ajouter cette méthode
 }
 
 class LocalDataSourceImpl implements LocalDataSource {
@@ -57,6 +58,17 @@ class LocalDataSourceImpl implements LocalDataSource {
     } catch (e) {
       throw CacheException(
         message: 'Erreur lors de la suppression du cache: $e',
+      );
+    }
+  }
+
+  @override
+  Future<void> removeFromCache(String key) async {
+    try {
+      await sharedPreferences.remove(key);
+    } catch (e) {
+      throw CacheException(
+        message: 'Erreur lors de la suppression de $key du cache: $e',
       );
     }
   }

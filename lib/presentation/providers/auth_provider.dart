@@ -40,12 +40,14 @@ class AuthState {
   final bool isLoading;
   final bool isAuthenticated;
   final String? error;
+  final String? token;
 
   const AuthState({
     this.user,
     this.isLoading = false,
     this.isAuthenticated = false,
     this.error,
+    this.token,
   });
 
   AuthState copyWith({
@@ -53,12 +55,14 @@ class AuthState {
     bool? isLoading,
     bool? isAuthenticated,
     String? error,
+    String? token,
   }) {
     return AuthState(
       user: user ?? this.user,
       isLoading: isLoading ?? this.isLoading,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       error: error,
+      token: token ?? this.token,
     );
   }
 }
@@ -128,12 +132,25 @@ class AuthNotifier extends StateNotifier<AuthState> {
           print('Login failed: ${failure.message}');
           state = state.copyWith(isLoading: false, error: failure.message);
         },
-        (user) {
+        (user) async {
           print('Login successful: ${user.email}');
+          
+          // Récupérer le token depuis le cache après la connexion
+          final tokenResult = await _authRepository.getToken();
+          String? token;
+          tokenResult.fold(
+            (failure) => print('Token retrieval failed: ${failure.message}'),
+            (tokenData) {
+              token = tokenData;
+              print('Token retrieved after login: ${token?.substring(0, 20)}...');
+            },
+          );
+          
           state = state.copyWith(
             isLoading: false,
             user: user,
             isAuthenticated: true,
+            token: token, // Ajouter le token à l'état
             error: null,
           );
         },
@@ -142,25 +159,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
       print('Login exception: $e');
       state = state.copyWith(
         isLoading: false,
-        error: 'Une erreur inattendue s\'est produite',
+        error: 'Erreur inattendue: $e',
       );
     }
   }
 
  // lib/presentation/providers/auth_provider.dart
 Future<void> register({
-  required String lastName,
-  required String phone,
-  required String firstName,
   required String email,
   required String password,
+  required String firstName,
+  required String lastName,
+  required String phone,
   required UserRole role,
 }) async {
-  print('AuthNotifier: Starting register for: $email');
+  print('Attempting register for: $email');
   state = state.copyWith(isLoading: true, error: null);
 
   try {
-    print('AuthNotifier: Calling repository...');
     final result = await _authRepository.register(
       firstName: firstName,
       lastName: lastName,
@@ -170,29 +186,39 @@ Future<void> register({
       role: role,
     );
 
-    print('AuthNotifier: Repository returned result');
     result.fold(
       (failure) {
-        print('AuthNotifier: Register failed: ${failure.message}');
+        print('Register failed: ${failure.message}');
         state = state.copyWith(isLoading: false, error: failure.message);
       },
-      (user) {
-        print('AuthNotifier: Register successful: ${user.email}');
-        print('AuthNotifier: Setting state to authenticated...');
+      (user) async {
+        print('Register successful: ${user.email}');
+        
+        // Récupérer le token depuis le cache après l'inscription
+        final tokenResult = await _authRepository.getToken();
+        String? token;
+        tokenResult.fold(
+          (failure) => print('Token retrieval failed: ${failure.message}'),
+          (tokenData) {
+            token = tokenData;
+            print('Token retrieved after register: ${token?.substring(0, 20)}...');
+          },
+        );
+        
         state = state.copyWith(
           isLoading: false,
           user: user,
           isAuthenticated: true,
+          token: token, // Ajouter le token à l'état
           error: null,
         );
-        print('AuthNotifier: State updated - isAuthenticated: ${state.isAuthenticated}');
       },
     );
   } catch (e) {
-    print('AuthNotifier: Register exception: $e');
+    print('Register exception: $e');
     state = state.copyWith(
       isLoading: false,
-      error: 'Une erreur inattendue s\'est produite: $e',
+      error: 'Erreur inattendue: $e',
     );
   }
 }

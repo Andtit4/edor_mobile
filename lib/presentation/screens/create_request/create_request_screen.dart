@@ -897,50 +897,114 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
   }
 
   Future<void> _submitRequest() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isSubmitting = true);
+    // Vérifier que nous sommes sur la bonne étape et que le formulaire est valide
+    if (_currentStep == 0) {
+      if (_formKey.currentState?.validate() ?? false) {
+        setState(() => _currentStep = 1);
+        _progressAnimationController.reset();
+        _progressAnimationController.forward();
+        return;
+      }
+    }
+    
+    // Pour l'étape finale, on valide manuellement les champs requis
+    if (_titleController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Le titre est requis')),
+      );
+      return;
+    }
+    
+    if (_descriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('La description est requise')),
+      );
+      return;
+    }
+    
+    if (_selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez sélectionner une catégorie')),
+      );
+      return;
+    }
+    
+    if (_locationController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Le lieu est requis')),
+      );
+      return;
+    }
+    
+    if (_budgetController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Le budget est requis')),
+      );
+      return;
+    }
+    
+    setState(() => _isSubmitting = true);
+    
+    try {
+      final authState = ref.read(authProvider);
+      final user = authState.user;
       
-      try {
-        // Simuler l'envoi de la demande
-        await Future.delayed(const Duration(seconds: 2));
+      if (user == null) {
+        throw Exception('Utilisateur non connecté');
+      }
+
+      // Récupérer le token directement depuis le cache
+      final localDataSource = ref.read(localDataSourceProvider);
+      final tokenData = await localDataSource.getFromCache('auth_token');
+      final token = tokenData?['token'] as String?;
+      
+      print('=== DEBUG TOKEN ===');
+      print('Token from cache: ${token?.substring(0, 20)}...');
+      print('==================');
+      
+      if (token == null || token.isEmpty) {
+        throw Exception('Token d\'authentification manquant');
+      }
+
+      // Créer la demande via l'API
+      final newRequest = await ref.read(serviceRequestProvider.notifier).createRequest(
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim(),
+        category: _selectedCategory!,
+        clientName: '${user.firstName} ${user.lastName}',
+        clientPhone: user.phone,
+        location: _locationController.text.trim(),
+        budget: double.parse(_budgetController.text.trim()),
+        deadline: _selectedDate ?? DateTime.now().add(const Duration(days: 7)),
+        notes: _selectedUrgency != null ? 'Urgence: $_selectedUrgency' : null,
+        token: token,
+      );
+
+      // Afficher un message de succès
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Demande créée avec succès !'),
+            backgroundColor: Colors.green,
+          ),
+        );
         
-        // Ici, vous pouvez appeler votre service pour créer la demande
-        // await ref.read(serviceRequestProvider.notifier).createRequest(...);
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Row(
-                children: [
-                  Icon(Icons.check_circle, color: Colors.white),
-                  SizedBox(width: 12),
-                  Text('Demande publiée avec succès!'),
-                ],
-              ),
-              backgroundColor: const Color(0xFF10B981),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          );
-          
-          // Retourner à l'écran précédent
-          context.pop();
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Erreur: ${e.toString()}'),
-              backgroundColor: const Color(0xFFEF4444),
-            ),
-          );
-        }
-      } finally {
-        if (mounted) {
-          setState(() => _isSubmitting = false);
-        }
+        // Retourner à l'écran précédent
+        context.pop();
+      }
+    } catch (e) {
+      print('Error creating request: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
       }
     }
   }
