@@ -1,4 +1,4 @@
-// src/entities/user.entity.ts
+// backend/src/entities/user.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -60,12 +60,12 @@ export class User {
   rating: number;
 
   @Column({ default: 0 })
-  reviewCount: number; // Changer de string à number
+  reviewCount: number;
 
-  @Column({ type: 'json', nullable: true })
+  @Column({ type: 'json', nullable: true }) // Supprimer default: '[]' si présent
   skills: string[];
 
-  @Column({ type: 'json', nullable: true })
+  @Column({ type: 'json', nullable: true }) // Supprimer default: '[]' si présent
   categories: string[];
 
   @CreateDateColumn()
