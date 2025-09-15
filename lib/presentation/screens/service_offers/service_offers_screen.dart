@@ -1,8 +1,11 @@
+import 'package:edor/presentation/router/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../domain/entities/service_offer.dart';
 import '../../providers/service_offer_provider.dart';
+import 'package:go_router/go_router.dart';
+// import '../../../router/app_routes.dart';
 
 class ServiceOffersScreen extends ConsumerStatefulWidget {
   const ServiceOffersScreen({super.key});
@@ -69,7 +72,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showCreateRequestDialog(),
+        onPressed: () => context.push(AppRoutes.createRequest),
         backgroundColor: const Color(0xFF8B5CF6),
         child: const Icon(Icons.add, color: Colors.white),
       ),
@@ -295,7 +298,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () => _showCreateRequestDialog(),
+            onPressed: () => context.push(AppRoutes.createRequest),
             icon: const Icon(Icons.add),
             label: const Text('Créer une demande'),
             style: ElevatedButton.styleFrom(
@@ -646,27 +649,6 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
               ),
             ),
             child: const Text('Envoyer message'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showCreateRequestDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: const Text('Créer une demande'),
-        content: const Text(
-          'Cette fonctionnalité sera disponible prochainement. Vous pourrez créer des demandes personnalisées.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fermer'),
           ),
         ],
       ),

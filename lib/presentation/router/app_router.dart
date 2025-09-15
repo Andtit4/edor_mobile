@@ -4,6 +4,7 @@ import 'package:edor/presentation/screens/job/job_screen.dart';
 import 'package:edor/presentation/screens/profile/edit_profile_screeb.dart';
 import 'package:edor/presentation/screens/service_offers/service_offers_screen.dart';
 import 'package:edor/presentation/screens/service_requests/service_requests_screen.dart';
+import 'package:edor/presentation/screens/create_request/create_request_screen.dart'; // AJOUT
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -170,14 +171,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
 
+      // Create Request (Full Screen) - AJOUT
+      GoRoute(
+        path: AppRoutes.createRequest,
+        name: AppRoutes.createRequestName,
+        builder: (context, state) => const CreateRequestScreen(),
+      ),
+
       // Edit Profile (Full Screen) - RESTE EN DEHORS
       GoRoute(
         path: AppRoutes.editProfile,
         name: AppRoutes.editProfileName,
         builder: (context, state) => const EditProfileScreen(),
       ),
-
-      // SUPPRIMER LA ROUTE JOBS DUPLIQUÉE (lignes 139-143)
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(
