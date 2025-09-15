@@ -23,41 +23,12 @@ import '../widgets/animated_bottom_nav.dart';
 import 'app_routes.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
-
   return GoRouter(
     initialLocation: AppRoutes.splash,
     redirect: (context, state) {
-      final isAuthenticated = authState.isAuthenticated;
-      final isLoading = authState.isLoading;
-
-      // Pendant le chargement, rester sur splash
-      if (isLoading) {
-        return AppRoutes.splash;
-      }
-
-      // Routes publiques (accessibles sans authentification)
-      final publicRoutes = [
-        AppRoutes.splash,
-        AppRoutes.login,
-        AppRoutes.register,
-      ];
-
-      final isPublicRoute = publicRoutes.contains(state.matchedLocation);
-
-      // Si non authentifié et sur une route privée, rediriger vers login
-      if (!isAuthenticated && !isPublicRoute) {
-        return AppRoutes.login;
-      }
-
-      // Si authentifié et sur splash ou login, rediriger vers home
-      if (isAuthenticated &&
-          (state.matchedLocation == AppRoutes.splash ||
-              state.matchedLocation == AppRoutes.login)) {
-        return AppRoutes.home;
-      }
-
-      return null; // Pas de redirection
+      // DÉSACTIVER TOUTES LES REDIRECTIONS
+      print('Router redirect called but disabled');
+      return null;
     },
     routes: [
       // Splash Screen

@@ -1,3 +1,4 @@
+// lib/domain/entities/user.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'user.freezed.dart';
@@ -19,13 +20,30 @@ class User with _$User {
     String? city,
     String? postalCode,
     String? bio,
-    double? rating,
-    int? reviewCount,
-    List<String>? skills, // Pour les prestataires
-    List<String>? categories, // Pour les prestataires
+    @JsonKey(fromJson: _ratingFromJson) double? rating,
+    @JsonKey(fromJson: _reviewCountFromJson) int? reviewCount,
+    List<String>? skills,
+    List<String>? categories,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _User;
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+}
+
+// Fonctions de conversion
+double? _ratingFromJson(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  return null;
+}
+
+int? _reviewCountFromJson(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is double) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
 }

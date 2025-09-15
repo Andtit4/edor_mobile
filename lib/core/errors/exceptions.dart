@@ -1,3 +1,4 @@
+// lib/core/errors/exceptions.dart
 class ServerException implements Exception {
   final String message;
   final int? statusCode;
@@ -43,4 +44,23 @@ class ValidationException implements Exception {
 
   @override
   String toString() => 'ValidationException: $message';
+}
+
+// Nouvelles exceptions pour l'API
+class UnauthorizedException implements Exception {
+  final String message;
+
+  const UnauthorizedException({required this.message});
+
+  @override
+  String toString() => 'UnauthorizedException: $message';
+}
+
+class ConflictException implements Exception {
+  final String message;
+
+  const ConflictException({required this.message});
+
+  @override
+  String toString() => 'ConflictException: $message';
 }

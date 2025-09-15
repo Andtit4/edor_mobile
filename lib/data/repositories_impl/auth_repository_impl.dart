@@ -1,55 +1,71 @@
+// lib/data/repositories_impl/auth_repository_impl.dart
 import 'package:fpdart/fpdart.dart';
 import '../../core/errors/failures.dart';
 import '../../core/errors/exceptions.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/local/local_data_source.dart';
+import '../datasources/remote/auth_remote_data_source.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final LocalDataSource localDataSource;
+  final AuthRemoteDataSource remoteDataSource;
 
-  AuthRepositoryImpl({required this.localDataSource});
+  AuthRepositoryImpl({
+    required this.localDataSource,
+    required this.remoteDataSource,
+  });
 
+  // lib/data/repositories_impl/auth_repository_impl.dart
   @override
   Future<Either<Failure, User>> login({
     required String email,
     required String password,
   }) async {
     try {
-      // Charger les utilisateurs depuis le JSON
-      final usersData = await localDataSource.loadAssetJson(
-        'assets/mock/users.json',
-      );
-      final usersList =
-          usersData['users'] as List<dynamic>? ?? usersData as List<dynamic>;
+      print('Starting login process...');
+      final result = await remoteDataSource.login(email, password);
 
-      // Trouver l'utilisateur avec cet email
-      final userData = usersList.firstWhere(
-        (user) => user['email'] == email,
-        orElse: () => null,
-      );
+      print('Login result received: ${result.keys}');
 
-      if (userData == null) {
-        return const Left(
-          Failure.authentication(message: 'Email ou mot de passe incorrect'),
+      if (result['user'] == null || result['token'] == null) {
+        print('Error: Missing user or token in login result');
+        return Left(
+          Failure.server(message: 'Données manquantes dans la réponse'),
         );
       }
 
-      // Pour le MVP, on accepte n'importe quel mot de passe
-      final user = User.fromJson(userData as Map<String, dynamic>);
+      final user = result['user'] as User;
+      final token = result['token'] as String;
 
-      // Sauvegarder la session
+      print(
+        'Login user parsed: ${user.email}, Token: ${token.substring(0, 20)}...',
+      );
+
+      // Sauvegarder la session avec le token
       await localDataSource.saveToCache('current_user', user.toJson());
+      await localDataSource.saveToCache('auth_token', {'token': token});
       await localDataSource.saveToCache('is_logged_in', {'value': true});
 
+      print('Login user data saved to cache');
+
       return Right(user);
+    } on UnauthorizedException catch (e) {
+      print('UnauthorizedException: ${e.message}');
+      return Left(Failure.authentication(message: e.message));
+    } on ServerException catch (e) {
+      print('ServerException: ${e.message}');
+      return Left(Failure.server(message: e.message));
     } on CacheException catch (e) {
+      print('CacheException: ${e.message}');
       return Left(Failure.cache(message: e.message));
     } catch (e) {
+      print('Unknown login exception: $e');
       return Left(Failure.unknown(message: e.toString()));
     }
   }
 
+  // lib/data/repositories_impl/auth_repository_impl.dart
   @override
   Future<Either<Failure, User>> register({
     required String firstName,
@@ -60,27 +76,49 @@ class AuthRepositoryImpl implements AuthRepository {
     required UserRole role,
   }) async {
     try {
-      // Pour le MVP, créer un nouvel utilisateur temporaire
-      final newUser = User(
-        id: 'user_${DateTime.now().millisecondsSinceEpoch}',
+      print('Starting register process...');
+      final result = await remoteDataSource.register(
         firstName: firstName,
         lastName: lastName,
         phone: phone,
         email: email,
+        password: password,
         role: role,
-        // isOnline: true,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
       );
 
-      // Sauvegarder la session
-      await localDataSource.saveToCache('current_user', newUser.toJson());
+      print('Register result received: ${result.keys}');
+
+      if (result['user'] == null || result['token'] == null) {
+        print('Error: Missing user or token in result');
+        return Left(
+          Failure.server(message: 'Données manquantes dans la réponse'),
+        );
+      }
+
+      final user = result['user'] as User;
+      final token = result['token'] as String;
+
+      print('User parsed: ${user.email}, Token: ${token.substring(0, 20)}...');
+
+      // Sauvegarder la session avec le token
+      await localDataSource.saveToCache('current_user', user.toJson());
+      await localDataSource.saveToCache('auth_token', {'token': token});
       await localDataSource.saveToCache('is_logged_in', {'value': true});
 
-      return Right(newUser);
+      print('User data saved to cache');
+
+      return Right(user);
+    } on ConflictException catch (e) {
+      print('ConflictException: ${e.message}');
+      return Left(Failure.authentication(message: e.message));
+    } on ServerException catch (e) {
+      print('ServerException: ${e.message}');
+      return Left(Failure.server(message: e.message));
     } on CacheException catch (e) {
+      print('CacheException: ${e.message}');
       return Left(Failure.cache(message: e.message));
     } catch (e) {
+      print('Unknown exception: $e');
       return Left(Failure.unknown(message: e.toString()));
     }
   }
@@ -89,8 +127,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, void>> logout() async {
     try {
       await localDataSource.saveToCache('is_logged_in', {'value': false});
-      // Optionnel: supprimer les données utilisateur
-      // await localDataSource.clearCache();
+      await localDataSource.saveToCache('auth_token', {'token': ''});
       return const Right(null);
     } on CacheException catch (e) {
       return Left(Failure.cache(message: e.message));

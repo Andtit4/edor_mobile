@@ -1,46 +1,42 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'user.dart';
+part of 'user_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$UserImpl _$$UserImplFromJson(Map<String, dynamic> json) => _$UserImpl(
+_$UserModelImpl _$$UserModelImplFromJson(
+  Map<String, dynamic> json,
+) => _$UserModelImpl(
   id: json['id'] as String,
   email: json['email'] as String,
   firstName: json['firstName'] as String,
   lastName: json['lastName'] as String,
   phone: json['phone'] as String,
-  role: $enumDecode(_$UserRoleEnumMap, json['role']),
+  role: json['role'] as String,
   profileImage: json['profileImage'] as String?,
   address: json['address'] as String?,
   city: json['city'] as String?,
   postalCode: json['postalCode'] as String?,
   bio: json['bio'] as String?,
-  rating: _ratingFromJson(json['rating']),
-  reviewCount: _reviewCountFromJson(json['reviewCount']),
+  rating: json['rating'] as String?,
+  reviewCount: json['reviewCount'] as String?,
   skills: (json['skills'] as List<dynamic>?)?.map((e) => e as String).toList(),
   categories:
       (json['categories'] as List<dynamic>?)?.map((e) => e as String).toList(),
-  createdAt:
-      json['createdAt'] == null
-          ? null
-          : DateTime.parse(json['createdAt'] as String),
-  updatedAt:
-      json['updatedAt'] == null
-          ? null
-          : DateTime.parse(json['updatedAt'] as String),
+  createdAt: json['createdAt'] as String?,
+  updatedAt: json['updatedAt'] as String?,
 );
 
-Map<String, dynamic> _$$UserImplToJson(_$UserImpl instance) =>
+Map<String, dynamic> _$$UserModelImplToJson(_$UserModelImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'email': instance.email,
       'firstName': instance.firstName,
       'lastName': instance.lastName,
       'phone': instance.phone,
-      'role': _$UserRoleEnumMap[instance.role]!,
+      'role': instance.role,
       'profileImage': instance.profileImage,
       'address': instance.address,
       'city': instance.city,
@@ -50,11 +46,6 @@ Map<String, dynamic> _$$UserImplToJson(_$UserImpl instance) =>
       'reviewCount': instance.reviewCount,
       'skills': instance.skills,
       'categories': instance.categories,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
+      'createdAt': instance.createdAt,
+      'updatedAt': instance.updatedAt,
     };
-
-const _$UserRoleEnumMap = {
-  UserRole.client: 'client',
-  UserRole.prestataire: 'prestataire',
-};

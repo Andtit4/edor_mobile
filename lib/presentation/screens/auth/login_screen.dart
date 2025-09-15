@@ -44,16 +44,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
 
-    // Écouter les erreurs
+    // Écouter les changements d'état
     ref.listen<AuthState>(authProvider, (previous, next) {
-      if (next.error != null) {
+      // Afficher les erreurs
+      if (next.error != null && next.error != previous?.error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.error!),
             backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 4),
           ),
         );
-        ref.read(authProvider.notifier).clearError();
+        // Effacer l'erreur après l'avoir affichée
+        Future.delayed(const Duration(seconds: 1), () {
+          ref.read(authProvider.notifier).clearError();
+        });
+      }
+      
+      // Navigation manuelle après succès
+      if (next.isAuthenticated && !next.isLoading && previous?.isAuthenticated != true) {
+        print('User authenticated, navigating to home');
+        context.go(AppRoutes.home);
       }
     });
 
