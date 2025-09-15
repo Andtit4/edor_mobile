@@ -270,13 +270,13 @@ class _MainWrapperState extends ConsumerState<MainWrapper>
                   builder: (context, child) {
                     return Transform.scale(
                       scale: _fabAnimation.value,
-                      child: FloatingActionButton(
+                      child: SizedBox()/* FloatingActionButton(
                         onPressed: () {
                           context.push(AppRoutes.createRequest);
                         },
                         backgroundColor: const Color(0xFF8B5CF6),
                         child: const Icon(Icons.add, color: Colors.white),
-                      ),
+                      ), */
                     );
                   },
                 ),
