@@ -41,6 +41,11 @@ export class ServiceRequestsController {
   @Get('my-requests')
   @UseGuards(JwtAuthGuard)
   findMyRequests(@Request() req) {
+    console.log('=== MY REQUESTS ENDPOINT ===');
+    console.log('User ID:', req.user?.id);
+    console.log('User email:', req.user?.email);
+    console.log('User role:', req.user?.role);
+    console.log('===========================');
     return this.serviceRequestsService.findByClient(req.user.id);
   }
 

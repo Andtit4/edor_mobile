@@ -77,9 +77,8 @@ export class AuthService {
         role: savedPrestataire.role,
       });
 
-      // Retourner le prestataire sans le mot de passe en utilisant toJSON
-      const prestataireData = savedPrestataire.toJSON();
-      const { password: _, ...prestataireWithoutPassword } = prestataireData;
+      // Retourner le prestataire sans le mot de passe
+      const { password: _, ...prestataireWithoutPassword } = savedPrestataire;
       return { user: prestataireWithoutPassword as Prestataire, token };
     } else {
       // Créer dans la table user pour les clients

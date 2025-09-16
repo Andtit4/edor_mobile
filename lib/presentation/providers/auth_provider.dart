@@ -9,7 +9,6 @@ import '../../data/datasources/local/local_data_source.dart';
 import '../../data/datasources/remote/auth_remote_data_source.dart';
 import '../../domain/entities/user.dart';
 import '../../core/network/network_info.dart';
-import '../../core/errors/failures.dart';
 
 // Providers pour les dépendances
 final localDataSourceProvider = Provider<LocalDataSource>((ref) {
@@ -91,7 +90,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       },
       (isLoggedIn) async {
         if (isLoggedIn) {
+          // Récupérer l'utilisateur et le token
           final userResult = await _authRepository.getCurrentUser();
+          final tokenResult = await _authRepository.getToken();
+          
           userResult.fold(
             (failure) {
               print('Get current user failed: ${failure.message}');
@@ -100,12 +102,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
                 error: failure.message,
               );
             },
-            (user) {
+            (user) async {
               print('User authenticated: ${user?.email}');
+              
+              // Récupérer le token
+              String? token;
+              tokenResult.fold(
+                (failure) => print('Token retrieval failed: ${failure.message}'),
+                (tokenData) {
+                  token = tokenData;
+                  print('Token retrieved: ${token?.substring(0, 20)}...');
+                },
+              );
+              
               state = state.copyWith(
                 isLoading: false,
                 user: user,
                 isAuthenticated: user != null,
+                token: token, // Ajouter le token à l'état
               );
             },
           );
@@ -244,6 +258,17 @@ Future<void> register({
 
   void clearError() {
     state = state.copyWith(error: null);
+  }
+
+  Future<void> refreshToken() async {
+    final tokenResult = await _authRepository.getToken();
+    tokenResult.fold(
+      (failure) => print('Token refresh failed: ${failure.message}'),
+      (token) {
+        print('Token refreshed: ${token.substring(0, 20)}...');
+        state = state.copyWith(token: token);
+      },
+    );
   }
 }
 
