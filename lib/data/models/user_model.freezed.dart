@@ -32,10 +32,10 @@ mixin _$UserModel {
   String? get city => throw _privateConstructorUsedError;
   String? get postalCode => throw _privateConstructorUsedError;
   String? get bio => throw _privateConstructorUsedError;
-  String? get rating =>
-      throw _privateConstructorUsedError; // Garder comme string pour le parsing
-  String? get reviewCount =>
-      throw _privateConstructorUsedError; // Garder comme string pour le parsing
+  @JsonKey(fromJson: _ratingFromJson)
+  double? get rating => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _reviewCountFromJson)
+  int? get reviewCount => throw _privateConstructorUsedError;
   List<String>? get skills => throw _privateConstructorUsedError;
   List<String>? get categories => throw _privateConstructorUsedError;
   String? get createdAt => throw _privateConstructorUsedError;
@@ -68,8 +68,8 @@ abstract class $UserModelCopyWith<$Res> {
     String? city,
     String? postalCode,
     String? bio,
-    String? rating,
-    String? reviewCount,
+    @JsonKey(fromJson: _ratingFromJson) double? rating,
+    @JsonKey(fromJson: _reviewCountFromJson) int? reviewCount,
     List<String>? skills,
     List<String>? categories,
     String? createdAt,
@@ -171,12 +171,12 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
                 freezed == rating
                     ? _value.rating
                     : rating // ignore: cast_nullable_to_non_nullable
-                        as String?,
+                        as double?,
             reviewCount:
                 freezed == reviewCount
                     ? _value.reviewCount
                     : reviewCount // ignore: cast_nullable_to_non_nullable
-                        as String?,
+                        as int?,
             skills:
                 freezed == skills
                     ? _value.skills
@@ -224,8 +224,8 @@ abstract class _$$UserModelImplCopyWith<$Res>
     String? city,
     String? postalCode,
     String? bio,
-    String? rating,
-    String? reviewCount,
+    @JsonKey(fromJson: _ratingFromJson) double? rating,
+    @JsonKey(fromJson: _reviewCountFromJson) int? reviewCount,
     List<String>? skills,
     List<String>? categories,
     String? createdAt,
@@ -326,12 +326,12 @@ class __$$UserModelImplCopyWithImpl<$Res>
             freezed == rating
                 ? _value.rating
                 : rating // ignore: cast_nullable_to_non_nullable
-                    as String?,
+                    as double?,
         reviewCount:
             freezed == reviewCount
                 ? _value.reviewCount
                 : reviewCount // ignore: cast_nullable_to_non_nullable
-                    as String?,
+                    as int?,
         skills:
             freezed == skills
                 ? _value._skills
@@ -372,8 +372,8 @@ class _$UserModelImpl implements _UserModel {
     this.city,
     this.postalCode,
     this.bio,
-    this.rating,
-    this.reviewCount,
+    @JsonKey(fromJson: _ratingFromJson) this.rating,
+    @JsonKey(fromJson: _reviewCountFromJson) this.reviewCount,
     final List<String>? skills,
     final List<String>? categories,
     this.createdAt,
@@ -407,13 +407,12 @@ class _$UserModelImpl implements _UserModel {
   @override
   final String? bio;
   @override
-  final String? rating;
-  // Garder comme string pour le parsing
+  @JsonKey(fromJson: _ratingFromJson)
+  final double? rating;
   @override
-  final String? reviewCount;
-  // Garder comme string pour le parsing
+  @JsonKey(fromJson: _reviewCountFromJson)
+  final int? reviewCount;
   final List<String>? _skills;
-  // Garder comme string pour le parsing
   @override
   List<String>? get skills {
     final value = _skills;
@@ -527,8 +526,8 @@ abstract class _UserModel implements UserModel {
     final String? city,
     final String? postalCode,
     final String? bio,
-    final String? rating,
-    final String? reviewCount,
+    @JsonKey(fromJson: _ratingFromJson) final double? rating,
+    @JsonKey(fromJson: _reviewCountFromJson) final int? reviewCount,
     final List<String>? skills,
     final List<String>? categories,
     final String? createdAt,
@@ -561,9 +560,11 @@ abstract class _UserModel implements UserModel {
   @override
   String? get bio;
   @override
-  String? get rating; // Garder comme string pour le parsing
+  @JsonKey(fromJson: _ratingFromJson)
+  double? get rating;
   @override
-  String? get reviewCount; // Garder comme string pour le parsing
+  @JsonKey(fromJson: _reviewCountFromJson)
+  int? get reviewCount;
   @override
   List<String>? get skills;
   @override

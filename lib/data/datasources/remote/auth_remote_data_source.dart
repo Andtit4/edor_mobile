@@ -8,12 +8,17 @@ import '../../../domain/entities/user.dart';
 abstract class AuthRemoteDataSource {
   Future<Map<String, dynamic>> login(String email, String password);
   Future<Map<String, dynamic>> register({
+    required String email,
+    required String password,
     required String firstName,
     required String lastName,
     required String phone,
-    required String email,
-    required String password,
     required UserRole role,
+    String? category,
+    String? location,
+    String? description,
+    double? pricePerHour,
+    List<String>? skills,
   });
   Future<User> getCurrentUser(String token);
 }
@@ -68,50 +73,57 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<Map<String, dynamic>> register({
+    required String email,
+    required String password,
     required String firstName,
     required String lastName,
     required String phone,
-    required String email,
-    required String password,
     required UserRole role,
+    String? category,
+    String? location,
+    String? description,
+    double? pricePerHour,
+    List<String>? skills,
   }) async {
     if (!await networkInfo.isConnected) {
       throw const ServerException(message: 'Pas de connexion internet');
     }
 
+    print('=== API CALL: REGISTER ===');
+    print('URL: $baseUrl/auth/register');
+    print('Email: $email');
+    print('Role: $role');
+
     final response = await client.post(
       Uri.parse('$baseUrl/auth/register'),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: json.encode({
+        'email': email,
+        'password': password,
         'firstName': firstName,
         'lastName': lastName,
         'phone': phone,
-        'email': email,
-        'password': password,
         'role': role.name,
+        'category': category,
+        'location': location,
+        'description': description,
+        'pricePerHour': pricePerHour,
+        'skills': skills,
       }),
     );
 
-    print('Register response status: ${response.statusCode}');
-    print('Register response body: ${response.body}');
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      try {
-        final data = json.decode(response.body);
-        final user = User.fromJson(data['user']); // Utiliser directement User
-        
-        return {
-          'user': user,
-          'token': data['token'],
-        };
-      } catch (e) {
-        print('Error parsing register response: $e');
-        throw ServerException(message: 'Erreur lors du parsing de la réponse: $e');
-      }
-    } else if (response.statusCode == 409) {
-      throw const ConflictException(message: 'Un utilisateur avec cet email existe déjà');
+      final Map<String, dynamic> data = json.decode(response.body);
+      print('Parsed user data: ${data['user']}');
+      print('Parsed token: ${data['token']}');
+      return data;
     } else {
-      throw ServerException(message: 'Erreur du serveur: ${response.statusCode} - ${response.body}');
+      throw ServerException(message: 'Erreur du serveur: ${response.statusCode}');
     }
   }
 

@@ -19,8 +19,8 @@ class UserModel with _$UserModel {
     String? city,
     String? postalCode,
     String? bio,
-    String? rating, // Garder comme string pour le parsing
-    String? reviewCount, // Garder comme string pour le parsing
+    @JsonKey(fromJson: _ratingFromJson) double? rating,
+    @JsonKey(fromJson: _reviewCountFromJson) int? reviewCount,
     List<String>? skills,
     List<String>? categories,
     String? createdAt,
@@ -28,7 +28,10 @@ class UserModel with _$UserModel {
   }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
+}
 
+// Extension pour ajouter la méthode toEntity
+extension UserModelExtension on UserModel {
   User toEntity() {
     return User(
       id: id,
@@ -42,12 +45,33 @@ class UserModel with _$UserModel {
       city: city,
       postalCode: postalCode,
       bio: bio,
-      rating: rating != null ? double.tryParse(rating!) : null,
-      reviewCount: reviewCount != null ? int.tryParse(reviewCount!) : null,
+      rating: rating,
+      reviewCount: reviewCount,
       skills: skills,
       categories: categories,
       createdAt: createdAt != null ? DateTime.tryParse(createdAt!) : null,
       updatedAt: updatedAt != null ? DateTime.tryParse(updatedAt!) : null,
     );
   }
+}
+
+// Fonctions de conversion pour gérer les types mixtes
+double? _ratingFromJson(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) {
+    // Gérer les cas comme "0.00"
+    final parsed = double.tryParse(value);
+    return parsed;
+  }
+  return null;
+}
+
+int? _reviewCountFromJson(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is double) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
 }

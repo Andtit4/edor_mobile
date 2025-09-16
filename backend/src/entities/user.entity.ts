@@ -56,16 +56,16 @@ export class User {
   @Column({ nullable: true, type: 'text' })
   bio: string;
 
-  @Column({ type: 'decimal', precision: 3, scale: 2, default: 0 })
+  @Column({ type: 'float', default: 0 })
   rating: number;
 
-  @Column({ default: 0 })
+  @Column({ type: 'int', default: 0 })
   reviewCount: number;
 
-  @Column({ type: 'json', nullable: true }) // Supprimer default: '[]' si présent
+  @Column({ type: 'json', nullable: true })
   skills: string[];
 
-  @Column({ type: 'json', nullable: true }) // Supprimer default: '[]' si présent
+  @Column({ type: 'json', nullable: true })
   categories: string[];
 
   @CreateDateColumn()

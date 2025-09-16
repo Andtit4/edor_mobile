@@ -31,6 +31,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
   bool _isLoading = false;
   UserRole _selectedRole = UserRole.client;
 
+  // Nouvelles variables pour les prestataires
+  String? _selectedCategory;
+  String? _selectedLocation;
+  String _description = '';
+  double _pricePerHour = 0.0;
+  List<String> _skills = [];
+  final TextEditingController _skillsController = TextEditingController();
+
   @override
   void dispose() {
     _firstNameController.dispose();
@@ -39,6 +47,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _skillsController.dispose(); // Ajouter cette ligne
     super.dispose();
   }
 
@@ -50,46 +59,40 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     });
 
     try {
-      final result = await ref.read(authProvider.notifier).register(
+      await ref.read(authProvider.notifier).register(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         phone: _phoneController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
         role: _selectedRole,
+        category: _selectedCategory,
+        location: _selectedLocation,
+        description: _description,
+        pricePerHour: _pricePerHour,
+        skills: _skills,
       );
 
-    
-
-        /* await result.fold(
-          (failure) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(failure.message),
-                  backgroundColor: AppColors.error,
-                ),
-              );
-            }
-          },
-        (user) async {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Compte créé avec succès'),
-                backgroundColor: AppColors.success,
-              ),
-            );
-            context.go(AppRoutes.home);
-          }
-        },
-      ); */
+      // Vérifier le résultat via le provider
+      final authState = ref.read(authProvider);
+      if (mounted) {
+        if (authState.isAuthenticated) {
+          context.go(AppRoutes.home);
+        } else if (authState.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(authState.error!),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: ${e.toString()}'),
-            backgroundColor: AppColors.error,
+            content: Text('Erreur: $e'),
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -104,6 +107,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      if (next.isAuthenticated && !next.isLoading) {
+        context.go(AppRoutes.home);
+      } else if (next.error != null && !next.isLoading) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error!),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: SafeArea(

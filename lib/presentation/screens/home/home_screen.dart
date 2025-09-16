@@ -344,8 +344,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Widget _buildClientContent() {
     return Column(
       children: [
-        // Popular Services
-        _buildSectionHeader('Prestataires populaires', () => context.push(AppRoutes.serviceOffers)),
+        // Titre de la section
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            children: [
+              Text(
+                'Prestataires populaires',
+                style: AppTextStyles.h4.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF1F2937),
+                ),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: () => context.push(AppRoutes.serviceOffers),
+                child: Text(
+                  'Voir tout',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: const Color(0xFF8B5CF6),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        // Liste des prestataires
         Expanded(
           child: _buildPopularServicesList(),
         ),
@@ -420,20 +446,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _buildPopularServicesList() {
-    final serviceOfferState = ref.watch(serviceOfferProvider);
+    final prestataireState = ref.watch(prestatairesProvider);
     
-    if (serviceOfferState.isLoading) {
+    print('=== DEBUG PRESTATAIRES ===');
+    print('Loading: ${prestataireState.isLoading}');
+    print('Error: ${prestataireState.error}');
+    print('Count: ${prestataireState.prestataires.length}');
+    print('========================');
+    
+    if (prestataireState.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
     
-    if (serviceOfferState.error != null) {
+    if (prestataireState.error != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Erreur: ${serviceOfferState.error}'),
+            Text('Erreur: ${prestataireState.error}'),
             ElevatedButton(
-              onPressed: () => ref.read(serviceOfferProvider.notifier).loadOffers(),
+              onPressed: () => ref.read(prestatairesProvider.notifier).loadPrestataires(),
               child: const Text('Réessayer'),
             ),
           ],
@@ -441,169 +473,125 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       );
     }
     
-    if (serviceOfferState.offers.isEmpty) {
+    if (prestataireState.prestataires.isEmpty) {
       return const Center(
-        child: Text('Aucune offre de service disponible'),
+        child: Text('Aucun prestataire disponible'),
       );
     }
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: serviceOfferState.offers.length,
+      itemCount: prestataireState.prestataires.length,
       itemBuilder: (context, index) {
-        final service = serviceOfferState.offers[index];
-        return _buildServiceCardFromEntity(service);
+        final prestataire = prestataireState.prestataires[index];
+        return _buildPrestataireListItem(prestataire);
       },
     );
   }
 
-  Widget _buildServiceCardFromEntity(ServiceOffer service) {
-    final colors = {
-      'Plomberie': const Color(0xFF8B5CF6),
-      'Électricité': const Color(0xFF10B981),
-      'Peinture': const Color(0xFFF59E0B),
-      'Nettoyage': const Color(0xFFEF4444),
-      'Jardinage': const Color(0xFF22C55E),
-    };
-
-    final color = colors[service.category] ?? const Color(0xFF8B5CF6);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+  Widget _buildPrestataireListItem(Prestataire prestataire) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.build,
-                  color: color,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      service.title,
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF1F2937),
-                      ),
-                    ),
-                    Text(
-                      service.category,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: color,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '${service.price.toStringAsFixed(0)}€',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
+      child: ListTile(
+        leading: CircleAvatar(
+          radius: 25,
+          backgroundImage: prestataire.avatar != null
+              ? NetworkImage(prestataire.avatar!)
+              : null,
+          child: prestataire.avatar == null
+              ? const Icon(Icons.person, color: Colors.grey)
+              : null,
+        ),
+        title: Text(
+          prestataire.name,
+          style: AppTextStyles.h6.copyWith(
+            fontWeight: FontWeight.bold,
           ),
-          const SizedBox(height: 12),
-          Text(
-            service.description,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: Colors.grey[600],
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              prestataire.category,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: const Color(0xFF8B5CF6),
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Icon(
-                Icons.person,
-                size: 16,
-                color: Colors.grey[600],
-              ),
-              const SizedBox(width: 4),
-              Text(
-                service.prestataireName,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: Colors.grey[600],
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(
+                  Icons.star,
+                  size: 14,
+                  color: Colors.amber[600],
                 ),
-              ),
-              const SizedBox(width: 16),
-              Icon(
-                Icons.location_on,
-                size: 16,
-                color: Colors.grey[600],
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  service.location,
+                const SizedBox(width: 4),
+                Text(
+                  '${prestataire.rating.toStringAsFixed(1)} (${prestataire.totalReviews})',
                   style: AppTextStyles.bodySmall.copyWith(
                     color: Colors.grey[600],
                   ),
-                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(width: 16),
+                Icon(
+                  Icons.location_on,
+                  size: 14,
+                  color: Colors.grey[600],
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    prestataire.location,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: prestataire.isAvailable 
+                    ? const Color(0xFF10B981) 
+                    : Colors.grey[400],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                prestataire.isAvailable ? 'Disponible' : 'Indisponible',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              Row(
-                children: [
-                  Icon(
-                    Icons.star,
-                    size: 16,
-                    color: Colors.amber[600],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    service.rating.toStringAsFixed(1),
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '(${service.reviewCount})',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
+            ),
+            if (prestataire.pricePerHour > 0) ...[
+              const SizedBox(height: 4),
+              Text(
+                '${prestataire.pricePerHour.toStringAsFixed(0)}€/h',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: const Color(0xFF10B981),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
-          ),
-        ],
+          ],
+        ),
+        onTap: () {
+          // Navigation vers le profil du prestataire
+          context.push('/prestataire/${prestataire.id}', extra: prestataire.id);
+        },
       ),
     );
   }

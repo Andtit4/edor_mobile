@@ -11,7 +11,12 @@ abstract class AuthRepository {
     required String firstName, 
     required String lastName, 
     required String phone,
-    required UserRole role, // Ajouter le paramètre role
+    required UserRole role,
+    String? category,
+    String? location,
+    String? description,
+    double? pricePerHour,
+    List<String>? skills,
   });
   Future<Either<Failure, bool>> isLoggedIn();
   Future<Either<Failure, User?>> getCurrentUser();

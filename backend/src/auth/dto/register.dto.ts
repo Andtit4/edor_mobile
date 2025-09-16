@@ -1,30 +1,75 @@
 // src/auth/dto/register.dto.ts
-import { IsEmail, IsNotEmpty, IsString, MinLength, IsEnum } from 'class-validator';
-import { UserRole } from '../../entities/user.entity';
+import { IsString, IsEmail, IsOptional, IsEnum, IsNumber, IsArray } from 'class-validator';
 
 export class RegisterDto {
-  @IsString()
-  @IsNotEmpty()
-  firstName: string;
-
-  @IsString()
-  @IsNotEmpty()
-  lastName: string;
-
-  @IsString()
-  @IsNotEmpty()
-  phone: string;
-
   @IsEmail()
-  @IsNotEmpty()
   email: string;
 
   @IsString()
-  @IsNotEmpty()
-  @MinLength(6)
   password: string;
 
-  @IsEnum(UserRole)
-  @IsNotEmpty()
-  role: UserRole;
+  @IsString()
+  firstName: string;
+
+  @IsString()
+  lastName: string;
+
+  @IsString()
+  phone: string;
+
+  @IsEnum(['client', 'prestataire'])
+  role: string;
+
+  // Champs optionnels pour tous les utilisateurs
+  @IsOptional()
+  @IsString()
+  profileImage?: string;
+
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @IsOptional()
+  @IsString()
+  postalCode?: string;
+
+  @IsOptional()
+  @IsString()
+  bio?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  skills?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  categories?: string[];
+
+  // Champs spécifiques aux prestataires
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsNumber()
+  pricePerHour?: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  portfolio?: string[];
 }

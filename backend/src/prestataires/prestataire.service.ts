@@ -1,9 +1,10 @@
-// backend/src/prestataires/prestataires.service.ts
+// backend/src/prestataires/prestataire.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Prestataire } from '../entities/prestataire.entity';
 import { CreatePrestataireDto } from './dto/create-prestataire.dto';
+import { UpdatePrestataireProfileDto } from './dto/update-prestataire-profile.dto';
 
 @Injectable()
 export class PrestatairesService {
@@ -63,5 +64,26 @@ export class PrestatairesService {
     if (result.affected === 0) {
       throw new NotFoundException('Prestataire non trouvé');
     }
+  }
+
+  async findByUserId(userId: string): Promise<Prestataire> {
+    const prestataire = await this.prestataireRepository.findOne({
+      where: { email: userId }, // On utilise l'email comme lien entre User et Prestataire
+    });
+
+    if (!prestataire) {
+      throw new NotFoundException('Profil prestataire non trouvé');
+    }
+
+    return prestataire;
+  }
+
+  async updateByUserId(
+    userId: string,
+    updateData: UpdatePrestataireProfileDto,
+  ): Promise<Prestataire> {
+    const prestataire = await this.findByUserId(userId);
+    await this.prestataireRepository.update(prestataire.id, updateData);
+    return this.findOne(prestataire.id);
   }
 }

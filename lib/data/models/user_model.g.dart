@@ -20,8 +20,8 @@ _$UserModelImpl _$$UserModelImplFromJson(
   city: json['city'] as String?,
   postalCode: json['postalCode'] as String?,
   bio: json['bio'] as String?,
-  rating: json['rating'] as String?,
-  reviewCount: json['reviewCount'] as String?,
+  rating: _ratingFromJson(json['rating']),
+  reviewCount: _reviewCountFromJson(json['reviewCount']),
   skills: (json['skills'] as List<dynamic>?)?.map((e) => e as String).toList(),
   categories:
       (json['categories'] as List<dynamic>?)?.map((e) => e as String).toList(),

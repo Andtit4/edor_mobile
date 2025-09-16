@@ -9,7 +9,7 @@ class AppRoutes {
   static const String serviceOffers = '/offers';
   static const String serviceRequests = '/requests';
   static const String createRequest = '/create-request';
-  static const String prestataireDetail = '/prestataire/:id';
+  static const String prestataireDetail = '/prestataire';
   static const String reservation = '/reservation';
   static const String messages = '/messages';
   static const String chat = '/messages/chat/:id';

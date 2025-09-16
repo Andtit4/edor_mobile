@@ -1,5 +1,6 @@
 // lib/data/repositories_impl/auth_repository_impl.dart
 import 'package:edor/core/network/network_info.dart';
+import 'package:edor/data/models/user_model.dart';
 import 'package:fpdart/fpdart.dart';
 import '../../core/errors/failures.dart';
 import '../../core/errors/exceptions.dart';
@@ -62,44 +63,42 @@ class AuthRepositoryImpl implements AuthRepository {
     required String lastName, 
     required String phone,
     required UserRole role,
+    String? category,
+    String? location,
+    String? description,
+    double? pricePerHour,
+    List<String>? skills,
   }) async {
     try {
-      print('Starting register process...');
       final result = await remoteDataSource.register(
+        email: email,
+        password: password,
         firstName: firstName,
         lastName: lastName,
         phone: phone,
-        email: email,
-        password: password,
         role: role,
+        category: category,
+        location: location,
+        description: description,
+        pricePerHour: pricePerHour,
+        skills: skills,
       );
-      final user = result['user'] as User;
-      final token = result['token'] as String;
-
-      print(
-        'Register user parsed: ${user.email}, Token: ${token.substring(0, 20)}...',
-      );
-
-      // Sauvegarder la session avec le token
-      await localDataSource.saveToCache('current_user', user.toJson());
-      await localDataSource.saveToCache('auth_token', {'token': token});
-      await localDataSource.saveToCache('is_logged_in', {'value': true});
-
-      print('Register user data saved to cache');
-
+      
+      // Sauvegarder le token
+      await localDataSource.saveToCache('auth_token', {'token': result['token']});
+      
+      // Convertir UserModel en User entity
+      final userModel = UserModel.fromJson(result['user']);
+      final user = userModel.toEntity();
+      
       return Right(user);
-    } on UnauthorizedException catch (e) {
-      print('UnauthorizedException: ${e.message}');
-      return Left(Failure.authentication(message: e.message));
     } on ServerException catch (e) {
-      print('ServerException: ${e.message}');
-      return Left(Failure.server(message: e.message));
+      return Left(ServerFailure(message: e.message));
     } on CacheException catch (e) {
-      print('CacheException: ${e.message}');
-      return Left(Failure.cache(message: e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      print('Unknown register exception: $e');
-      return Left(Failure.unknown(message: e.toString()));
+      print('Error in register: $e');
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 

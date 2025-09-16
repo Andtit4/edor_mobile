@@ -172,55 +172,63 @@ Future<void> register({
   required String lastName,
   required String phone,
   required UserRole role,
+  String? category,
+  String? location,
+  String? description,
+  double? pricePerHour,
+  List<String>? skills,
 }) async {
-  print('Attempting register for: $email');
   state = state.copyWith(isLoading: true, error: null);
+  
+  print('=== REGISTER START ===');
+  print('Email: $email');
+  print('Role: $role');
+  print('Category: $category');
+  print('Location: $location');
+  print('=====================');
 
-  try {
-    final result = await _authRepository.register(
-      firstName: firstName,
-      lastName: lastName,
-      phone: phone,
-      email: email,
-      password: password,
-      role: role,
-    );
+  final result = await _authRepository.register(
+    email: email,
+    password: password,
+    firstName: firstName,
+    lastName: lastName,
+    phone: phone,
+    role: role,
+    category: category,
+    location: location,
+    description: description,
+    pricePerHour: pricePerHour,
+    skills: skills,
+  );
 
-    result.fold(
-      (failure) {
-        print('Register failed: ${failure.message}');
-        state = state.copyWith(isLoading: false, error: failure.message);
-      },
-      (user) async {
-        print('Register successful: ${user.email}');
-        
-        // Récupérer le token depuis le cache après l'inscription
-        final tokenResult = await _authRepository.getToken();
-        String? token;
+  result.fold(
+    (failure) {
+      print('Register failed: ${failure.message}');
+      state = state.copyWith(
+        isLoading: false,
+        error: failure.message,
+      );
+    },
+    (user) {
+      print('Register success: ${user.email}');
+      // Récupérer le token
+      _authRepository.getToken().then((tokenResult) {
         tokenResult.fold(
           (failure) => print('Token retrieval failed: ${failure.message}'),
-          (tokenData) {
-            token = tokenData;
-            print('Token retrieved after register: ${token?.substring(0, 20)}...');
+          (token) {
+            state = state.copyWith(
+              isLoading: false,
+              isAuthenticated: true,
+              user: user,
+              token: token,
+              error: null,
+            );
+            print('Auth state updated with token');
           },
         );
-        
-        state = state.copyWith(
-          isLoading: false,
-          user: user,
-          isAuthenticated: true,
-          token: token, // Ajouter le token à l'état
-          error: null,
-        );
-      },
-    );
-  } catch (e) {
-    print('Register exception: $e');
-    state = state.copyWith(
-      isLoading: false,
-      error: 'Erreur inattendue: $e',
-    );
-  }
+      });
+    },
+  );
 }
 
   Future<void> logout() async {

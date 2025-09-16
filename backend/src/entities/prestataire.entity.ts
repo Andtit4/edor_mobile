@@ -6,26 +6,72 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  OneToOne,
   JoinColumn,
+  BeforeInsert,
 } from 'typeorm';
 import { ServiceOffer } from './service-offer.entity';
+import { User } from './user.entity';
+import * as bcrypt from 'bcryptjs';
 
 @Entity('prestataires')
 export class Prestataire {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  name: string;
-
+  // Champs communs avec User
   @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true })
-  avatar: string;
+  @Column()
+  firstName: string;
+
+  @Column()
+  lastName: string;
+
+  @Column()
+  phone: string;
+
+  @Column()
+  password: string;
+
+  @Column({
+    type: 'enum',
+    enum: ['client', 'prestataire'],
+    default: 'prestataire',
+  })
+  role: string;
 
   @Column({ nullable: true })
-  phone: string;
+  profileImage: string;
+
+  @Column({ nullable: true })
+  address: string;
+
+  @Column({ nullable: true })
+  city: string;
+
+  @Column({ nullable: true })
+  postalCode: string;
+
+  @Column({ nullable: true, type: 'text' })
+  bio: string;
+
+  @Column({ type: 'float', default: 0 })
+  rating: number;
+
+  @Column({ type: 'int', default: 0 })
+  reviewCount: number;
+
+  @Column({ type: 'json', nullable: true })
+  skills: string[];
+
+  @Column({ type: 'json', nullable: true })
+  categories: string[];
+
+  // Champs spécifiques aux prestataires
+  @Column()
+  name: string;
 
   @Column()
   category: string;
@@ -36,25 +82,19 @@ export class Prestataire {
   @Column({ type: 'text' })
   description: string;
 
-  @Column({ type: 'decimal', precision: 3, scale: 2, default: 0 })
-  rating: number;
-
-  @Column({ default: 0 })
+  @Column({ type: 'float', default: 0 })
   pricePerHour: number;
 
-  @Column({ type: 'json', nullable: true }) // Supprimer default: '[]'
-  skills: string[];
-
-  @Column({ type: 'json', nullable: true }) // Supprimer default: '[]'
+  @Column({ type: 'json', nullable: true })
   portfolio: string[];
 
   @Column({ default: true })
   isAvailable: boolean;
 
-  @Column({ default: 0 })
+  @Column({ type: 'int', default: 0 })
   completedJobs: number;
 
-  @Column({ default: 0 })
+  @Column({ type: 'int', default: 0 })
   totalReviews: number;
 
   @CreateDateColumn()
@@ -65,4 +105,44 @@ export class Prestataire {
 
   @OneToMany(() => ServiceOffer, (offer) => offer.prestataire)
   serviceOffers: ServiceOffer[];
+
+  @BeforeInsert()
+  async hashPassword() {
+    this.password = await bcrypt.hash(this.password, 12);
+  }
+
+  async validatePassword(password: string): Promise<boolean> {
+    return bcrypt.compare(password, this.password);
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      email: this.email,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      phone: this.phone,
+      role: this.role,
+      profileImage: this.profileImage,
+      address: this.address,
+      city: this.city,
+      postalCode: this.postalCode,
+      bio: this.bio,
+      rating: parseFloat(this.rating.toString()),
+      reviewCount: parseInt(this.reviewCount.toString()),
+      skills: this.skills,
+      categories: this.categories,
+      name: this.name,
+      category: this.category,
+      location: this.location,
+      description: this.description,
+      pricePerHour: parseFloat(this.pricePerHour.toString()),
+      portfolio: this.portfolio,
+      isAvailable: this.isAvailable,
+      completedJobs: parseInt(this.completedJobs.toString()),
+      totalReviews: parseInt(this.totalReviews.toString()),
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
+  }
 }
