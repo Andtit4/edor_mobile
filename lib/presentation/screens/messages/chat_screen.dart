@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/message_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -47,6 +48,46 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     final conversation = ref.watch(conversationProvider(widget.conversationId));
     final messages = ref.watch(messagesForConversationProvider(widget.conversationId));
     final messagesState = ref.watch(messagesProvider);
+
+    // Charger les conversations et messages si nécessaire
+    if (messagesState.conversations.isEmpty && !messagesState.isLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final authState = ref.read(authProvider);
+        if (authState.token != null) {
+          ref.read(messagesProvider.notifier).loadConversations(authState.token!);
+        }
+      });
+    }
+
+    // Charger les messages de cette conversation si nécessaire
+    if (conversation != null && 
+        !messagesState.messagesByConversation.containsKey(widget.conversationId)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final authState = ref.read(authProvider);
+        if (authState.token != null) {
+          ref.read(messagesProvider.notifier).loadMessages(widget.conversationId, authState.token!);
+        }
+      });
+    }
+
+    // Debug: Afficher les informations de la conversation
+    print('=== CHAT SCREEN DEBUG ===');
+    print('Conversation ID: ${widget.conversationId}');
+    print('Conversations count: ${messagesState.conversations.length}');
+    print('Conversation found: ${conversation != null}');
+    if (conversation != null) {
+      print('Prestataire name: ${conversation.prestataireName}');
+      print('Last message time: ${conversation.lastMessageTime}');
+    }
+    print('========================');
+
+    if (messagesState.isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
 
     if (conversation == null) {
       return _buildErrorState('Conversation non trouvée');
@@ -136,14 +177,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  conversation.prestataireName,
+                  conversation.prestataireName.isNotEmpty 
+                      ? conversation.prestataireName 
+                      : 'Prestataire',
                   style: AppTextStyles.h4.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
-                  'En ligne',
+                  _getLastSeenText(conversation),
                   style: AppTextStyles.caption.copyWith(
                     color: Colors.white.withOpacity(0.8),
                   ),
@@ -213,9 +256,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         }
         
         final message = messages[index];
-        final isCurrentUser = message.senderId == 'current_user';
+        final authState = ref.read(authProvider);
+        final currentUserId = authState.user?.id;
+        final isCurrentUser = message.senderType == 'client' && 
+            message.senderUserId == currentUserId;
         final isConsecutive = index > 0 && 
-            messages[index - 1].senderId == message.senderId;
+            messages[index - 1].senderType == message.senderType &&
+            ((message.senderType == 'client' && 
+              messages[index - 1].senderUserId == message.senderUserId) ||
+             (message.senderType == 'prestataire' && 
+              messages[index - 1].senderPrestataireId == message.senderPrestataireId));
         
         return _buildMessageBubble(message, isCurrentUser, isConsecutive);
       },
@@ -240,7 +290,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
               radius: 16,
               backgroundColor: const Color(0xFF8B5CF6).withOpacity(0.1),
               child: Text(
-                message.senderId == 'current_user' ? 'M' : 'P',
+                message.senderType == 'client' ? 'M' : 'P',
                 style: const TextStyle(
                   color: Color(0xFF8B5CF6),
                   fontWeight: FontWeight.bold,
@@ -560,14 +610,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   void _sendMessage() {
     final text = _messageController.text.trim();
     if (text.isNotEmpty) {
-      ref.read(messagesProvider.notifier).sendMessage(
-        conversationId: widget.conversationId,
-        content: text,
-      );
-      _messageController.clear();
-      setState(() => _isTyping = false);
-      _typingAnimationController.stop();
-      _scrollToBottom();
+      final authState = ref.read(authProvider);
+      if (authState.token != null) {
+        ref.read(messagesProvider.notifier).sendMessage(
+          conversationId: widget.conversationId,
+          content: text,
+          token: authState.token!,
+        );
+        _messageController.clear();
+        setState(() => _isTyping = false);
+        _typingAnimationController.stop();
+        _scrollToBottom();
+      }
     }
   }
 
@@ -709,5 +763,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
   void _sendVoiceMessage() {
     // Implémentation pour l'envoi de messages vocaux
+  }
+
+  String _getLastSeenText(conversation) {
+    if (conversation.lastMessageTime == null) {
+      return 'Jamais en ligne';
+    }
+    
+    final now = DateTime.now();
+    final lastMessageTime = conversation.lastMessageTime;
+    final difference = now.difference(lastMessageTime);
+    
+    if (difference.inMinutes < 1) {
+      return 'En ligne maintenant';
+    } else if (difference.inMinutes < 60) {
+      return 'En ligne il y a ${difference.inMinutes} min';
+    } else if (difference.inHours < 24) {
+      return 'En ligne il y a ${difference.inHours}h';
+    } else if (difference.inDays < 7) {
+      return 'En ligne il y a ${difference.inDays}j';
+    } else {
+      return 'En ligne le ${lastMessageTime.day}/${lastMessageTime.month}';
+    }
   }
 }

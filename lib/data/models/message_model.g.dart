@@ -1,13 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'message.dart';
+part of 'message_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$MessageImpl _$$MessageImplFromJson(Map<String, dynamic> json) =>
-    _$MessageImpl(
+_$MessageModelImpl _$$MessageModelImplFromJson(Map<String, dynamic> json) =>
+    _$MessageModelImpl(
       id: json['id'] as String,
       conversationId: json['conversationId'] as String,
       senderUserId: json['senderUserId'] as String?,
@@ -27,7 +27,7 @@ _$MessageImpl _$$MessageImplFromJson(Map<String, dynamic> json) =>
               : DateTime.parse(json['updatedAt'] as String),
     );
 
-Map<String, dynamic> _$$MessageImplToJson(_$MessageImpl instance) =>
+Map<String, dynamic> _$$MessageModelImplToJson(_$MessageModelImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'conversationId': instance.conversationId,

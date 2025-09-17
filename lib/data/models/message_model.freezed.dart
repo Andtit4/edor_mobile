@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'message.dart';
+part of 'message_model.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -15,18 +15,17 @@ final _privateConstructorUsedError = UnsupportedError(
   'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
 );
 
-Message _$MessageFromJson(Map<String, dynamic> json) {
-  return _Message.fromJson(json);
+MessageModel _$MessageModelFromJson(Map<String, dynamic> json) {
+  return _MessageModel.fromJson(json);
 }
 
 /// @nodoc
-mixin _$Message {
+mixin _$MessageModel {
   String get id => throw _privateConstructorUsedError;
   String get conversationId => throw _privateConstructorUsedError;
   String? get senderUserId => throw _privateConstructorUsedError;
   String? get senderPrestataireId => throw _privateConstructorUsedError;
-  String get senderType =>
-      throw _privateConstructorUsedError; // 'client' ou 'prestataire'
+  String get senderType => throw _privateConstructorUsedError;
   String get content => throw _privateConstructorUsedError;
   MessageType get type => throw _privateConstructorUsedError;
   bool get isRead => throw _privateConstructorUsedError;
@@ -34,19 +33,22 @@ mixin _$Message {
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this Message to a JSON map.
+  /// Serializes this MessageModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of Message
+  /// Create a copy of MessageModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $MessageCopyWith<Message> get copyWith => throw _privateConstructorUsedError;
+  $MessageModelCopyWith<MessageModel> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $MessageCopyWith<$Res> {
-  factory $MessageCopyWith(Message value, $Res Function(Message) then) =
-      _$MessageCopyWithImpl<$Res, Message>;
+abstract class $MessageModelCopyWith<$Res> {
+  factory $MessageModelCopyWith(
+    MessageModel value,
+    $Res Function(MessageModel) then,
+  ) = _$MessageModelCopyWithImpl<$Res, MessageModel>;
   @useResult
   $Res call({
     String id,
@@ -64,16 +66,16 @@ abstract class $MessageCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$MessageCopyWithImpl<$Res, $Val extends Message>
-    implements $MessageCopyWith<$Res> {
-  _$MessageCopyWithImpl(this._value, this._then);
+class _$MessageModelCopyWithImpl<$Res, $Val extends MessageModel>
+    implements $MessageModelCopyWith<$Res> {
+  _$MessageModelCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Message
+  /// Create a copy of MessageModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -154,11 +156,12 @@ class _$MessageCopyWithImpl<$Res, $Val extends Message>
 }
 
 /// @nodoc
-abstract class _$$MessageImplCopyWith<$Res> implements $MessageCopyWith<$Res> {
-  factory _$$MessageImplCopyWith(
-    _$MessageImpl value,
-    $Res Function(_$MessageImpl) then,
-  ) = __$$MessageImplCopyWithImpl<$Res>;
+abstract class _$$MessageModelImplCopyWith<$Res>
+    implements $MessageModelCopyWith<$Res> {
+  factory _$$MessageModelImplCopyWith(
+    _$MessageModelImpl value,
+    $Res Function(_$MessageModelImpl) then,
+  ) = __$$MessageModelImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({
@@ -177,15 +180,15 @@ abstract class _$$MessageImplCopyWith<$Res> implements $MessageCopyWith<$Res> {
 }
 
 /// @nodoc
-class __$$MessageImplCopyWithImpl<$Res>
-    extends _$MessageCopyWithImpl<$Res, _$MessageImpl>
-    implements _$$MessageImplCopyWith<$Res> {
-  __$$MessageImplCopyWithImpl(
-    _$MessageImpl _value,
-    $Res Function(_$MessageImpl) _then,
+class __$$MessageModelImplCopyWithImpl<$Res>
+    extends _$MessageModelCopyWithImpl<$Res, _$MessageModelImpl>
+    implements _$$MessageModelImplCopyWith<$Res> {
+  __$$MessageModelImplCopyWithImpl(
+    _$MessageModelImpl _value,
+    $Res Function(_$MessageModelImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of Message
+  /// Create a copy of MessageModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -203,7 +206,7 @@ class __$$MessageImplCopyWithImpl<$Res>
     Object? updatedAt = freezed,
   }) {
     return _then(
-      _$MessageImpl(
+      _$MessageModelImpl(
         id:
             null == id
                 ? _value.id
@@ -266,8 +269,8 @@ class __$$MessageImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$MessageImpl implements _Message {
-  const _$MessageImpl({
+class _$MessageModelImpl implements _MessageModel {
+  const _$MessageModelImpl({
     required this.id,
     required this.conversationId,
     this.senderUserId,
@@ -281,8 +284,8 @@ class _$MessageImpl implements _Message {
     this.updatedAt,
   });
 
-  factory _$MessageImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MessageImplFromJson(json);
+  factory _$MessageModelImpl.fromJson(Map<String, dynamic> json) =>
+      _$$MessageModelImplFromJson(json);
 
   @override
   final String id;
@@ -294,7 +297,6 @@ class _$MessageImpl implements _Message {
   final String? senderPrestataireId;
   @override
   final String senderType;
-  // 'client' ou 'prestataire'
   @override
   final String content;
   @override
@@ -311,14 +313,14 @@ class _$MessageImpl implements _Message {
 
   @override
   String toString() {
-    return 'Message(id: $id, conversationId: $conversationId, senderUserId: $senderUserId, senderPrestataireId: $senderPrestataireId, senderType: $senderType, content: $content, type: $type, isRead: $isRead, imageUrl: $imageUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'MessageModel(id: $id, conversationId: $conversationId, senderUserId: $senderUserId, senderPrestataireId: $senderPrestataireId, senderType: $senderType, content: $content, type: $type, isRead: $isRead, imageUrl: $imageUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$MessageImpl &&
+            other is _$MessageModelImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.conversationId, conversationId) ||
                 other.conversationId == conversationId) &&
@@ -356,22 +358,22 @@ class _$MessageImpl implements _Message {
     updatedAt,
   );
 
-  /// Create a copy of Message
+  /// Create a copy of MessageModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$MessageImplCopyWith<_$MessageImpl> get copyWith =>
-      __$$MessageImplCopyWithImpl<_$MessageImpl>(this, _$identity);
+  _$$MessageModelImplCopyWith<_$MessageModelImpl> get copyWith =>
+      __$$MessageModelImplCopyWithImpl<_$MessageModelImpl>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$MessageImplToJson(this);
+    return _$$MessageModelImplToJson(this);
   }
 }
 
-abstract class _Message implements Message {
-  const factory _Message({
+abstract class _MessageModel implements MessageModel {
+  const factory _MessageModel({
     required final String id,
     required final String conversationId,
     final String? senderUserId,
@@ -383,9 +385,10 @@ abstract class _Message implements Message {
     final String? imageUrl,
     final DateTime? createdAt,
     final DateTime? updatedAt,
-  }) = _$MessageImpl;
+  }) = _$MessageModelImpl;
 
-  factory _Message.fromJson(Map<String, dynamic> json) = _$MessageImpl.fromJson;
+  factory _MessageModel.fromJson(Map<String, dynamic> json) =
+      _$MessageModelImpl.fromJson;
 
   @override
   String get id;
@@ -396,7 +399,7 @@ abstract class _Message implements Message {
   @override
   String? get senderPrestataireId;
   @override
-  String get senderType; // 'client' ou 'prestataire'
+  String get senderType;
   @override
   String get content;
   @override
@@ -410,10 +413,10 @@ abstract class _Message implements Message {
   @override
   DateTime? get updatedAt;
 
-  /// Create a copy of Message
+  /// Create a copy of MessageModel
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$MessageImplCopyWith<_$MessageImpl> get copyWith =>
+  _$$MessageModelImplCopyWith<_$MessageModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

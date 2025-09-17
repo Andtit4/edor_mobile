@@ -11,6 +11,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE || 'edor_mobile',
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  synchronize: process.env.NODE_ENV !== 'production',
-  logging: process.env.NODE_ENV === 'development',
+  synchronize: true, // Force la synchronisation pour recréer les tables
+  logging: true, // Active les logs pour voir les requêtes SQL
+  dropSchema: false, // Ne pas supprimer toutes les tables
 };

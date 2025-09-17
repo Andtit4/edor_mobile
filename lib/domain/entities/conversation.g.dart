@@ -11,8 +11,12 @@ _$ConversationImpl _$$ConversationImplFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       clientId: json['clientId'] as String,
       prestataireId: json['prestataireId'] as String,
-      clientName: json['clientName'] as String,
-      prestataireName: json['prestataireName'] as String,
+      serviceRequestId: json['serviceRequestId'] as String?,
+      isActive: json['isActive'] as bool? ?? true,
+      unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
+      lastMessageId: json['lastMessageId'] as String?,
+      clientName: json['clientName'] as String?,
+      prestataireName: json['prestataireName'] as String?,
       clientAvatar: json['clientAvatar'] as String?,
       prestataireAvatar: json['prestataireAvatar'] as String?,
       lastMessage: json['lastMessage'] as String?,
@@ -20,7 +24,6 @@ _$ConversationImpl _$$ConversationImplFromJson(Map<String, dynamic> json) =>
           json['lastMessageTime'] == null
               ? null
               : DateTime.parse(json['lastMessageTime'] as String),
-      unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
       messages:
           (json['messages'] as List<dynamic>?)
               ?.map((e) => Message.fromJson(e as Map<String, dynamic>))
@@ -41,13 +44,16 @@ Map<String, dynamic> _$$ConversationImplToJson(_$ConversationImpl instance) =>
       'id': instance.id,
       'clientId': instance.clientId,
       'prestataireId': instance.prestataireId,
+      'serviceRequestId': instance.serviceRequestId,
+      'isActive': instance.isActive,
+      'unreadCount': instance.unreadCount,
+      'lastMessageId': instance.lastMessageId,
       'clientName': instance.clientName,
       'prestataireName': instance.prestataireName,
       'clientAvatar': instance.clientAvatar,
       'prestataireAvatar': instance.prestataireAvatar,
       'lastMessage': instance.lastMessage,
       'lastMessageTime': instance.lastMessageTime?.toIso8601String(),
-      'unreadCount': instance.unreadCount,
       'messages': instance.messages,
       'createdAt': instance.createdAt?.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),

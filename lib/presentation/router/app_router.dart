@@ -18,7 +18,7 @@ import '../screens/home/home_screen.dart';
 import '../screens/prestataire_detail/prestataire_detail_screen.dart';
 import '../screens/reservation/reservation_screen.dart';
 import '../screens/messages/messages_screen.dart';
-import '../screens/messages/chat_screen.dart';
+import '../screens/chat/chat_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../widgets/animated_bottom_nav.dart';
 import 'app_routes.dart';
@@ -187,6 +187,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: AppRoutes.editProfileName,
         builder: (context, state) => const EditProfileScreen(),
       ),
+
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(

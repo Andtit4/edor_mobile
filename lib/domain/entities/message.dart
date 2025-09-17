@@ -10,7 +10,9 @@ class Message with _$Message {
   const factory Message({
     required String id,
     required String conversationId,
-    required String senderId,
+    String? senderUserId,
+    String? senderPrestataireId,
+    required String senderType, // 'client' ou 'prestataire'
     required String content,
     required MessageType type,
     @Default(false) bool isRead,

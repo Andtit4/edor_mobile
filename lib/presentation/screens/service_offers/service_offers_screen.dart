@@ -10,6 +10,7 @@ import '../../providers/service_offer_provider.dart';
 import '../../providers/service_request_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/prestataire_provider.dart';
+import '../../providers/message_provider.dart';
 import 'package:go_router/go_router.dart';
 // import '../../../router/app_routes.dart';
 
@@ -1488,7 +1489,20 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     );
   }
 
-  void _contactPrestataireFromCard(Prestataire prestataire) {
+  void _contactPrestataireFromCard(Prestataire prestataire) async {
+    final authState = ref.read(authProvider);
+    final token = authState.token;
+    
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vous devez être connecté pour contacter un prestataire'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -1505,15 +1519,73 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
             child: const Text('Annuler'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
+              // Fermer le dialogue de contact d'abord
               Navigator.pop(context);
-              // TODO: Implémenter la logique de contact
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Contact avec ${prestataire.name} initié'),
-                  backgroundColor: const Color(0xFF8B5CF6),
-                ),
-              );
+              
+              // Attendre un peu pour que le dialogue se ferme complètement
+              await Future.delayed(const Duration(milliseconds: 100));
+              
+              // Afficher un indicateur de chargement
+              if (context.mounted) {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+              
+              try {
+                print('=== CREATING CONVERSATION ===');
+                print('Prestataire ID: ${prestataire.id}');
+                print('Token: ${token?.substring(0, 20)}...');
+                
+                // Créer la conversation avec timeout
+                final conversation = await ref.read(messagesProvider.notifier).createConversation(
+                  prestataireId: prestataire.id,
+                  token: token,
+                ).timeout(
+                  const Duration(seconds: 10),
+                  onTimeout: () {
+                    print('TIMEOUT: createConversation took too long');
+                    throw Exception('Timeout: La création de conversation a pris trop de temps');
+                  },
+                );
+                
+                print('Conversation created: ${conversation?.id}');
+                print('===============================');
+                
+                // Fermer l'indicateur de chargement
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+                
+                if (conversation != null && context.mounted) {
+                  // Naviguer vers l'écran de chat
+                  context.push('/messages/chat/${conversation.id}');
+                } else if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Erreur lors de la création de la conversation'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              } catch (e) {
+                // Fermer l'indicateur de chargement
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Erreur: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF8B5CF6),

@@ -12,7 +12,7 @@ class AppRoutes {
   static const String prestataireDetail = '/prestataire';
   static const String reservation = '/reservation';
   static const String messages = '/messages';
-  static const String chat = '/messages/chat/:id';
+  static const String chat = '/chat';
   static const String profile = '/profile';
   static const String editProfile = '/profile/edit';
 

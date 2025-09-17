@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../providers/message_provider.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../providers/auth_provider.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class MessagesScreen extends ConsumerWidget {
   const MessagesScreen({super.key});
@@ -11,9 +12,19 @@ class MessagesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final messagesState = ref.watch(messagesProvider);
+    final authState = ref.watch(authProvider);
+    final currentUser = authState.user;
+
+    // Charger les conversations au démarrage
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final token = authState.token;
+      if (token != null) {
+        ref.read(messagesProvider.notifier).loadConversations(token);
+      }
+    });
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -28,257 +39,178 @@ class MessagesScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(
-              Icons.notifications_outlined,
+              Icons.refresh,
               color: Colors.black,
             ),
             onPressed: () {
-              // TODO: Implémenter les notifications
+              final token = authState.token;
+              if (token != null) {
+                ref.read(messagesProvider.notifier).refresh(token);
+              }
             },
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Barre de recherche
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppColors.gray100,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search chats',
-                  hintStyle: TextStyle(
-                    color: AppColors.gray500,
-                    fontSize: 14,
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: AppColors.gray500,
-                    size: 20,
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                ),
-                style: const TextStyle(fontSize: 14),
-              ),
-            ),
-          ),
-          // Liste des conversations
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                await ref.read(messagesProvider.notifier).refresh();
-              },
-              child: messagesState.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : messagesState.error != null
-                  ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: AppColors.error,
+      body: messagesState.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : messagesState.error != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Colors.red[400],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Erreur de chargement',
+                        style: AppTextStyles.h3.copyWith(
+                          color: Colors.red[600],
                         ),
-                        const SizedBox(height: 16),
-                        Text('Erreur: ${messagesState.error}'),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            ref.read(messagesProvider.notifier).refresh();
-                          },
-                          child: const Text('Réessayer'),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        messagesState.error!,
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          color: Colors.red[500],
                         ),
-                      ],
-                    ),
-                  )
-                  : messagesState.conversations.isEmpty
-                  ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.chat_bubble_outline,
-                          size: 64,
-                          color: AppColors.gray400,
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          'Aucune conversation',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Vos conversations apparaîtront ici',
-                          style: TextStyle(color: AppColors.gray600),
-                        ),
-                      ],
-                    ),
-                  )
-                  : ListView.builder(
-                    itemCount: messagesState.conversations.length,
-                    itemBuilder: (context, index) {
-                      final conversation = messagesState.conversations[index];
-
-                      return GestureDetector(
-                        onTap: () {
-                          context.push('/messages/chat/${conversation.id}');
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          final token = authState.token;
+                          if (token != null) {
+                            ref.read(messagesProvider.notifier).loadConversations(token);
+                          }
                         },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                        child: const Text('Réessayer'),
+                      ),
+                    ],
+                  ),
+                )
+              : messagesState.conversations.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.chat_bubble_outline,
+                            size: 64,
+                            color: Colors.grey[400],
                           ),
-                          decoration: BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(
-                                color: AppColors.gray200,
-                                width: 0.5,
-                              ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Aucune conversation',
+                            style: AppTextStyles.h3.copyWith(
+                              color: Colors.grey[600],
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              // Avatar
-                              CircleAvatar(
-                                radius: 24,
-                                backgroundColor: AppColors.gray200,
-                                backgroundImage:
-                                    conversation.prestataireAvatar != null
-                                        ? NetworkImage(
-                                          conversation.prestataireAvatar!,
-                                        )
-                                        : null,
-                                child:
-                                    conversation.prestataireAvatar == null
-                                        ? Text(
-                                          conversation.prestataireName.isNotEmpty
-                                              ? conversation.prestataireName[0]
-                                                  .toUpperCase()
-                                              : '?',
-                                          style: const TextStyle(
-                                            color: AppColors.gray600,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        )
-                                        : null,
-                              ),
-                              const SizedBox(width: 12),
-                              // Contenu de la conversation
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            conversation.prestataireName,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.black,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        Text(
-                                          conversation.lastMessageTime != null
-                                              ? _formatTimeForUI(conversation.lastMessageTime!)
-                                              : '',
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: AppColors.gray500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            conversation.lastMessage ??
-                                                'Nouvelle conversation',
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              color: AppColors.gray600,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        if (conversation.unreadCount > 0) ...[
-                                          const SizedBox(width: 8),
-                                          Container(
-                                            width: 20,
-                                            height: 20,
-                                            decoration: const BoxDecoration(
-                                              color: Colors.black,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Center(
-                                              child: Text(
-                                                '${conversation.unreadCount}',
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                          const SizedBox(height: 8),
+                          Text(
+                            'Commencez une conversation avec un prestataire',
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              color: Colors.grey[500],
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
-                      );
-                    },
-                  ),
-            ),
-          ),
-        ],
-      ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: messagesState.conversations.length,
+                      itemBuilder: (context, index) {
+                        final conversation = messagesState.conversations[index];
+                        return _buildConversationCard(context, conversation, currentUser);
+                      },
+                    ),
     );
   }
 
-  String _formatTimeForUI(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
+  Widget _buildConversationCard(BuildContext context, conversation, currentUser) {
+    // Déterminer le nom de l'autre utilisateur
+    final otherUserName = currentUser?.role == 'client' 
+        ? conversation.prestataireName ?? 'Prestataire'
+        : conversation.clientName ?? 'Client';
 
-    if (difference.inDays > 0) {
-      if (difference.inDays == 1) {
-        return '1d';
-      } else if (difference.inDays < 7) {
-        return '${difference.inDays}d';
-      } else {
-        return DateFormat('dd/MM').format(dateTime);
-      }
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m';
-    } else {
-      return 'now';
-    }
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: CircleAvatar(
+          radius: 25,
+          backgroundColor: const Color(0xFF8B5CF6).withOpacity(0.1),
+          child: Text(
+            otherUserName.isNotEmpty ? otherUserName[0].toUpperCase() : 'U',
+            style: const TextStyle(
+              color: Color(0xFF8B5CF6),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        title: Text(
+          otherUserName,
+          style: AppTextStyles.bodyLarge.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        subtitle: Text(
+          conversation.lastMessage ?? 'Aucun message',
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: Colors.grey[600],
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (conversation.lastMessageTime != null)
+              Text(
+                DateFormat('HH:mm').format(conversation.lastMessageTime!),
+                style: AppTextStyles.caption.copyWith(
+                  color: Colors.grey[500],
+                ),
+              ),
+            if (conversation.unreadCount > 0) ...[
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF8B5CF6),
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  conversation.unreadCount.toString(),
+                  style: AppTextStyles.caption.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        onTap: () {
+          context.push('/messages/chat/${conversation.id}');
+        },
+      ),
+    );
   }
-
 }

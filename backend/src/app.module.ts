@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { PrestatairesModule } from './prestataires/prestataire.module';
 import { ServiceOffersModule } from './service-offers/service-offers.module';
 import { ServiceRequestsModule } from './service-requests/service-requests.module';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ServiceRequestsModule } from './service-requests/service-requests.modul
     PrestatairesModule,
     ServiceOffersModule,
     ServiceRequestsModule,
+    MessagesModule,
   ],
 })
 export class AppModule {}

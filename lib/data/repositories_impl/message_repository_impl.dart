@@ -89,7 +89,9 @@ class MessageRepositoryImpl implements MessageRepository {
       final message = Message(
         id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
         conversationId: conversationId,
-        senderId: 'current_user',
+        senderUserId: 'current_user',
+        senderPrestataireId: null,
+        senderType: 'client',
         content: content,
         type: type,
         isRead: false,
@@ -157,7 +159,9 @@ class MessageRepositoryImpl implements MessageRepository {
           Message(
             id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
             conversationId: 'conv_${DateTime.now().millisecondsSinceEpoch}',
-            senderId: 'current_user',
+            senderUserId: 'current_user',
+            senderPrestataireId: null,
+            senderType: 'client',
             content: initialMessage,
             type: MessageType.text,
             isRead: false,
