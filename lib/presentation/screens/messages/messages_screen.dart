@@ -5,23 +5,37 @@ import 'package:intl/intl.dart';
 import '../../providers/message_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../domain/entities/user.dart';
 
-class MessagesScreen extends ConsumerWidget {
+class MessagesScreen extends ConsumerStatefulWidget {
   const MessagesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MessagesScreen> createState() => _MessagesScreenState();
+}
+
+class _MessagesScreenState extends ConsumerState<MessagesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Charger les conversations une seule fois au démarrage
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authState = ref.read(authProvider);
+      if (authState.token != null) {
+        final messagesState = ref.read(messagesProvider);
+        if (messagesState.conversations.isEmpty && !messagesState.isLoading) {
+          ref.read(messagesProvider.notifier).loadConversations(authState.token!);
+        }
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final messagesState = ref.watch(messagesProvider);
     final authState = ref.watch(authProvider);
     final currentUser = authState.user;
 
-    // Charger les conversations au démarrage
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final token = authState.token;
-      if (token != null) {
-        ref.read(messagesProvider.notifier).loadConversations(token);
-      }
-    });
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -131,10 +145,18 @@ class MessagesScreen extends ConsumerWidget {
   }
 
   Widget _buildConversationCard(BuildContext context, conversation, currentUser) {
-    // Déterminer le nom de l'autre utilisateur
-    final otherUserName = currentUser?.role == 'client' 
+    // Logique simple : client voit prestataireName, prestataire voit clientName
+    print('=== MESSAGES SCREEN DEBUG ===');
+    print('Current user role: ${currentUser?.role}');
+    print('Prestataire name: ${conversation.prestataireName}');
+    print('Client name: ${conversation.clientName}');
+    
+    final otherUserName = currentUser?.role == UserRole.client 
         ? conversation.prestataireName ?? 'Prestataire'
         : conversation.clientName ?? 'Client';
+    
+    print('Selected name: $otherUserName');
+    print('=============================');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -164,13 +186,13 @@ class MessagesScreen extends ConsumerWidget {
           ),
         ),
         title: Text(
-          otherUserName,
+          otherUserName ,
           style: AppTextStyles.bodyLarge.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
         subtitle: Text(
-          conversation.lastMessage ?? 'Aucun message',
+          conversation.lastMessageContent ?? 'Aucun message',
           style: AppTextStyles.bodyMedium.copyWith(
             color: Colors.grey[600],
           ),

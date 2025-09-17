@@ -63,16 +63,12 @@ class MessagesNotifier extends StateNotifier<MessagesState> {
     try {
       final conversations = await _remoteDataSource.getConversations(token);
       
-      // Créer la map des messages par conversation
-      final Map<String, List<Message>> messagesByConversation = {};
-      for (final conversation in conversations) {
-        messagesByConversation[conversation.id] = conversation.messages;
-      }
+      // Ne pas essayer d'accéder aux messages des conversations car ils ne sont pas chargés
+      // Les messages seront chargés individuellement quand nécessaire
 
       state = state.copyWith(
         isLoading: false,
         conversations: conversations,
-        messagesByConversation: messagesByConversation,
       );
     } catch (e) {
       state = state.copyWith(
@@ -112,9 +108,9 @@ class MessagesNotifier extends StateNotifier<MessagesState> {
       final currentMessages = state.messagesByConversation[conversationId] ?? [];
       final updatedMessages = [...currentMessages, message];
 
-      final updatedMessagesMap = Map<String, List<Message>>.from(
-        state.messagesByConversation,
-      );
+      // Créer une nouvelle map pour forcer la mise à jour
+      final updatedMessagesMap = <String, List<Message>>{};
+      updatedMessagesMap.addAll(state.messagesByConversation);
       updatedMessagesMap[conversationId] = updatedMessages;
 
       state = state.copyWith(
@@ -134,30 +130,31 @@ class MessagesNotifier extends StateNotifier<MessagesState> {
     required String token,
     String? serviceRequestId,
   }) async {
+    print('=== MESSAGE PROVIDER: CREATE CONVERSATION ===');
+    print('Prestataire ID: $prestataireId');
+    print('Token: ${token.substring(0, 20)}...');
+    
     try {
-      print('=== MESSAGE PROVIDER - CREATE CONVERSATION ===');
-      print('Prestataire ID: $prestataireId');
-      print('Token: ${token.substring(0, 20)}...');
-      print('Service Request ID: $serviceRequestId');
-      
+      print('Calling remote data source...');
       final conversation = await _remoteDataSource.createConversation(
         prestataireId, 
         token, 
         serviceRequestId: serviceRequestId,
       );
       
-      print('Conversation received from API: ${conversation?.id}');
+      print('Conversation received from API: ${conversation.id}');
+      print('Prestataire Name: ${conversation.prestataireName}');
+      print('Client Name: ${conversation.clientName}');
       
       // Ajouter la conversation à la liste
       final updatedConversations = [...state.conversations, conversation];
       state = state.copyWith(conversations: updatedConversations);
       
       print('Conversation added to state');
-      print('===============================================');
-      
+      print('===============================');
       return conversation;
     } catch (e) {
-      print('ERROR in createConversation: $e');
+      print('Error in createConversation: $e');
       state = state.copyWith(error: e.toString());
       return null;
     }
@@ -214,9 +211,23 @@ final conversationProvider = Provider.family<Conversation?, String>((
   conversationId,
 ) {
   final conversations = ref.watch(messagesProvider).conversations;
+  print('=== CONVERSATION PROVIDER ===');
+  print('Looking for conversation: $conversationId');
+  print('Available conversations: ${conversations.length}');
+  conversations.forEach((conv) {
+    print('Conversation: ${conv.id} - Prestataire: ${conv.prestataireName} - Client: ${conv.clientName}');
+  });
+  
   try {
-    return conversations.firstWhere((conv) => conv.id == conversationId);
+    final conversation = conversations.firstWhere((conv) => conv.id == conversationId);
+    print('Found conversation: ${conversation.id}');
+    print('Prestataire name: ${conversation.prestataireName}');
+    print('Client name: ${conversation.clientName}');
+    print('=============================');
+    return conversation;
   } catch (e) {
+    print('Conversation not found: $conversationId');
+    print('=============================');
     return null;
   }
 });
@@ -226,8 +237,9 @@ final messagesForConversationProvider = Provider.family<List<Message>, String>((
   ref,
   conversationId,
 ) {
-  final messagesMap = ref.watch(messagesProvider).messagesByConversation;
-  return messagesMap[conversationId] ?? [];
+  final messagesState = ref.watch(messagesProvider);
+  final messages = messagesState.messagesByConversation[conversationId] ?? [];
+  return messages;
 });
 
 // Unread Messages Count Provider

@@ -50,13 +50,27 @@ export class MessagesService {
       throw new NotFoundException('Prestataire non trouvé');
     }
 
+    // Vérifier que le client existe
+    const client = await this.userRepository.findOne({
+      where: { id: clientId },
+    });
+
+    if (!client) {
+      throw new NotFoundException('Client non trouvé');
+    }
+
     // Créer la nouvelle conversation
+    const clientName = client.firstName + ' ' + client.lastName;
+    const prestataireName = prestataire.firstName + ' ' + prestataire.lastName;
+    
     const conversation = this.conversationRepository.create({
       clientId,
       prestataireId,
       serviceRequestId,
       isActive: true,
-      prestataireName: prestataire.firstName + ' ' + prestataire.lastName,
+      clientName,
+      clientAvatar: client.profileImage,
+      prestataireName,
       prestataireAvatar: prestataire.profileImage,
     });
 
@@ -68,11 +82,25 @@ export class MessagesService {
       ? { clientId: userId, isActive: true }
       : { prestataireId: userId, isActive: true };
 
-    return this.conversationRepository.find({
+    const conversations = await this.conversationRepository.find({
       where: whereCondition,
       relations: ['client', 'prestataire', 'lastMessage'],
       order: { updatedAt: 'DESC' },
     });
+
+    // S'assurer que les noms sont à jour
+    for (const conversation of conversations) {
+      if (!conversation.clientName && conversation.client) {
+        conversation.clientName = conversation.client.firstName + ' ' + conversation.client.lastName;
+        conversation.clientAvatar = conversation.client.profileImage;
+      }
+      if (!conversation.prestataireName && conversation.prestataire) {
+        conversation.prestataireName = conversation.prestataire.firstName + ' ' + conversation.prestataire.lastName;
+        conversation.prestataireAvatar = conversation.prestataire.profileImage;
+      }
+    }
+
+    return conversations;
   }
 
   async getConversationById(
@@ -96,6 +124,16 @@ export class MessagesService {
 
     if (!hasAccess) {
       throw new ForbiddenException('Accès non autorisé à cette conversation');
+    }
+
+    // S'assurer que les noms sont à jour
+    if (!conversation.clientName && conversation.client) {
+      conversation.clientName = conversation.client.firstName + ' ' + conversation.client.lastName;
+      conversation.clientAvatar = conversation.client.profileImage;
+    }
+    if (!conversation.prestataireName && conversation.prestataire) {
+      conversation.prestataireName = conversation.prestataire.firstName + ' ' + conversation.prestataire.lastName;
+      conversation.prestataireAvatar = conversation.prestataire.profileImage;
     }
 
     return conversation;

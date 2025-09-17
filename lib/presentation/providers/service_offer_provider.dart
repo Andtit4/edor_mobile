@@ -115,11 +115,6 @@ class ServiceOfferNotifier extends StateNotifier<ServiceOfferState> {
     }
   }
 
-  Future<void> contactPrestataire(String offerId) async {
-    // Implémentation pour contacter le prestataire
-    // Pour l'instant, on peut juste afficher un message
-    print('Contacting prestataire for offer: $offerId');
-  }
 
   void clearError() {
     state = state.copyWith(error: null);

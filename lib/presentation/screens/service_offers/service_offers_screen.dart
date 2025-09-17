@@ -6,6 +6,7 @@ import '../../../domain/entities/service_offer.dart';
 import '../../../domain/entities/service_request.dart';
 import '../../../domain/entities/user.dart';
 import '../../../domain/entities/prestataire.dart';
+import '../../../domain/entities/conversation.dart';
 import '../../providers/service_offer_provider.dart';
 import '../../providers/service_request_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -1147,38 +1148,85 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     );
   }
 
-  void _contactPrestataire(ServiceOffer offer) {
+  void _contactPrestataire(ServiceOffer offer) async {
+    final authState = ref.read(authProvider);
+    final token = authState.token;
+
+    if (!authState.isAuthenticated || token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vous devez être connecté pour contacter un prestataire'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Afficher un indicateur de chargement
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: const Text('Contacter le prestataire'),
-        content: Text(
-          'Voulez-vous contacter ${offer.prestataireName} pour discuter de vos besoins?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(serviceOfferProvider.notifier).contactPrestataire(offer.id);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8B5CF6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Envoyer message'),
-          ),
-        ],
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
       ),
     );
+
+    try {
+      // Charger les conversations d'abord
+      await ref.read(messagesProvider.notifier).loadConversations(token);
+      
+      // Vérifier si une conversation existe déjà
+      final existingConversations = ref.read(messagesProvider).conversations;
+      Conversation? existingConversation;
+      try {
+        existingConversation = existingConversations.firstWhere(
+          (conv) => conv.prestataireId == offer.prestataireId,
+        );
+      } catch (e) {
+        existingConversation = null;
+      }
+      
+      Conversation? conversation;
+      
+      if (existingConversation != null) {
+        conversation = existingConversation;
+      } else {
+        // Créer une nouvelle conversation
+        conversation = await ref.read(messagesProvider.notifier).createConversation(
+          prestataireId: offer.prestataireId,
+          token: token,
+          serviceRequestId: offer.id,
+        );
+      }
+      
+      // Fermer l'indicateur de chargement
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+      
+      if (conversation != null && context.mounted) {
+        // Naviguer vers le chat
+        context.push('/messages/chat/${conversation.id}');
+      } else if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur lors de la création de la conversation'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      // Fermer l'indicateur de chargement
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildPrestataireCard(Prestataire prestataire) {
@@ -1492,8 +1540,8 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
   void _contactPrestataireFromCard(Prestataire prestataire) async {
     final authState = ref.read(authProvider);
     final token = authState.token;
-    
-    if (token == null) {
+
+    if (!authState.isAuthenticated || token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Vous devez être connecté pour contacter un prestataire'),
@@ -1503,100 +1551,71 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
       return;
     }
 
+    // Afficher un indicateur de chargement
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: const Text('Contacter le prestataire'),
-        content: Text(
-          'Voulez-vous contacter ${prestataire.name} pour discuter de vos besoins?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              // Fermer le dialogue de contact d'abord
-              Navigator.pop(context);
-              
-              // Attendre un peu pour que le dialogue se ferme complètement
-              await Future.delayed(const Duration(milliseconds: 100));
-              
-              // Afficher un indicateur de chargement
-              if (context.mounted) {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
-              
-              try {
-                print('=== CREATING CONVERSATION ===');
-                print('Prestataire ID: ${prestataire.id}');
-                print('Token: ${token?.substring(0, 20)}...');
-                
-                // Créer la conversation avec timeout
-                final conversation = await ref.read(messagesProvider.notifier).createConversation(
-                  prestataireId: prestataire.id,
-                  token: token,
-                ).timeout(
-                  const Duration(seconds: 10),
-                  onTimeout: () {
-                    print('TIMEOUT: createConversation took too long');
-                    throw Exception('Timeout: La création de conversation a pris trop de temps');
-                  },
-                );
-                
-                print('Conversation created: ${conversation?.id}');
-                print('===============================');
-                
-                // Fermer l'indicateur de chargement
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-                
-                if (conversation != null && context.mounted) {
-                  // Naviguer vers l'écran de chat
-                  context.push('/messages/chat/${conversation.id}');
-                } else if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Erreur lors de la création de la conversation'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              } catch (e) {
-                // Fermer l'indicateur de chargement
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Erreur: ${e.toString()}'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8B5CF6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Envoyer message'),
-          ),
-        ],
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
       ),
     );
+
+    try {
+      // Charger les conversations d'abord
+      await ref.read(messagesProvider.notifier).loadConversations(token);
+      
+      // Vérifier si une conversation existe déjà
+      final existingConversations = ref.read(messagesProvider).conversations;
+      Conversation? existingConversation;
+      try {
+        existingConversation = existingConversations.firstWhere(
+          (conv) => conv.prestataireId == prestataire.id,
+        );
+      } catch (e) {
+        existingConversation = null;
+      }
+      
+      Conversation? conversation;
+      
+      if (existingConversation != null) {
+        conversation = existingConversation;
+      } else {
+        // Créer une nouvelle conversation
+        conversation = await ref.read(messagesProvider.notifier).createConversation(
+          prestataireId: prestataire.id,
+          token: token,
+        );
+      }
+      
+      // Fermer l'indicateur de chargement
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+      
+      if (conversation != null && context.mounted) {
+        // Naviguer vers le chat
+        context.push('/messages/chat/${conversation.id}');
+      } else if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur lors de la création de la conversation'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      // Fermer l'indicateur de chargement
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
+
+
 }

@@ -8,6 +8,7 @@ import '../../providers/message_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../../domain/entities/message.dart';
 import '../../../domain/entities/conversation.dart';
+import '../../../domain/entities/user.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final String conversationId;
@@ -95,9 +96,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
 
     // Déterminer le nom de l'autre utilisateur
-    final otherUserName = currentUser?.role == 'client' 
+    print('=== CHAT SCREEN DEBUG (CORRECT FILE) ===');
+    print('Current user role: ${currentUser?.role}');
+    print('Prestataire name: ${conversation.prestataireName}');
+    print('Client name: ${conversation.clientName}');
+    
+    final otherUserName = currentUser?.role == UserRole.client 
         ? conversation.prestataireName ?? 'Prestataire'
         : conversation.clientName ?? 'Client';
+    
+    print('Selected name: $otherUserName');
+    print('=========================================');
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),

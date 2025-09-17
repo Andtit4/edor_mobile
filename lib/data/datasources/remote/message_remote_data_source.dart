@@ -44,7 +44,8 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      return data.map((json) => ConversationModel.fromJson(json).toEntity()).toList();
+      final conversations = data.map((json) => ConversationModel.fromJson(json).toEntity()).toList();
+      return conversations;
     } else {
       throw ServerException(message: 'Erreur du serveur: ${response.statusCode}');
     }
@@ -122,18 +123,10 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
 
   @override
   Future<Conversation> createConversation(String prestataireId, String token, {String? serviceRequestId}) async {
-    print('=== MESSAGE REMOTE DATA SOURCE - CREATE CONVERSATION ===');
-    print('URL: $baseUrl/messages/conversations');
-    print('Prestataire ID: $prestataireId');
-    print('Token: ${token.substring(0, 20)}...');
-    print('Service Request ID: $serviceRequestId');
-    
     if (!await networkInfo.isConnected) {
-      print('ERROR: Pas de connexion internet');
       throw const ServerException(message: 'Pas de connexion internet');
     }
 
-    print('Sending POST request...');
     final response = await client.post(
       Uri.parse('$baseUrl/messages/conversations'),
       headers: {
@@ -145,24 +138,16 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
         if (serviceRequestId != null) 'serviceRequestId': serviceRequestId,
       }),
     ).timeout(
-      const Duration(seconds: 10),
+      const Duration(seconds: 5),
       onTimeout: () {
-        print('TIMEOUT: HTTP request took too long');
         throw ServerException(message: 'Timeout: La requête a pris trop de temps');
       },
     );
 
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
-
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = json.decode(response.body);
-      final conversation = ConversationModel.fromJson(data).toEntity();
-      print('Conversation created successfully: ${conversation.id}');
-      print('========================================================');
-      return conversation;
+      return ConversationModel.fromJson(data).toEntity();
     } else {
-      print('ERROR: Erreur du serveur: ${response.statusCode}');
       throw ServerException(message: 'Erreur du serveur: ${response.statusCode}');
     }
   }

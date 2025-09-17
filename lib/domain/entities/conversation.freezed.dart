@@ -33,7 +33,7 @@ mixin _$Conversation {
   String? get prestataireName => throw _privateConstructorUsedError;
   String? get clientAvatar => throw _privateConstructorUsedError;
   String? get prestataireAvatar => throw _privateConstructorUsedError;
-  String? get lastMessage => throw _privateConstructorUsedError;
+  String? get lastMessageContent => throw _privateConstructorUsedError;
   DateTime? get lastMessageTime => throw _privateConstructorUsedError;
   List<Message> get messages => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
@@ -68,7 +68,7 @@ abstract class $ConversationCopyWith<$Res> {
     String? prestataireName,
     String? clientAvatar,
     String? prestataireAvatar,
-    String? lastMessage,
+    String? lastMessageContent,
     DateTime? lastMessageTime,
     List<Message> messages,
     DateTime? createdAt,
@@ -102,7 +102,7 @@ class _$ConversationCopyWithImpl<$Res, $Val extends Conversation>
     Object? prestataireName = freezed,
     Object? clientAvatar = freezed,
     Object? prestataireAvatar = freezed,
-    Object? lastMessage = freezed,
+    Object? lastMessageContent = freezed,
     Object? lastMessageTime = freezed,
     Object? messages = null,
     Object? createdAt = freezed,
@@ -165,10 +165,10 @@ class _$ConversationCopyWithImpl<$Res, $Val extends Conversation>
                     ? _value.prestataireAvatar
                     : prestataireAvatar // ignore: cast_nullable_to_non_nullable
                         as String?,
-            lastMessage:
-                freezed == lastMessage
-                    ? _value.lastMessage
-                    : lastMessage // ignore: cast_nullable_to_non_nullable
+            lastMessageContent:
+                freezed == lastMessageContent
+                    ? _value.lastMessageContent
+                    : lastMessageContent // ignore: cast_nullable_to_non_nullable
                         as String?,
             lastMessageTime:
                 freezed == lastMessageTime
@@ -217,7 +217,7 @@ abstract class _$$ConversationImplCopyWith<$Res>
     String? prestataireName,
     String? clientAvatar,
     String? prestataireAvatar,
-    String? lastMessage,
+    String? lastMessageContent,
     DateTime? lastMessageTime,
     List<Message> messages,
     DateTime? createdAt,
@@ -250,7 +250,7 @@ class __$$ConversationImplCopyWithImpl<$Res>
     Object? prestataireName = freezed,
     Object? clientAvatar = freezed,
     Object? prestataireAvatar = freezed,
-    Object? lastMessage = freezed,
+    Object? lastMessageContent = freezed,
     Object? lastMessageTime = freezed,
     Object? messages = null,
     Object? createdAt = freezed,
@@ -313,10 +313,10 @@ class __$$ConversationImplCopyWithImpl<$Res>
                 ? _value.prestataireAvatar
                 : prestataireAvatar // ignore: cast_nullable_to_non_nullable
                     as String?,
-        lastMessage:
-            freezed == lastMessage
-                ? _value.lastMessage
-                : lastMessage // ignore: cast_nullable_to_non_nullable
+        lastMessageContent:
+            freezed == lastMessageContent
+                ? _value.lastMessageContent
+                : lastMessageContent // ignore: cast_nullable_to_non_nullable
                     as String?,
         lastMessageTime:
             freezed == lastMessageTime
@@ -358,7 +358,7 @@ class _$ConversationImpl implements _Conversation {
     this.prestataireName,
     this.clientAvatar,
     this.prestataireAvatar,
-    this.lastMessage,
+    this.lastMessageContent,
     this.lastMessageTime,
     final List<Message> messages = const [],
     this.createdAt,
@@ -394,7 +394,7 @@ class _$ConversationImpl implements _Conversation {
   @override
   final String? prestataireAvatar;
   @override
-  final String? lastMessage;
+  final String? lastMessageContent;
   @override
   final DateTime? lastMessageTime;
   final List<Message> _messages;
@@ -413,7 +413,7 @@ class _$ConversationImpl implements _Conversation {
 
   @override
   String toString() {
-    return 'Conversation(id: $id, clientId: $clientId, prestataireId: $prestataireId, serviceRequestId: $serviceRequestId, isActive: $isActive, unreadCount: $unreadCount, lastMessageId: $lastMessageId, clientName: $clientName, prestataireName: $prestataireName, clientAvatar: $clientAvatar, prestataireAvatar: $prestataireAvatar, lastMessage: $lastMessage, lastMessageTime: $lastMessageTime, messages: $messages, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Conversation(id: $id, clientId: $clientId, prestataireId: $prestataireId, serviceRequestId: $serviceRequestId, isActive: $isActive, unreadCount: $unreadCount, lastMessageId: $lastMessageId, clientName: $clientName, prestataireName: $prestataireName, clientAvatar: $clientAvatar, prestataireAvatar: $prestataireAvatar, lastMessageContent: $lastMessageContent, lastMessageTime: $lastMessageTime, messages: $messages, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -442,8 +442,8 @@ class _$ConversationImpl implements _Conversation {
                 other.clientAvatar == clientAvatar) &&
             (identical(other.prestataireAvatar, prestataireAvatar) ||
                 other.prestataireAvatar == prestataireAvatar) &&
-            (identical(other.lastMessage, lastMessage) ||
-                other.lastMessage == lastMessage) &&
+            (identical(other.lastMessageContent, lastMessageContent) ||
+                other.lastMessageContent == lastMessageContent) &&
             (identical(other.lastMessageTime, lastMessageTime) ||
                 other.lastMessageTime == lastMessageTime) &&
             const DeepCollectionEquality().equals(other._messages, _messages) &&
@@ -468,7 +468,7 @@ class _$ConversationImpl implements _Conversation {
     prestataireName,
     clientAvatar,
     prestataireAvatar,
-    lastMessage,
+    lastMessageContent,
     lastMessageTime,
     const DeepCollectionEquality().hash(_messages),
     createdAt,
@@ -502,7 +502,7 @@ abstract class _Conversation implements Conversation {
     final String? prestataireName,
     final String? clientAvatar,
     final String? prestataireAvatar,
-    final String? lastMessage,
+    final String? lastMessageContent,
     final DateTime? lastMessageTime,
     final List<Message> messages,
     final DateTime? createdAt,
@@ -535,7 +535,7 @@ abstract class _Conversation implements Conversation {
   @override
   String? get prestataireAvatar;
   @override
-  String? get lastMessage;
+  String? get lastMessageContent;
   @override
   DateTime? get lastMessageTime;
   @override

@@ -18,62 +18,62 @@ export class Conversation {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'client_id' })
   clientId: string;
 
-  @Column()
+  @Column({ name: 'prestataire_id' })
   prestataireId: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'service_request_id', nullable: true })
   serviceRequestId: string; // Optionnel, pour lier à une demande de service
 
-  @Column({ default: false })
+  @Column({ name: 'is_active', default: false })
   isActive: boolean;
 
-  @Column({ default: 0 })
+  @Column({ name: 'unread_count', default: 0 })
   unreadCount: number;
 
-  @Column({ nullable: true })
+  @Column({ name: 'last_message_id', nullable: true })
   lastMessageId: string;
 
   // Informations des utilisateurs (pour l'affichage)
-  @Column({ nullable: true })
+  @Column({ name: 'client_name', nullable: true })
   clientName: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'prestataire_name', nullable: true })
   prestataireName: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'client_avatar', nullable: true })
   clientAvatar: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'prestataire_avatar', nullable: true })
   prestataireAvatar: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'last_message_content', nullable: true })
   lastMessageContent: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'last_message_time', nullable: true })
   lastMessageTime: Date;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
   // Relations
   @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'clientId', foreignKeyConstraintName: 'FK_conversation_client' })
+  @JoinColumn({ name: 'client_id', foreignKeyConstraintName: 'FK_conversation_client' })
   client: User;
 
   @ManyToOne(() => Prestataire, { nullable: true })
-  @JoinColumn({ name: 'prestataireId', foreignKeyConstraintName: 'FK_conversation_prestataire' })
+  @JoinColumn({ name: 'prestataire_id', foreignKeyConstraintName: 'FK_conversation_prestataire' })
   prestataire: Prestataire;
 
   @OneToMany(() => Message, (message) => message.conversation)
   messages: Message[];
 
   @ManyToOne(() => Message, { nullable: true })
-  @JoinColumn({ name: 'lastMessageId' })
+  @JoinColumn({ name: 'last_message_id' })
   lastMessage: Message;
 }

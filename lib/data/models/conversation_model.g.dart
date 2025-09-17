@@ -20,7 +20,7 @@ _$ConversationModelImpl _$$ConversationModelImplFromJson(
   prestataireName: json['prestataireName'] as String?,
   clientAvatar: json['clientAvatar'] as String?,
   prestataireAvatar: json['prestataireAvatar'] as String?,
-  lastMessage: json['lastMessage'] as String?,
+  lastMessageContent: json['lastMessageContent'] as String?,
   lastMessageTime:
       json['lastMessageTime'] == null
           ? null
@@ -54,7 +54,7 @@ Map<String, dynamic> _$$ConversationModelImplToJson(
   'prestataireName': instance.prestataireName,
   'clientAvatar': instance.clientAvatar,
   'prestataireAvatar': instance.prestataireAvatar,
-  'lastMessage': instance.lastMessage,
+  'lastMessageContent': instance.lastMessageContent,
   'lastMessageTime': instance.lastMessageTime?.toIso8601String(),
   'messages': instance.messages,
   'createdAt': instance.createdAt?.toIso8601String(),

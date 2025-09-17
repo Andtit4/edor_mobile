@@ -23,16 +23,16 @@ export class Message {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'conversation_id' })
   conversationId: string;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ name: 'sender_user_id', type: 'varchar', nullable: true })
   senderUserId: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ name: 'sender_prestataire_id', type: 'varchar', nullable: true })
   senderPrestataireId: string | null;
 
-  @Column()
+  @Column({ name: 'sender_type' })
   senderType: 'client' | 'prestataire';
 
   @Column({ type: 'text' })
@@ -45,30 +45,30 @@ export class Message {
   })
   type: MessageType;
 
-  @Column({ default: false })
+  @Column({ name: 'is_read', default: false })
   isRead: boolean;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ name: 'image_url', type: 'varchar', nullable: true })
   imageUrl: string | null;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
   // Relations
   @ManyToOne(() => Conversation, (conversation) => conversation.messages, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'conversationId' })
+  @JoinColumn({ name: 'conversation_id' })
   conversation: Conversation;
 
   @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'senderUserId' })
+  @JoinColumn({ name: 'sender_user_id' })
   senderUser: User;
 
   @ManyToOne(() => Prestataire, { nullable: true })
-  @JoinColumn({ name: 'senderPrestataireId' })
+  @JoinColumn({ name: 'sender_prestataire_id' })
   senderPrestataire: Prestataire;
 }

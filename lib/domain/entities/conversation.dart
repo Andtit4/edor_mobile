@@ -19,7 +19,7 @@ class Conversation with _$Conversation {
     String? prestataireName,
     String? clientAvatar,
     String? prestataireAvatar,
-    String? lastMessage,
+    String? lastMessageContent,
     DateTime? lastMessageTime,
     @Default([]) List<Message> messages,
     DateTime? createdAt,
