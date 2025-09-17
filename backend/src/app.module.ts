@@ -8,6 +8,7 @@ import { PrestatairesModule } from './prestataires/prestataire.module';
 import { ServiceOffersModule } from './service-offers/service-offers.module';
 import { ServiceRequestsModule } from './service-requests/service-requests.module';
 import { MessagesModule } from './messages/messages.module';
+import { PriceNegotiationsModule } from './price-negotiations/price-negotiations.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { MessagesModule } from './messages/messages.module';
     ServiceOffersModule,
     ServiceRequestsModule,
     MessagesModule,
+    PriceNegotiationsModule,
   ],
 })
 export class AppModule {}

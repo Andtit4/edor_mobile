@@ -9,6 +9,7 @@ import {
 	JoinColumn,
   } from 'typeorm';
   import { User } from './user.entity';
+  import { Prestataire } from './prestataire.entity';
   
   export enum ServiceRequestStatus {
 	PENDING = 'pending',
@@ -72,7 +73,7 @@ import {
 	@UpdateDateColumn()
 	updatedAt: Date;
   
-	@ManyToOne(() => User, { nullable: true })
+	@ManyToOne(() => Prestataire, { nullable: true })
 	@JoinColumn({ name: 'assignedPrestataireId' })
-	assignedPrestataire: User;
+	assignedPrestataire: Prestataire;
   }

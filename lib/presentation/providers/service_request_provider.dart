@@ -188,6 +188,10 @@ class ServiceRequestNotifier extends StateNotifier<ServiceRequestState> {
     }
   }
 
+  Future<void> updateServiceRequest(String id, Map<String, dynamic> data, String token) async {
+    return updateRequest(id, data, token);
+  }
+
   Future<void> deleteRequest(String id, String token) async {
     try {
       await _remoteDataSource.deleteServiceRequest(id, token);

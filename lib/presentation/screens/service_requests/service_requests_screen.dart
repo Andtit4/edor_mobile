@@ -6,6 +6,7 @@ import '../../../domain/entities/service_request.dart';
 import '../../../domain/entities/user.dart';
 import '../../providers/service_request_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/price_negotiation_provider.dart';
 
 class ServiceRequestsScreen extends ConsumerStatefulWidget {
   const ServiceRequestsScreen({super.key});
@@ -449,6 +450,22 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
                 ),
               ),
               const Spacer(),
+              // Indicateur de statut
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _getStatusColor(request.status).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  _getStatusText(request.status),
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: _getStatusColor(request.status),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
               if (request.status == 'pending')
                 ElevatedButton(
                   onPressed: () => _acceptRequest(request),
@@ -494,16 +511,231 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     );
   }
 
-  void _acceptRequest(ServiceRequest request) {
+  void _acceptRequest(ServiceRequest request) async {
     final authState = ref.read(authProvider);
     final user = authState.user;
     final token = authState.token;
     
+    print('=== ACCEPT REQUEST CALLED ===');
+    print('Request ID: ${request.id}');
+    print('User: ${user?.firstName} ${user?.lastName}');
+    print('User role: ${user?.role}');
+    print('User ID: ${user?.id}');
+    print('Token exists: ${token != null}');
+    
     if (user != null && token != null) {
-      ref.read(serviceRequestProvider.notifier).acceptRequest(
-        request.id,
-        token,
+      // Afficher un indicateur de chargement
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
       );
+
+      try {
+        print('Calling assignPrestataire...');
+        // Assigner le prestataire à la demande
+        await ref.read(serviceRequestProvider.notifier).assignPrestataire(
+          request.id,
+          user.id, // ID du prestataire connecté
+          '${user.firstName} ${user.lastName}', // Nom du prestataire
+          token,
+        );
+        print('assignPrestataire completed successfully');
+
+        // Fermer l'indicateur de chargement
+        if (context.mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+        }
+
+        // Recharger les demandes pour voir le statut mis à jour
+        ref.read(serviceRequestProvider.notifier).loadAllRequests();
+        
+        // Rediriger vers le flow de négociation
+        if (context.mounted) {
+          _showPriceNegotiationDialog(request);
+        }
+      } catch (e) {
+        print('ERROR in assignPrestataire: $e');
+        // Fermer l'indicateur de chargement
+        if (context.mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erreur: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } else {
+      print('ERROR: User or token is null');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erreur d\'authentification'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _showPriceNegotiationDialog(ServiceRequest request) {
+    final TextEditingController priceController = TextEditingController();
+    final TextEditingController messageController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Text(
+          'Proposer un prix',
+          style: AppTextStyles.h4.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Demande: ${request.title}',
+              style: AppTextStyles.bodyLarge.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Budget initial: ${request.budget.toStringAsFixed(0)} FCFA',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: priceController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Votre prix proposé (FCFA)',
+                hintText: 'Ex: 50000',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                prefixIcon: const Icon(Icons.attach_money),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: messageController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                labelText: 'Message (optionnel)',
+                hintText: 'Expliquez votre proposition...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                prefixIcon: const Icon(Icons.message),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final proposedPrice = double.tryParse(priceController.text);
+              if (proposedPrice == null || proposedPrice <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Veuillez entrer un prix valide'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+              
+              Navigator.pop(context);
+              _createPriceNegotiation(request, proposedPrice, messageController.text);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF8B5CF6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Proposer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _createPriceNegotiation(ServiceRequest request, double proposedPrice, String message) async {
+    final authState = ref.read(authProvider);
+    final token = authState.token;
+    
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Token non disponible'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Afficher un indicateur de chargement
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      // Créer la négociation de prix
+      await ref.read(priceNegotiationProvider.notifier).createNegotiation(
+        serviceRequestId: request.id,
+        proposedPrice: proposedPrice,
+        isFromPrestataire: true,
+        message: message.isNotEmpty ? message : null,
+        token: token,
+      );
+
+      // Fermer l'indicateur de chargement
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
+      // Recharger les demandes pour voir le statut mis à jour
+      ref.read(serviceRequestProvider.notifier).loadAllRequests();
+
+      // Afficher un message de succès
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Proposition de prix envoyée avec succès'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      // Fermer l'indicateur de chargement
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

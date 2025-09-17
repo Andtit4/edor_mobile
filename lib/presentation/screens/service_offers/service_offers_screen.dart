@@ -12,6 +12,7 @@ import '../../providers/service_request_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/prestataire_provider.dart';
 import '../../providers/message_provider.dart';
+import '../../widgets/negotiation_list_widget.dart';
 import 'package:go_router/go_router.dart';
 // import '../../../router/app_routes.dart';
 
@@ -37,8 +38,10 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(serviceOfferProvider.notifier).loadOffers();
       ref.read(prestatairesProvider.notifier).loadPrestataires(); // Charger les prestataires
+      ref.read(serviceRequestProvider.notifier).loadAllRequests(); // Charger toutes les demandes
       _loadMyRequests(); // Charger les demandes du client
       _loadMyOffers(); // Charger les offres du prestataire
+      _loadAssignedRequests(); // Charger les demandes assignées au prestataire
     });
   }
 
@@ -77,6 +80,15 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     }
   }
 
+  void _loadAssignedRequests() {
+    final authState = ref.read(authProvider);
+    final token = authState.token;
+    
+    if (token != null && authState.user?.role == UserRole.prestataire) {
+      ref.read(serviceRequestProvider.notifier).loadAssignedRequests(token);
+    }
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -112,10 +124,12 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                 controller: _tabController,
                 children: [
                   _buildPrestatairesList(), // Premier onglet
-                  _buildOffersList(offerState.offers), // Deuxième onglet
                   user?.role == UserRole.prestataire
-                    ? _buildMyOffersList(offerState.offers) // Pour les prestataires
-                    : _buildMyRequestsList([]), // Pour les clients - on utilise le Consumer à l'intérieur
+                    ? _buildAllRequestsList() // Pour les prestataires - toutes les demandes
+                    : _buildOffersList(offerState.offers), // Pour les clients - offres
+                  user?.role == UserRole.prestataire
+                    ? _buildAssignedRequestsList() // Pour les prestataires - demandes assignées
+                    : _buildMyRequestsList([]), // Pour les clients - leurs demandes
                 ],
               ),
             ),
@@ -269,8 +283,8 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
         tabs: user?.role == UserRole.prestataire 
           ? const [
               Tab(text: 'Prestataires'),
-              Tab(text: 'Offres'),
-              Tab(text: 'Mes offres'), // Pour les prestataires
+              Tab(text: 'Demandes'), // Pour les prestataires - toutes les demandes
+              Tab(text: 'Mes demandes'), // Pour les prestataires - demandes assignées
             ]
           : const [
               Tab(text: 'Prestataires'),
@@ -401,6 +415,130 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
           itemBuilder: (context, index) {
             final prestataire = filteredPrestataires[index];
             return _buildPrestataireCard(prestataire);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildAllRequestsList() {
+    return Consumer(
+      builder: (context, ref, child) {
+        final authState = ref.watch(authProvider);
+        final requestState = ref.watch(serviceRequestProvider);
+        
+        // Vérifier que l'utilisateur est un prestataire
+        if (authState.user?.role != UserRole.prestataire) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.person_outline,
+                  size: 64,
+                  color: Colors.grey,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Cette section est réservée aux prestataires',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        if (requestState.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        
+        if (requestState.error != null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Colors.red[400],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Erreur de chargement',
+                  style: AppTextStyles.h3.copyWith(
+                    color: Colors.red[600],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  requestState.error!,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: Colors.red[500],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    ref.read(serviceRequestProvider.notifier).loadAllRequests();
+                  },
+                  child: const Text('Réessayer'),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        if (requestState.allRequests.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.inbox_outlined,
+                  size: 64,
+                  color: Colors.grey,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Aucune demande disponible',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Il n\'y a pas de demandes de service pour le moment',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+                SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    ref.read(serviceRequestProvider.notifier).loadAllRequests();
+                  },
+                  icon: Icon(Icons.refresh),
+                  label: Text('Actualiser'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(20),
+          itemCount: requestState.allRequests.length,
+          itemBuilder: (context, index) {
+            final request = requestState.allRequests[index];
+            return _buildAllRequestCard(request);
           },
         );
       },
@@ -593,6 +731,136 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
           itemBuilder: (context, index) {
             final request = requestState.myRequests[index];
             return _buildRequestCard(request);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildAssignedRequestsList() {
+    return Consumer(
+      builder: (context, ref, child) {
+        final authState = ref.watch(authProvider);
+        final requestState = ref.watch(serviceRequestProvider);
+        
+        // Vérifier que l'utilisateur est un prestataire
+        if (authState.user?.role != UserRole.prestataire) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.person_outline,
+                  size: 64,
+                  color: Colors.grey,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Cette section est réservée aux prestataires',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        if (requestState.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        
+        if (requestState.error != null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Colors.red[400],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Erreur de chargement',
+                  style: AppTextStyles.h3.copyWith(
+                    color: Colors.red[600],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  requestState.error!,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: Colors.red[500],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    final token = authState.token;
+                    if (token != null) {
+                      ref.read(serviceRequestProvider.notifier).loadAssignedRequests(token);
+                    }
+                  },
+                  child: const Text('Réessayer'),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        if (requestState.assignedRequests.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.inbox_outlined,
+                  size: 64,
+                  color: Colors.grey,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Aucune demande assignée',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Vous n\'avez pas encore de demandes assignées',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+                SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    final token = authState.token;
+                    if (token != null) {
+                      ref.read(serviceRequestProvider.notifier).loadAssignedRequests(token);
+                    }
+                  },
+                  icon: Icon(Icons.refresh),
+                  label: Text('Actualiser'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(20),
+          itemCount: requestState.assignedRequests.length,
+          itemBuilder: (context, index) {
+            final request = requestState.assignedRequests[index];
+            return _buildAssignedRequestCard(request);
           },
         );
       },
@@ -889,6 +1157,301 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     );
   }
 
+  Widget _buildAllRequestCard(ServiceRequest request) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    request.title,
+                    style: AppTextStyles.h4.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1F2937),
+                    ),
+                  ),
+                ),
+                _buildStatusChip(request.status),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              request.description,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Colors.grey[600],
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  Icons.location_on,
+                  size: 16,
+                  color: Colors.grey[600],
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  request.location,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${request.budget.toStringAsFixed(0)} FCFA',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF8B5CF6),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.schedule,
+                  size: 16,
+                  color: Colors.grey[600],
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Échéance: ${_formatDate(request.deadline)}',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const Spacer(),
+                if (request.assignedPrestataireId != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Déjà assigné',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: Colors.green[700],
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (request.assignedPrestataireId == null) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => _showRequestDetails(request),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.grey[700],
+                        side: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      child: const Text('Voir détails'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        print('=== ACCEPT BUTTON CLICKED ===');
+                        _acceptRequestFromAll(request);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF8B5CF6),
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Accepter'),
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Cette demande a déjà été assignée',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAssignedRequestCard(ServiceRequest request) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    request.title,
+                    style: AppTextStyles.h4.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1F2937),
+                    ),
+                  ),
+                ),
+                _buildStatusChip(request.status),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              request.description,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Colors.grey[600],
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  Icons.location_on,
+                  size: 16,
+                  color: Colors.grey[600],
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  request.location,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${request.budget.toStringAsFixed(0)} FCFA',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF8B5CF6),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.schedule,
+                  size: 16,
+                  color: Colors.grey[600],
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Échéance: ${_formatDate(request.deadline)}',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Assigné à vous',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: Colors.blue[700],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => _rejectRequest(request),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red),
+                    ),
+                    child: const Text('Refuser'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => _acceptRequest(request),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF8B5CF6),
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Accepter'),
+                  ),
+                ),
+              ],
+            ),
+            if (request.status == 'assigned') ...[
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 16),
+              NegotiationListWidget(
+                serviceRequestId: request.id,
+                currentBudget: request.budget,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildRequestCard(ServiceRequest request) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -990,6 +1553,15 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                   ),
               ],
             ),
+            if (request.assignedPrestataireId != null) ...[
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 16),
+              NegotiationListWidget(
+                serviceRequestId: request.id,
+                currentBudget: request.budget,
+              ),
+            ],
           ],
         ),
       ),
@@ -1535,6 +2107,282 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
         ],
       ),
     );
+  }
+
+  void _acceptRequestFromAll(ServiceRequest request) async {
+    print('=== ACCEPT REQUEST FROM ALL CALLED ===');
+    print('Request ID: ${request.id}');
+    print('Request title: ${request.title}');
+    
+    final authState = ref.read(authProvider);
+    final token = authState.token;
+    
+    print('User: ${authState.user?.firstName} ${authState.user?.lastName}');
+    print('User role: ${authState.user?.role}');
+    print('User ID: ${authState.user?.id}');
+    print('Token exists: ${token != null}');
+
+    if (token == null) {
+      print('ERROR: Token is null');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Token non disponible'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Afficher un indicateur de chargement
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      print('Calling assignPrestataire...');
+      // Assigner le prestataire à la demande
+      await ref.read(serviceRequestProvider.notifier).assignPrestataire(
+        request.id,
+        authState.user!.id, // ID du prestataire connecté
+        '${authState.user!.firstName} ${authState.user!.lastName}', // Nom du prestataire
+        token,
+      );
+      print('assignPrestataire completed successfully');
+
+      // Fermer l'indicateur de chargement
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
+      // Afficher un message de succès
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Demande acceptée avec succès'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+
+      // Recharger toutes les demandes
+      print('Reloading all requests...');
+      ref.read(serviceRequestProvider.notifier).loadAllRequests();
+      print('All requests reloaded');
+    } catch (e) {
+      print('ERROR in assignPrestataire: $e');
+      // Fermer l'indicateur de chargement
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showRequestDetails(ServiceRequest request) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Text(
+          request.title,
+          style: AppTextStyles.h4.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Description:',
+              style: AppTextStyles.bodyLarge.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(request.description),
+            const SizedBox(height: 16),
+            Text(
+              'Catégorie: ${request.category}',
+              style: AppTextStyles.bodyMedium,
+            ),
+            Text(
+              'Localisation: ${request.location}',
+              style: AppTextStyles.bodyMedium,
+            ),
+            Text(
+              'Budget: ${request.budget.toStringAsFixed(0)} FCFA',
+              style: AppTextStyles.bodyMedium,
+            ),
+            Text(
+              'Échéance: ${_formatDate(request.deadline)}',
+              style: AppTextStyles.bodyMedium,
+            ),
+            if (request.notes != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Notes: ${request.notes}',
+                style: AppTextStyles.bodyMedium,
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fermer'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _acceptRequestFromAll(request);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF8B5CF6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Accepter'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _acceptRequest(ServiceRequest request) async {
+    final authState = ref.read(authProvider);
+    final token = authState.token;
+
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Token non disponible'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Afficher un indicateur de chargement
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      // Mettre à jour le statut de la demande à "accepted"
+      await ref.read(serviceRequestProvider.notifier).updateServiceRequest(
+        request.id,
+        {'status': 'accepted'},
+        token,
+      );
+
+      // Fermer l'indicateur de chargement
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
+      // Afficher un message de succès
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Demande acceptée avec succès'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+
+      // Recharger les demandes assignées
+      _loadAssignedRequests();
+    } catch (e) {
+      // Fermer l'indicateur de chargement
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _rejectRequest(ServiceRequest request) async {
+    final authState = ref.read(authProvider);
+    final token = authState.token;
+
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Token non disponible'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Afficher un indicateur de chargement
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      // Mettre à jour le statut de la demande à "cancelled"
+      await ref.read(serviceRequestProvider.notifier).updateServiceRequest(
+        request.id,
+        {'status': 'cancelled'},
+        token,
+      );
+
+      // Fermer l'indicateur de chargement
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
+      // Afficher un message de succès
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Demande refusée'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+
+      // Recharger les demandes assignées
+      _loadAssignedRequests();
+    } catch (e) {
+      // Fermer l'indicateur de chargement
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _contactPrestataireFromCard(Prestataire prestataire) async {
