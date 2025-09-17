@@ -6,6 +6,7 @@ part 'price_negotiation_model.freezed.dart';
 part 'price_negotiation_model.g.dart';
 
 @freezed
+@JsonSerializable()
 class PriceNegotiationModel with _$PriceNegotiationModel {
   const factory PriceNegotiationModel({
     required String id,
@@ -21,8 +22,13 @@ class PriceNegotiationModel with _$PriceNegotiationModel {
     String? updatedAt,
   }) = _PriceNegotiationModel;
 
-  factory PriceNegotiationModel.fromJson(Map<String, dynamic> json) =>
-      _$PriceNegotiationModelFromJson(json);
+  factory PriceNegotiationModel.fromJson(Map<String, dynamic> json) {
+    // Convertir proposedPrice de String vers double si nécessaire
+    if (json['proposedPrice'] is String) {
+      json['proposedPrice'] = double.parse(json['proposedPrice']);
+    }
+    return _$PriceNegotiationModelFromJson(json);
+  }
 }
 
 extension PriceNegotiationModelExtension on PriceNegotiationModel {

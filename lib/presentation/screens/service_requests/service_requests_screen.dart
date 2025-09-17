@@ -534,25 +534,13 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
       );
 
       try {
-        print('Calling assignPrestataire...');
-        // Assigner le prestataire à la demande
-        await ref.read(serviceRequestProvider.notifier).assignPrestataire(
-          request.id,
-          user.id, // ID du prestataire connecté
-          '${user.firstName} ${user.lastName}', // Nom du prestataire
-          token,
-        );
-        print('assignPrestataire completed successfully');
-
         // Fermer l'indicateur de chargement
         if (context.mounted) {
           Navigator.of(context, rootNavigator: true).pop();
         }
-
-        // Recharger les demandes pour voir le statut mis à jour
-        ref.read(serviceRequestProvider.notifier).loadAllRequests();
         
-        // Rediriger vers le flow de négociation
+        // Rediriger directement vers le flow de négociation
+        // La demande reste "En attente" jusqu'à ce que le client accepte
         if (context.mounted) {
           _showPriceNegotiationDialog(request);
         }
@@ -679,7 +667,14 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     final authState = ref.read(authProvider);
     final token = authState.token;
     
+    print('=== CREATE PRICE NEGOTIATION CALLED ===');
+    print('Request ID: ${request.id}');
+    print('Proposed Price: $proposedPrice');
+    print('Message: $message');
+    print('Token exists: ${token != null}');
+    
     if (token == null) {
+      print('ERROR: Token is null');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Token non disponible'),
@@ -699,14 +694,17 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     );
 
     try {
+      print('Calling createNegotiation...');
       // Créer la négociation de prix
-      await ref.read(priceNegotiationProvider.notifier).createNegotiation(
+      final result = await ref.read(priceNegotiationProvider.notifier).createNegotiation(
         serviceRequestId: request.id,
         proposedPrice: proposedPrice,
         isFromPrestataire: true,
         message: message.isNotEmpty ? message : null,
         token: token,
       );
+      
+      print('createNegotiation result: $result');
 
       // Fermer l'indicateur de chargement
       if (context.mounted) {

@@ -68,6 +68,40 @@ class PriceNegotiationNotifier extends StateNotifier<PriceNegotiationState> {
     }
   }
 
+  Future<void> loadClientNegotiations({
+    required String clientId,
+    required String token,
+  }) async {
+    print('=== LOAD CLIENT NEGOTIATIONS PROVIDER ===');
+    print('Client ID: $clientId');
+    print('Token: ${token.substring(0, 20)}...');
+    
+    state = state.copyWith(isLoading: true, error: null);
+    
+    try {
+      final negotiations = await _remoteDataSource.getClientNegotiations(
+        clientId: clientId,
+        token: token,
+      );
+      
+      print('Negotiations loaded: ${negotiations.length}');
+      for (var negotiation in negotiations) {
+        print('Negotiation: ${negotiation.id} - ${negotiation.proposedPrice} - ${negotiation.status}');
+      }
+      
+      state = state.copyWith(
+        isLoading: false,
+        negotiations: negotiations,
+      );
+    } catch (e) {
+      print('Error loading negotiations: $e');
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+      );
+    }
+  }
+
   Future<PriceNegotiation?> createNegotiation({
     required String serviceRequestId,
     required double proposedPrice,
@@ -113,6 +147,32 @@ class PriceNegotiationNotifier extends StateNotifier<PriceNegotiationState> {
       final updatedNegotiations = state.negotiations.map((negotiation) {
         if (negotiation.id == id) {
           return updatedNegotiation;
+        }
+        return negotiation;
+      }).toList();
+      
+      state = state.copyWith(negotiations: updatedNegotiations);
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> acceptNegotiation({
+    required String id,
+    required String token,
+  }) async {
+    try {
+      final acceptedNegotiation = await _remoteDataSource.acceptNegotiation(
+        id: id,
+        token: token,
+      );
+      
+      // Mettre à jour la négociation dans la liste
+      final updatedNegotiations = state.negotiations.map((negotiation) {
+        if (negotiation.id == id) {
+          return acceptedNegotiation;
         }
         return negotiation;
       }).toList();

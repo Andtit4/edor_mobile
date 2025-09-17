@@ -2,7 +2,6 @@ import 'package:edor/presentation/router/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../domain/entities/service_offer.dart';
 import '../../../domain/entities/service_request.dart';
 import '../../../domain/entities/user.dart';
 import '../../../domain/entities/prestataire.dart';
@@ -12,7 +11,8 @@ import '../../providers/service_request_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/prestataire_provider.dart';
 import '../../providers/message_provider.dart';
-import '../../widgets/negotiation_list_widget.dart';
+import '../../providers/price_negotiation_provider.dart';
+import 'negotiation_widgets.dart';
 import 'package:go_router/go_router.dart';
 // import '../../../router/app_routes.dart';
 
@@ -42,6 +42,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
       _loadMyRequests(); // Charger les demandes du client
       _loadMyOffers(); // Charger les offres du prestataire
       _loadAssignedRequests(); // Charger les demandes assignées au prestataire
+      _loadClientNegotiations(); // Charger les négociations du client
     });
   }
 
@@ -97,7 +98,6 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
 
   @override
   Widget build(BuildContext context) {
-    final offerState = ref.watch(serviceOfferProvider);
     final authState = ref.watch(authProvider);
     final user = authState.user;
     
@@ -126,7 +126,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                   _buildPrestatairesList(), // Premier onglet
                   user?.role == UserRole.prestataire
                     ? _buildAllRequestsList() // Pour les prestataires - toutes les demandes
-                    : _buildOffersList(offerState.offers), // Pour les clients - offres
+                    : NegotiationWidgets.buildNegotiationsList(ref), // Pour les clients - négociations
                   user?.role == UserRole.prestataire
                     ? _buildAssignedRequestsList() // Pour les prestataires - demandes assignées
                     : _buildMyRequestsList([]), // Pour les clients - leurs demandes
@@ -545,51 +545,6 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     );
   }
 
-  Widget _buildOffersList(List<ServiceOffer> offers) {
-    final filteredOffers = offers.where((offer) {
-      if (_selectedFilter == 'Toutes') return true;
-      return offer.category == _selectedFilter;
-    }).toList();
-
-    if (filteredOffers.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Aucun prestataire',
-              style: AppTextStyles.h3.copyWith(
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Aucun prestataire ne correspond à vos critères',
-              style: AppTextStyles.bodyLarge.copyWith(
-                color: Colors.grey[500],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(20),
-      itemCount: filteredOffers.length,
-      itemBuilder: (context, index) {
-        final offer = filteredOffers[index];
-        return _buildOfferCard(offer);
-      },
-    );
-  }
 
   Widget _buildMyRequestsList(List<ServiceRequest> requests) {
     return Consumer(
@@ -867,295 +822,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     );
   }
 
-  Widget _buildMyOffersList(List<ServiceOffer> offers) {
-    final authState = ref.watch(authProvider);
-    
-    // Vérifier que l'utilisateur est un prestataire
-    if (authState.user?.role != UserRole.prestataire) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.person_outline,
-              size: 64,
-              color: Colors.grey,
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Cette section est réservée aux prestataires',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    
-    if (offers.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.add_business_outlined,
-              size: 64,
-              color: Colors.grey,
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Vous n\'avez créé aucune offre',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Créez votre première offre de service',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(20),
-      itemCount: offers.length,
-      itemBuilder: (context, index) {
-        final offer = offers[index];
-        return _buildOfferCard(offer);
-      },
-    );
-  }
-
-  Widget _buildOfferCard(ServiceOffer offer) {
-    final colors = {
-      'Plomberie': const Color(0xFF8B5CF6),
-      'Électricité': const Color(0xFF06B6D4),
-      'Peinture': const Color(0xFF10B981),
-      'Bricolage': const Color(0xFFF59E0B),
-      'Jardinage': const Color(0xFFEF4444),
-      'Nettoyage': const Color(0xFF8B5CF6),
-    };
-
-    final color = colors[offer.category] ?? const Color(0xFF8B5CF6);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              // Prestataire Avatar
-              CircleAvatar(
-                radius: 25,
-                backgroundColor: color.withOpacity(0.1),
-                child: Text(
-                  offer.prestataireName[0],
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      offer.prestataireName,
-                      style: AppTextStyles.h4.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      offer.title,
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          size: 14,
-                          color: Colors.grey[500],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          offer.location,
-                          style: AppTextStyles.caption.copyWith(
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  'Disponible',
-                  style: AppTextStyles.caption.copyWith(
-                    color: const Color(0xFF10B981),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            offer.description,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: Colors.grey[700],
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              // Rating
-              Row(
-                children: [
-                  Icon(
-                    Icons.star,
-                    size: 16,
-                    color: Colors.amber[600],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${offer.rating}',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '(${offer.reviewCount} avis)',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              // Price
-              Row(
-                children: [
-                  Icon(
-                    Icons.euro,
-                    size: 16,
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${offer.price.toStringAsFixed(0)}€/h',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // Experience and Availability
-          Row(
-            children: [
-              Icon(
-                Icons.work_history,
-                size: 14,
-                color: Colors.grey[500],
-              ),
-              const SizedBox(width: 4),
-              Text(
-                offer.experience ?? '',
-                style: AppTextStyles.caption.copyWith(
-                  color: Colors.grey[500],
-                ),
-              ),
-              const SizedBox(width: 16),
-              Icon(
-                Icons.schedule,
-                size: 14,
-                color: Colors.grey[500],
-              ),
-              const SizedBox(width: 4),
-              Text(
-                offer.availability ?? '',
-                style: AppTextStyles.caption.copyWith(
-                  color: Colors.grey[500],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => _showOfferDetails(offer),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[100],
-                    foregroundColor: Colors.grey[700],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text('Voir profil'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => _contactPrestataire(offer),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8B5CF6),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text('Contacter'),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildAllRequestCard(ServiceRequest request) {
     return Container(
@@ -1437,15 +1104,8 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                 ),
               ],
             ),
-            if (request.status == 'assigned') ...[
-              const SizedBox(height: 16),
-              const Divider(),
-              const SizedBox(height: 16),
-              NegotiationListWidget(
-                serviceRequestId: request.id,
-                currentBudget: request.budget,
-              ),
-            ],
+            // Les négociations sont maintenant gérées dans l'onglet "Offres"
+            // Plus besoin d'afficher NegotiationListWidget ici
           ],
         ),
       ),
@@ -1553,15 +1213,8 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                   ),
               ],
             ),
-            if (request.assignedPrestataireId != null) ...[
-              const SizedBox(height: 16),
-              const Divider(),
-              const SizedBox(height: 16),
-              NegotiationListWidget(
-                serviceRequestId: request.id,
-                currentBudget: request.budget,
-              ),
-            ],
+            // Les négociations sont maintenant gérées dans l'onglet "Offres"
+            // Plus besoin d'afficher NegotiationListWidget ici
           ],
         ),
       ),
@@ -1635,171 +1288,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     return '${date.day}/${date.month}/${date.year}';
   }
 
-  void _showOfferDetails(ServiceOffer offer) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Text(
-          offer.prestataireName,
-          style: AppTextStyles.h4.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Service: ${offer.title}',
-              style: AppTextStyles.bodyLarge.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(offer.description),
-            const SizedBox(height: 16),
-            Text(
-              'Téléphone: ${offer.prestatairePhone}',
-              style: AppTextStyles.bodyMedium,
-            ),
-            Text(
-              'Localisation: ${offer.location}',
-              style: AppTextStyles.bodyMedium,
-            ),
-            Text(
-              'Prix: ${offer.price.toStringAsFixed(0)}€/h',
-              style: AppTextStyles.bodyMedium,
-            ),
-            if (offer.experience != null) ...[
-              Text(
-                'Expérience: ${offer.experience}',
-                style: AppTextStyles.bodyMedium,
-              ),
-            ],
-            if (offer.availability != null) ...[
-              Text(
-                'Disponibilité: ${offer.availability}',
-                style: AppTextStyles.bodyMedium,
-              ),
-            ],
-            Row(
-              children: [
-                Icon(Icons.star, size: 16, color: Colors.amber[600]),
-                const SizedBox(width: 4),
-                Text(
-                  '${offer.rating} (${offer.reviewCount} avis)',
-                  style: AppTextStyles.bodyMedium,
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fermer'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _contactPrestataire(offer);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8B5CF6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Contacter'),
-          ),
-        ],
-      ),
-    );
-  }
 
-  void _contactPrestataire(ServiceOffer offer) async {
-    final authState = ref.read(authProvider);
-    final token = authState.token;
-
-    if (!authState.isAuthenticated || token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vous devez être connecté pour contacter un prestataire'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    // Afficher un indicateur de chargement
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-
-    try {
-      // Charger les conversations d'abord
-      await ref.read(messagesProvider.notifier).loadConversations(token);
-      
-      // Vérifier si une conversation existe déjà
-      final existingConversations = ref.read(messagesProvider).conversations;
-      Conversation? existingConversation;
-      try {
-        existingConversation = existingConversations.firstWhere(
-          (conv) => conv.prestataireId == offer.prestataireId,
-        );
-      } catch (e) {
-        existingConversation = null;
-      }
-      
-      Conversation? conversation;
-      
-      if (existingConversation != null) {
-        conversation = existingConversation;
-      } else {
-        // Créer une nouvelle conversation
-        conversation = await ref.read(messagesProvider.notifier).createConversation(
-          prestataireId: offer.prestataireId,
-          token: token,
-          serviceRequestId: offer.id,
-        );
-      }
-      
-      // Fermer l'indicateur de chargement
-      if (context.mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
-      }
-      
-      if (conversation != null && context.mounted) {
-        // Naviguer vers le chat
-        context.push('/messages/chat/${conversation.id}');
-      } else if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erreur lors de la création de la conversation'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      // Fermer l'indicateur de chargement
-      if (context.mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
 
   Widget _buildPrestataireCard(Prestataire prestataire) {
     final colors = {
@@ -2465,5 +1954,24 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     }
   }
 
-
+  void _loadClientNegotiations() async {
+    final authState = ref.read(authProvider);
+    var token = authState.token;
+    
+    print('=== LOAD CLIENT NEGOTIATIONS CALLED ===');
+    print('User: ${authState.user?.firstName} ${authState.user?.lastName}');
+    print('Role: ${authState.user?.role}');
+    print('User ID: ${authState.user?.id}');
+    print('Token exists: ${token != null}');
+    
+    if (token != null && authState.user?.role == UserRole.client) {
+      print('Loading client negotiations for client ID: ${authState.user!.id}');
+      ref.read(priceNegotiationProvider.notifier).loadClientNegotiations(
+        clientId: authState.user!.id,
+        token: token,
+      );
+    } else {
+      print('Not loading negotiations - conditions not met');
+    }
+  }
 }

@@ -6,24 +6,24 @@ part of 'price_negotiation_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$PriceNegotiationModelImpl _$$PriceNegotiationModelImplFromJson(
+PriceNegotiationModel _$PriceNegotiationModelFromJson(
   Map<String, dynamic> json,
-) => _$PriceNegotiationModelImpl(
+) => PriceNegotiationModel(
   id: json['id'] as String,
   serviceRequestId: json['serviceRequestId'] as String,
   prestataireId: json['prestataireId'] as String,
   clientId: json['clientId'] as String,
   proposedPrice: (json['proposedPrice'] as num).toDouble(),
   message: json['message'] as String?,
-  status: json['status'] as String? ?? 'pending',
-  isFromPrestataire: json['isFromPrestataire'] as bool? ?? true,
+  status: json['status'] as String,
+  isFromPrestataire: json['isFromPrestataire'] as bool,
   parentNegotiationId: json['parentNegotiationId'] as String?,
   createdAt: json['createdAt'] as String?,
   updatedAt: json['updatedAt'] as String?,
 );
 
-Map<String, dynamic> _$$PriceNegotiationModelImplToJson(
-  _$PriceNegotiationModelImpl instance,
+Map<String, dynamic> _$PriceNegotiationModelToJson(
+  PriceNegotiationModel instance,
 ) => <String, dynamic>{
   'id': instance.id,
   'serviceRequestId': instance.serviceRequestId,

@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { ServiceRequest } from './service-request.entity';
 import { User } from './user.entity';
+import { Prestataire } from './prestataire.entity';
 
 export enum NegotiationStatus {
   PENDING = 'pending',
@@ -62,9 +63,9 @@ export class PriceNegotiation {
   @JoinColumn({ name: 'service_request_id' })
   serviceRequest: ServiceRequest;
 
-  @ManyToOne(() => User, { nullable: false })
+  @ManyToOne(() => Prestataire, { nullable: false })
   @JoinColumn({ name: 'prestataire_id' })
-  prestataire: User;
+  prestataire: Prestataire;
 
   @ManyToOne(() => User, { nullable: false })
   @JoinColumn({ name: 'client_id' })

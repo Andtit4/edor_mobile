@@ -3,7 +3,7 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PriceNegotiation, NegotiationStatus } from '../entities/price-negotiation.entity';
-import { ServiceRequest } from '../entities/service-request.entity';
+import { ServiceRequest, ServiceRequestStatus } from '../entities/service-request.entity';
 import { CreatePriceNegotiationDto } from './dto/create-price-negotiation.dto';
 import { UpdatePriceNegotiationDto } from './dto/update-price-negotiation.dto';
 
@@ -37,9 +37,8 @@ export class PriceNegotiationsService {
       throw new ForbiddenException('Vous ne pouvez pas négocier cette demande');
     }
 
-    if (userRole === 'prestataire' && serviceRequest.assignedPrestataireId !== userId) {
-      throw new ForbiddenException('Vous ne pouvez pas négocier cette demande');
-    }
+    // Pour les prestataires, ils peuvent faire des propositions même s'ils ne sont pas encore assignés
+    // La vérification se fera au moment de l'acceptation par le client
 
     // Si c'est une contre-proposition, vérifier que la négociation parent existe
     let parentNegotiation: PriceNegotiation | null = null;
@@ -61,7 +60,7 @@ export class PriceNegotiationsService {
     // Créer la nouvelle négociation
     const negotiation = this.priceNegotiationRepository.create({
       serviceRequestId,
-      prestataireId: serviceRequest.assignedPrestataireId,
+      prestataireId: userRole === 'prestataire' ? userId : serviceRequest.assignedPrestataireId,
       clientId: serviceRequest.clientId,
       proposedPrice,
       message,
@@ -175,5 +174,65 @@ export class PriceNegotiationsService {
     }
 
     await this.priceNegotiationRepository.remove(negotiation);
+  }
+
+  // Récupérer toutes les négociations d'un client
+  async findByClient(clientId: string): Promise<PriceNegotiation[]> {
+    return this.priceNegotiationRepository.find({
+      where: { clientId },
+      relations: ['serviceRequest', 'prestataire', 'client'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  // Accepter une négociation (assigner le prestataire et rejeter les autres)
+  async acceptNegotiation(negotiationId: string, clientId: string): Promise<PriceNegotiation> {
+    const negotiation = await this.priceNegotiationRepository.findOne({
+      where: { id: negotiationId },
+      relations: ['serviceRequest', 'prestataire'],
+    });
+
+    if (!negotiation) {
+      throw new NotFoundException('Négociation non trouvée');
+    }
+
+    // Vérifier que c'est bien le client qui accepte
+    if (negotiation.clientId !== clientId) {
+      throw new ForbiddenException('Vous ne pouvez pas accepter cette négociation');
+    }
+
+    const serviceRequest = negotiation.serviceRequest;
+
+    // Assigner le prestataire à la demande
+    await this.serviceRequestRepository.update(serviceRequest.id, {
+      assignedPrestataireId: negotiation.prestataireId,
+      status: ServiceRequestStatus.ASSIGNED,
+    });
+
+    // Accepter cette négociation
+    await this.priceNegotiationRepository.update(negotiationId, {
+      status: NegotiationStatus.ACCEPTED,
+    });
+
+    // Rejeter toutes les autres négociations pour cette demande
+    await this.priceNegotiationRepository
+      .createQueryBuilder()
+      .update(PriceNegotiation)
+      .set({ status: NegotiationStatus.REJECTED })
+      .where('serviceRequestId = :serviceRequestId', { serviceRequestId: serviceRequest.id })
+      .andWhere('id != :negotiationId', { negotiationId })
+      .execute();
+
+    // Retourner la négociation acceptée
+    const acceptedNegotiation = await this.priceNegotiationRepository.findOne({
+      where: { id: negotiationId },
+      relations: ['serviceRequest', 'prestataire', 'client'],
+    });
+
+    if (!acceptedNegotiation) {
+      throw new NotFoundException('Négociation acceptée non trouvée');
+    }
+
+    return acceptedNegotiation;
   }
 }

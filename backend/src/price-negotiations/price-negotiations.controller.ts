@@ -9,6 +9,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PriceNegotiationsService } from './price-negotiations.service';
 import { CreatePriceNegotiationDto } from './dto/create-price-negotiation.dto';
@@ -61,5 +62,21 @@ export class PriceNegotiationsController {
   @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string, @Request() req) {
     return this.priceNegotiationsService.remove(id, req.user.id);
+  }
+
+  @Get('client/:clientId')
+  @UseGuards(JwtAuthGuard)
+  findByClient(@Param('clientId') clientId: string, @Request() req) {
+    // Vérifier que l'utilisateur peut accéder aux négociations de ce client
+    if (req.user.id !== clientId && req.user.role !== 'admin') {
+      throw new ForbiddenException('Accès non autorisé');
+    }
+    return this.priceNegotiationsService.findByClient(clientId);
+  }
+
+  @Put(':id/accept')
+  @UseGuards(JwtAuthGuard)
+  acceptNegotiation(@Param('id') id: string, @Request() req) {
+    return this.priceNegotiationsService.acceptNegotiation(id, req.user.id);
   }
 }
