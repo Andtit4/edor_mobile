@@ -6,9 +6,14 @@ import { ServiceRequestsController } from './service-requests.controller';
 import { ServiceCompletionService } from './service-completion.service';
 import { ServiceRequest } from '../entities/service-request.entity';
 import { Review } from '../entities/review.entity';
+import { Prestataire } from '../entities/prestataire.entity';
+import { EmailModule } from '../email/email.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ServiceRequest, Review])],
+  imports: [
+    TypeOrmModule.forFeature([ServiceRequest, Review, Prestataire]),
+    EmailModule,
+  ],
   controllers: [ServiceRequestsController],
   providers: [ServiceRequestsService, ServiceCompletionService],
   exports: [ServiceRequestsService, ServiceCompletionService],

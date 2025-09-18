@@ -6,6 +6,7 @@ import { ServiceRequest, ServiceRequestStatus } from '../entities/service-reques
 import { CreateServiceRequestDto } from './dto/create-service-request';
 import { CompleteServiceRequestDto } from './dto/complete-service-request.dto';
 import { ServiceRequestResponseDto } from './dto/service-request-response.dto';
+import { EmailService } from '../email/email.service';
 // import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 
 @Injectable()
@@ -13,17 +14,44 @@ export class ServiceRequestsService {
   constructor(
     @InjectRepository(ServiceRequest)
     private serviceRequestRepository: Repository<ServiceRequest>,
+    private emailService: EmailService,
   ) {}
 
   async create(
     createServiceRequestDto: CreateServiceRequestDto,
     clientId: string,
+    clientEmail?: string,
   ): Promise<ServiceRequest> {
     const serviceRequest = this.serviceRequestRepository.create({
       ...createServiceRequestDto,
       clientId,
     });
-    return this.serviceRequestRepository.save(serviceRequest);
+    
+    const savedServiceRequest = await this.serviceRequestRepository.save(serviceRequest);
+    
+    // Envoyer l'email de confirmation au client si l'email est fourni
+    if (clientEmail) {
+      // Convertir la deadline en Date si c'est une chaîne
+      const deadlineDate = typeof savedServiceRequest.deadline === 'string' 
+        ? new Date(savedServiceRequest.deadline)
+        : savedServiceRequest.deadline;
+      
+      await this.emailService.sendServiceRequestConfirmation(
+        clientEmail,
+        createServiceRequestDto.clientName,
+        {
+          id: savedServiceRequest.id,
+          title: savedServiceRequest.title,
+          description: savedServiceRequest.description,
+          category: savedServiceRequest.category,
+          location: savedServiceRequest.location,
+          budget: savedServiceRequest.budget,
+          deadline: deadlineDate.toLocaleDateString('fr-FR'),
+        }
+      );
+    }
+    
+    return savedServiceRequest;
   }
 
   async findAll(): Promise<ServiceRequestResponseDto[]> {

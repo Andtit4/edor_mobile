@@ -181,53 +181,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   Widget _buildQuickActions(UserRole role) {
     if (role == UserRole.prestataire) {
-      return _buildPrestataireQuickActions();
+      // Ne pas afficher le bloc Actions rapides pour les prestataires
+      return const SizedBox.shrink();
     } else {
       return _buildClientQuickActions();
     }
   }
 
-  Widget _buildPrestataireQuickActions() {
-    return Container(
-      margin: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Actions rapides',
-            style: AppTextStyles.h4.copyWith(
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF1F2937),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildQuickActionCard(
-                  'Nouvelles demandes',
-                  'Voir les demandes',
-                  Icons.work_outline,
-                  const Color(0xFF8B5CF6),
-                  () => context.push(AppRoutes.serviceRequests),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildQuickActionCard(
-                  'Mes offres',
-                  'Gérer mes services',
-                  Icons.build_outlined,
-                  const Color(0xFF10B981),
-                  () => context.push(AppRoutes.serviceOffers),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildClientQuickActions() {
     return Container(

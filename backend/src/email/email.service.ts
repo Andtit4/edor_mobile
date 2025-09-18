@@ -38,6 +38,48 @@ export class EmailService {
     }
   }
 
+  async sendServiceRequestConfirmation(
+    clientEmail: string,
+    clientName: string,
+    requestData: {
+      id: string;
+      title: string;
+      description: string;
+      category: string;
+      location: string;
+      budget: number;
+      deadline: string;
+    }
+  ) {
+    // Vérifier si les credentials email sont configurés
+    if (!process.env.MAIL_USER || !process.env.MAIL_PASS) {
+      console.log(`Email de confirmation non envoyé à ${clientEmail} - Configuration email manquante`);
+      return;
+    }
+
+    try {
+      await this.mailerService.sendMail({
+        to: clientEmail,
+        subject: 'Confirmation de votre demande de service - Edor',
+        template: 'service-request-confirmation',
+        context: {
+          clientName,
+          requestId: requestData.id.substring(0, 8).toUpperCase(),
+          title: requestData.title,
+          description: requestData.description,
+          category: requestData.category,
+          location: requestData.location,
+          budget: requestData.budget.toLocaleString(),
+          deadline: requestData.deadline,
+        },
+      });
+      console.log(`Email de confirmation envoyé à ${clientEmail} pour la demande ${requestData.id}`);
+    } catch (error) {
+      console.error(`Erreur lors de l'envoi de l'email de confirmation à ${clientEmail}:`, error);
+      // Ne pas faire échouer la création de demande si l'email ne peut pas être envoyé
+    }
+  }
+
   async sendTestEmail() {
     try {
       await this.mailerService.sendMail({

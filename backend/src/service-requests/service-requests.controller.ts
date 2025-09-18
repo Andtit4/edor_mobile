@@ -33,6 +33,7 @@ export class ServiceRequestsController {
     return this.serviceRequestsService.create(
       createServiceRequestDto,
       req.user.id,
+      req.user.email, // Passer l'email du client connecté
     );
   }
 

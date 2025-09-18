@@ -58,13 +58,15 @@ MAIL_PASS=mon-mot-de-passe
 Une fois configuré, vous pouvez tester l'envoi d'emails :
 
 1. **Inscription d'un nouvel utilisateur** - Un email de bienvenue sera automatiquement envoyé
-2. **Endpoint de test** - `POST /email/test` (nécessite une authentification)
+2. **Création d'une demande de service** - Un email de confirmation sera envoyé au client
+3. **Endpoint de test** - `POST /email/test` (nécessite une authentification)
 
 ## 📝 Fonctionnalités
 
 - ✅ **Email de bienvenue automatique** lors de l'inscription
+- ✅ **Email de confirmation** lors de la création d'une demande de service
 - ✅ **Templates personnalisés** selon le rôle (client/prestataire)
-- ✅ **Gestion d'erreurs** - L'inscription ne échoue pas si l'email ne peut pas être envoyé
+- ✅ **Gestion d'erreurs** - Les opérations ne échouent pas si l'email ne peut pas être envoyé
 - ✅ **Configuration flexible** via variables d'environnement
 
 ## 🚨 Dépannage
@@ -83,6 +85,10 @@ Une fois configuré, vous pouvez tester l'envoi d'emails :
 
 ## 📋 Statut actuel
 
-**Sans configuration** : L'inscription fonctionne, mais aucun email n'est envoyé (message dans les logs)
+**Sans configuration** : 
+- L'inscription fonctionne, mais aucun email de bienvenue n'est envoyé (message dans les logs)
+- La création de demande fonctionne, mais aucun email de confirmation n'est envoyé (message dans les logs)
 
-**Avec configuration** : L'inscription envoie automatiquement un email de bienvenue personnalisé
+**Avec configuration** : 
+- L'inscription envoie automatiquement un email de bienvenue personnalisé
+- La création de demande envoie automatiquement un email de confirmation avec les détails
