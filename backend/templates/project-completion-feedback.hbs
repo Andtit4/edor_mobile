@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback de votre projet terminé</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: #8B5CF6;
+            margin-bottom: 10px;
+        }
+        .feedback-title {
+            color: #1F2937;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .completion-highlight {
+            background-color: #10B981;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .project-details {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #374151;
+        }
+        .detail-value {
+            color: #6b7280;
+            text-align: right;
+            max-width: 60%;
+        }
+        .rating-section {
+            background-color: #FEF3C7;
+            border: 1px solid #F59E0B;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .stars {
+            font-size: 32px;
+            color: #F59E0B;
+            margin: 10px 0;
+        }
+        .rating-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #92400E;
+            margin-top: 10px;
+        }
+        .client-info {
+            background-color: #ECFDF5;
+            border: 1px solid #10B981;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .client-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #8B5CF6;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            margin-right: 15px;
+        }
+        .client-details {
+            display: inline-block;
+            vertical-align: top;
+        }
+        .feedback-box {
+            background-color: #F3F4F6;
+            border-left: 4px solid #8B5CF6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .completion-notes {
+            background-color: #EFF6FF;
+            border: 1px solid #3B82F6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .next-steps {
+            background-color: #F0FDF4;
+            border: 1px solid #22C55E;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .step-item {
+            margin: 10px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        .step-item::before {
+            content: "✓";
+            color: #22C55E;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #8B5CF6;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .button:hover {
+            background-color: #7C3AED;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Edor</div>
+            <h1 class="feedback-title">Feedback de votre projet terminé</h1>
+        </div>
+
+        <div class="content">
+            <p>Bonjour {{prestataireName}},</p>
+            
+            <p>Votre projet vient d'être clôturé par le client. Voici le feedback qu'il vous a laissé :</p>
+            
+            <div class="completion-highlight">
+                <strong>🎉 Projet terminé !</strong><br>
+                Référence projet : #{{requestId}}
+            </div>
+
+            <div class="project-details">
+                <h3 style="margin-top: 0; color: #1F2937;">Détails du projet</h3>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Service :</span>
+                    <span class="detail-value">{{serviceTitle}}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Prix final :</span>
+                    <span class="detail-value">{{finalPrice}} FCFA</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Date de clôture :</span>
+                    <span class="detail-value">{{completionDate}}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Localisation :</span>
+                    <span class="detail-value">{{location}}</span>
+                </div>
+            </div>
+
+            <div class="rating-section">
+                <h3 style="margin-top: 0; color: #92400E;">Note du client</h3>
+                <div class="stars">{{stars}}</div>
+                <div class="rating-text">{{rating}}/5 étoiles</div>
+            </div>
+
+            <div class="client-info">
+                <h3 style="margin-top: 0; color: #065F46;">Client</h3>
+                <div>
+                    <div class="client-avatar">{{clientInitial}}</div>
+                    <div class="client-details">
+                        <div style="font-weight: bold; font-size: 16px; color: #1F2937;">{{clientName}}</div>
+                        <div style="color: #6b7280; margin-top: 4px;">{{clientPhone}}</div>
+                        <div style="color: #6b7280; font-size: 14px;">Projet clôturé le {{completionDate}}</div>
+                    </div>
+                </div>
+            </div>
+
+            {{#if reviewComment}}
+            <div class="feedback-box">
+                <h4 style="margin-top: 0; color: #1F2937;">Commentaire du client :</h4>
+                <p style="margin-bottom: 0; font-style: italic;">"{{reviewComment}}"</p>
+            </div>
+            {{/if}}
+
+            {{#if completionNotes}}
+            <div class="completion-notes">
+                <h4 style="margin-top: 0; color: #1E40AF;">Notes de clôture :</h4>
+                <p style="margin-bottom: 0;">{{completionNotes}}</p>
+            </div>
+            {{/if}}
+
+            <div class="next-steps">
+                <h3 style="margin-top: 0; color: #166534;">Impact sur votre profil</h3>
+                <div class="step-item">Votre note moyenne a été mise à jour</div>
+                <div class="step-item">Ce projet apparaît dans votre historique</div>
+                <div class="step-item">Votre réputation s'améliore avec chaque projet réussi</div>
+                <div class="step-item">Les futurs clients pourront voir ce feedback</div>
+            </div>
+
+            <p><strong>Merci pour votre excellent travail !</strong> Continuez ainsi pour maintenir votre excellente réputation sur Edor.</p>
+
+            {{!-- <div style="text-align: center;">
+                <a href="#" class="button">Voir mon profil</a>
+            </div> --}}
+        </div>
+
+        <div class="footer">
+            <p>Merci de faire partie de notre communauté de prestataires !</p>
+            <p><strong>L'équipe Edor</strong></p>
+            <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+        </div>
+    </div>
+</body>
+</html>

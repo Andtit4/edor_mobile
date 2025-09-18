@@ -7,6 +7,7 @@ import { ServiceRequest, ServiceRequestStatus } from '../entities/service-reques
 import { CreatePriceNegotiationDto } from './dto/create-price-negotiation.dto';
 import { UpdatePriceNegotiationDto } from './dto/update-price-negotiation.dto';
 import { PriceNegotiationResponseDto } from './dto/price-negotiation-response.dto';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class PriceNegotiationsService {
@@ -15,6 +16,7 @@ export class PriceNegotiationsService {
     private priceNegotiationRepository: Repository<PriceNegotiation>,
     @InjectRepository(ServiceRequest)
     private serviceRequestRepository: Repository<ServiceRequest>,
+    private emailService: EmailService,
   ) {}
 
   async create(
@@ -70,7 +72,40 @@ export class PriceNegotiationsService {
       status: NegotiationStatus.PENDING,
     });
 
-    return this.priceNegotiationRepository.save(negotiation);
+    const savedNegotiation = await this.priceNegotiationRepository.save(negotiation);
+
+    // Envoyer un email de notification au client si c'est un prestataire qui fait une proposition
+    if (userRole === 'prestataire') {
+      // Récupérer les informations du prestataire et du client
+      const negotiationWithDetails = await this.priceNegotiationRepository
+        .createQueryBuilder('negotiation')
+        .leftJoinAndSelect('negotiation.serviceRequest', 'serviceRequest')
+        .leftJoinAndSelect('negotiation.prestataire', 'prestataire')
+        .leftJoinAndSelect('negotiation.client', 'client')
+        .where('negotiation.id = :id', { id: savedNegotiation.id })
+        .getOne();
+
+      if (negotiationWithDetails && negotiationWithDetails.client && negotiationWithDetails.prestataire) {
+        await this.emailService.sendPriceProposalNotification(
+          negotiationWithDetails.client.email,
+          `${negotiationWithDetails.client.firstName} ${negotiationWithDetails.client.lastName}`,
+          {
+            requestId: negotiationWithDetails.serviceRequest.id,
+            serviceTitle: negotiationWithDetails.serviceRequest.title,
+            proposedPrice: negotiationWithDetails.proposedPrice,
+            initialBudget: negotiationWithDetails.serviceRequest.budget,
+            location: negotiationWithDetails.serviceRequest.location,
+            prestataireName: `${negotiationWithDetails.prestataire.firstName} ${negotiationWithDetails.prestataire.lastName}`,
+            prestataireCategory: negotiationWithDetails.prestataire.category || 'Service',
+            prestataireRating: negotiationWithDetails.prestataire.rating || 0,
+            prestataireReviews: negotiationWithDetails.prestataire.totalReviews || 0,
+            message: negotiationWithDetails.message,
+          }
+        );
+      }
+    }
+
+    return savedNegotiation;
   }
 
   async findByServiceRequest(serviceRequestId: string, userId: string): Promise<PriceNegotiationResponseDto[]> {
@@ -284,6 +319,25 @@ export class PriceNegotiationsService {
         `${acceptedNegotiation.client.firstName} ${acceptedNegotiation.client.lastName}` : 
         'Client inconnu',
     };
+
+    // Envoyer un email de notification au prestataire
+    if (acceptedNegotiation.prestataire && acceptedNegotiation.client) {
+      await this.emailService.sendOfferAcceptedNotification(
+        acceptedNegotiation.prestataire.email,
+        `${acceptedNegotiation.prestataire.firstName} ${acceptedNegotiation.prestataire.lastName}`,
+        {
+          requestId: acceptedNegotiation.serviceRequest.id,
+          serviceTitle: acceptedNegotiation.serviceRequest.title,
+          acceptedPrice: acceptedNegotiation.proposedPrice,
+          location: acceptedNegotiation.serviceRequest.location,
+          deadline: acceptedNegotiation.serviceRequest.deadline.toLocaleDateString('fr-FR'),
+          clientName: `${acceptedNegotiation.client.firstName} ${acceptedNegotiation.client.lastName}`,
+          clientPhone: acceptedNegotiation.serviceRequest.clientPhone || 'Non renseigné',
+          acceptanceDate: new Date().toLocaleDateString('fr-FR'),
+          message: acceptedNegotiation.message,
+        }
+      );
+    }
 
     return new PriceNegotiationResponseDto(negotiationWithNames);
   }

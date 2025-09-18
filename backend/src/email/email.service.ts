@@ -80,6 +80,155 @@ export class EmailService {
     }
   }
 
+  async sendPriceProposalNotification(
+    clientEmail: string,
+    clientName: string,
+    proposalData: {
+      requestId: string;
+      serviceTitle: string;
+      proposedPrice: number;
+      initialBudget: number;
+      location: string;
+      prestataireName: string;
+      prestataireCategory: string;
+      prestataireRating: number;
+      prestataireReviews: number;
+      message?: string;
+    }
+  ) {
+    // Vérifier si les credentials email sont configurés
+    if (!process.env.MAIL_USER || !process.env.MAIL_PASS) {
+      console.log(`Email de notification non envoyé à ${clientEmail} - Configuration email manquante`);
+      return;
+    }
+
+    try {
+      await this.mailerService.sendMail({
+        to: clientEmail,
+        subject: 'Nouvelle proposition de prix reçue - Edor',
+        template: 'price-proposal-notification',
+        context: {
+          clientName,
+          requestId: proposalData.requestId.substring(0, 8).toUpperCase(),
+          serviceTitle: proposalData.serviceTitle,
+          proposedPrice: proposalData.proposedPrice.toLocaleString(),
+          initialBudget: proposalData.initialBudget.toLocaleString(),
+          location: proposalData.location,
+          prestataireName: proposalData.prestataireName,
+          prestataireInitial: proposalData.prestataireName.charAt(0).toUpperCase(),
+          prestataireCategory: proposalData.prestataireCategory,
+          prestataireRating: proposalData.prestataireRating.toFixed(1),
+          prestataireReviews: proposalData.prestataireReviews,
+          message: proposalData.message,
+        },
+      });
+      console.log(`Email de notification envoyé à ${clientEmail} pour la proposition ${proposalData.requestId}`);
+    } catch (error) {
+      console.error(`Erreur lors de l'envoi de l'email de notification à ${clientEmail}:`, error);
+      // Ne pas faire échouer la création de proposition si l'email ne peut pas être envoyé
+    }
+  }
+
+  async sendOfferAcceptedNotification(
+    prestataireEmail: string,
+    prestataireName: string,
+    offerData: {
+      requestId: string;
+      serviceTitle: string;
+      acceptedPrice: number;
+      location: string;
+      deadline: string;
+      clientName: string;
+      clientPhone: string;
+      acceptanceDate: string;
+      message?: string;
+    }
+  ) {
+    // Vérifier si les credentials email sont configurés
+    if (!process.env.MAIL_USER || !process.env.MAIL_PASS) {
+      console.log(`Email de notification non envoyé à ${prestataireEmail} - Configuration email manquante`);
+      return;
+    }
+
+    try {
+      await this.mailerService.sendMail({
+        to: prestataireEmail,
+        subject: 'Félicitations ! Votre offre a été acceptée - Edor',
+        template: 'offer-accepted-notification',
+        context: {
+          prestataireName,
+          requestId: offerData.requestId.substring(0, 8).toUpperCase(),
+          serviceTitle: offerData.serviceTitle,
+          acceptedPrice: offerData.acceptedPrice.toLocaleString(),
+          location: offerData.location,
+          deadline: offerData.deadline,
+          clientName: offerData.clientName,
+          clientInitial: offerData.clientName.charAt(0).toUpperCase(),
+          clientPhone: offerData.clientPhone,
+          acceptanceDate: offerData.acceptanceDate,
+          message: offerData.message,
+        },
+      });
+      console.log(`Email de notification envoyé à ${prestataireEmail} pour l'offre acceptée ${offerData.requestId}`);
+    } catch (error) {
+      console.error(`Erreur lors de l'envoi de l'email de notification à ${prestataireEmail}:`, error);
+      // Ne pas faire échouer l'acceptation si l'email ne peut pas être envoyé
+    }
+  }
+
+  async sendProjectCompletionFeedback(
+    prestataireEmail: string,
+    prestataireName: string,
+    feedbackData: {
+      requestId: string;
+      serviceTitle: string;
+      finalPrice: number;
+      completionDate: string;
+      location: string;
+      clientName: string;
+      clientPhone: string;
+      rating: number;
+      reviewComment?: string;
+      completionNotes?: string;
+    }
+  ) {
+    // Vérifier si les credentials email sont configurés
+    if (!process.env.MAIL_USER || !process.env.MAIL_PASS) {
+      console.log(`Email de feedback non envoyé à ${prestataireEmail} - Configuration email manquante`);
+      return;
+    }
+
+    // Générer les étoiles pour l'affichage
+    const stars = '★'.repeat(feedbackData.rating) + '☆'.repeat(5 - feedbackData.rating);
+
+    try {
+      await this.mailerService.sendMail({
+        to: prestataireEmail,
+        subject: 'Feedback de votre projet terminé - Edor',
+        template: 'project-completion-feedback',
+        context: {
+          prestataireName,
+          requestId: feedbackData.requestId.substring(0, 8).toUpperCase(),
+          serviceTitle: feedbackData.serviceTitle,
+          finalPrice: feedbackData.finalPrice.toLocaleString(),
+          completionDate: feedbackData.completionDate,
+          location: feedbackData.location,
+          clientName: feedbackData.clientName,
+          clientInitial: feedbackData.clientName.charAt(0).toUpperCase(),
+          clientPhone: feedbackData.clientPhone,
+          rating: feedbackData.rating,
+          stars: stars,
+          reviewComment: feedbackData.reviewComment,
+          completionNotes: feedbackData.completionNotes,
+        },
+      });
+      console.log(`Email de feedback envoyé à ${prestataireEmail} pour le projet ${feedbackData.requestId}`);
+    } catch (error) {
+      console.error(`Erreur lors de l'envoi de l'email de feedback à ${prestataireEmail}:`, error);
+      // Ne pas faire échouer la clôture si l'email ne peut pas être envoyé
+    }
+  }
+
   async sendTestEmail() {
     try {
       await this.mailerService.sendMail({

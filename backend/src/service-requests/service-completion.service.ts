@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ServiceRequest, ServiceRequestStatus } from '../entities/service-request.entity';
 import { Review } from '../entities/review.entity';
 import { CompleteServiceRequestDto } from './dto/complete-service-request.dto';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class ServiceCompletionService {
@@ -12,6 +13,7 @@ export class ServiceCompletionService {
     private serviceRequestRepository: Repository<ServiceRequest>,
     @InjectRepository(Review)
     private reviewRepository: Repository<Review>,
+    private emailService: EmailService,
   ) {}
 
   async completeServiceRequestWithReview(
@@ -65,13 +67,34 @@ export class ServiceCompletionService {
 
     const savedReview = await this.reviewRepository.save(review);
 
-    // Récupérer la demande mise à jour
+    // Récupérer la demande mise à jour avec les relations
     const updatedServiceRequest = await this.serviceRequestRepository.findOne({
       where: { id: serviceRequestId },
+      relations: ['assignedPrestataire'],
     });
 
     if (!updatedServiceRequest) {
       throw new NotFoundException('Erreur lors de la mise à jour de la demande');
+    }
+
+    // Envoyer un email de feedback au prestataire
+    if (updatedServiceRequest.assignedPrestataire) {
+      await this.emailService.sendProjectCompletionFeedback(
+        updatedServiceRequest.assignedPrestataire.email,
+        `${updatedServiceRequest.assignedPrestataire.firstName} ${updatedServiceRequest.assignedPrestataire.lastName}`,
+        {
+          requestId: updatedServiceRequest.id,
+          serviceTitle: updatedServiceRequest.title,
+          finalPrice: updatedServiceRequest.budget, // Utiliser le budget comme prix final
+          completionDate: new Date(completeServiceRequestDto.completionDate).toLocaleDateString('fr-FR'),
+          location: updatedServiceRequest.location,
+          clientName: updatedServiceRequest.clientName,
+          clientPhone: updatedServiceRequest.clientPhone || 'Non renseigné',
+          rating: completeServiceRequestDto.rating,
+          reviewComment: completeServiceRequestDto.reviewComment,
+          completionNotes: completeServiceRequestDto.completionNotes,
+        }
+      );
     }
 
     return {

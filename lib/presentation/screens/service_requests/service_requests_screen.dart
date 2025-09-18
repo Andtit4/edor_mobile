@@ -571,94 +571,140 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
   void _showPriceNegotiationDialog(ServiceRequest request) {
     final TextEditingController priceController = TextEditingController();
     final TextEditingController messageController = TextEditingController();
+    bool useInitialBudget = false;
     
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Text(
-          'Proposer un prix',
-          style: AppTextStyles.h4.copyWith(
-            fontWeight: FontWeight.w700,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Demande: ${request.title}',
-              style: AppTextStyles.bodyLarge.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          title: Text(
+            'Proposer un prix',
+            style: AppTextStyles.h4.copyWith(
+              fontWeight: FontWeight.w700,
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Budget initial: ${request.budget.toStringAsFixed(0)} FCFA',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: Colors.grey[600],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Demande: ${request.title}',
+                style: AppTextStyles.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
+              const SizedBox(height: 8),
+              Text(
+                'Budget initial: ${request.budget.toStringAsFixed(0)} FCFA',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              // Checkbox "Le prix me va"
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF8B5CF6).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFF8B5CF6).withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Checkbox(
+                      value: useInitialBudget,
+                      onChanged: (value) {
+                        setState(() {
+                          useInitialBudget = value ?? false;
+                          if (useInitialBudget) {
+                            priceController.text = request.budget.toStringAsFixed(0);
+                          } else {
+                            priceController.text = '';
+                          }
+                        });
+                      },
+                      activeColor: const Color(0xFF8B5CF6),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Le prix me va (${request.budget.toStringAsFixed(0)} FCFA)',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF8B5CF6),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              TextFormField(
+                controller: priceController,
+                keyboardType: TextInputType.number,
+                enabled: !useInitialBudget,
+                decoration: InputDecoration(
+                  labelText: 'Votre prix proposé (FCFA)',
+                  hintText: 'Ex: 50000',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  prefixIcon: const Icon(Icons.attach_money),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: messageController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  labelText: 'Message (optionnel)',
+                  hintText: 'Expliquez votre proposition...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  prefixIcon: const Icon(Icons.message),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Annuler'),
             ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: priceController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Votre prix proposé (FCFA)',
-                hintText: 'Ex: 50000',
-                border: OutlineInputBorder(
+            ElevatedButton(
+              onPressed: () {
+                final proposedPrice = double.tryParse(priceController.text);
+                if (proposedPrice == null || proposedPrice <= 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Veuillez entrer un prix valide'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+                
+                Navigator.pop(context);
+                _createPriceNegotiation(request, proposedPrice, messageController.text);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF8B5CF6),
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                prefixIcon: const Icon(Icons.attach_money),
               ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: messageController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                labelText: 'Message (optionnel)',
-                hintText: 'Expliquez votre proposition...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                prefixIcon: const Icon(Icons.message),
-              ),
+              child: const Text('Proposer'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final proposedPrice = double.tryParse(priceController.text);
-              if (proposedPrice == null || proposedPrice <= 0) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Veuillez entrer un prix valide'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
-              
-              Navigator.pop(context);
-              _createPriceNegotiation(request, proposedPrice, messageController.text);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8B5CF6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Proposer'),
-          ),
-        ],
       ),
     );
   }
