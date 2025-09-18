@@ -108,12 +108,16 @@ class PrestatairesNotifier extends StateNotifier<PrestatairesState> {
     state = state.copyWith(isLoading: true, error: null);
     
     try {
+      print('[DEBUG] Chargement des prestataires...');
       final prestataires = await _remoteDataSource.getAllPrestataires();
+      print('[DEBUG] Prestataires chargés: ${prestataires.length}');
       state = state.copyWith(
         prestataires: prestataires,
         isLoading: false,
       );
     } catch (e) {
+      print('[ERROR] Erreur lors du chargement des prestataires: $e');
+      print('[ERROR] Stack trace: ${StackTrace.current}');
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),

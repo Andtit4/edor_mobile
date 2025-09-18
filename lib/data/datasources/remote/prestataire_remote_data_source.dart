@@ -33,8 +33,29 @@ class PrestataireRemoteDataSourceImpl implements PrestataireRemoteDataSource {
     );
 
     if (response.statusCode == 200) {
+      print('[DEBUG] Réponse du serveur reçue pour getAllPrestataires');
       final List<dynamic> data = json.decode(response.body);
-      return data.map((json) => Prestataire.fromJson(json)).toList();
+      print('[DEBUG] Nombre d\'éléments reçus: ${data.length}');
+      
+      if (data.isNotEmpty) {
+        print('[DEBUG] Premier élément: ${data.first}');
+      }
+      
+      final List<Prestataire> prestataires = [];
+      for (int i = 0; i < data.length; i++) {
+        try {
+          print('[DEBUG] Parsing prestataire $i: ${data[i]}');
+          final prestataire = Prestataire.fromJson(data[i]);
+          prestataires.add(prestataire);
+          print('[DEBUG] Prestataire $i parsé avec succès');
+        } catch (e) {
+          print('[ERROR] Erreur lors du parsing du prestataire $i: $e');
+          print('[ERROR] Données: ${data[i]}');
+          rethrow;
+        }
+      }
+      
+      return prestataires;
     } else {
       throw ServerException(message: 'Erreur du serveur: ${response.statusCode}');
     }

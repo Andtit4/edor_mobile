@@ -16,6 +16,8 @@ class ServiceRequestModel with _$ServiceRequestModel {
     required String clientName,
     required String clientPhone,
     required String location,
+    @JsonKey(fromJson: _latitudeFromJson) double? latitude,
+    @JsonKey(fromJson: _longitudeFromJson) double? longitude,
     @JsonKey(fromJson: _budgetFromJson) required double budget,
     @JsonKey(fromJson: _dateTimeFromJson) required DateTime createdAt,
     @JsonKey(fromJson: _dateTimeFromJson) required DateTime deadline,
@@ -44,6 +46,8 @@ extension ServiceRequestModelExtension on ServiceRequestModel {
       clientName: clientName,
       clientPhone: clientPhone,
       location: location,
+      latitude: latitude,
+      longitude: longitude,
       budget: budget,
       createdAt: createdAt,
       deadline: deadline,
@@ -78,5 +82,22 @@ DateTime? _dateTimeFromJsonNullable(dynamic value) {
   if (value == null) return null;
   if (value is DateTime) return value;
   if (value is String) return DateTime.tryParse(value);
+  return null;
+}
+
+// Fonctions de conversion pour les coordonnées GPS
+double? _latitudeFromJson(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  return null;
+}
+
+double? _longitudeFromJson(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value);
   return null;
 }

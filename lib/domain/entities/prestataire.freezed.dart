@@ -29,16 +29,22 @@ mixin _$Prestataire {
   String get category => throw _privateConstructorUsedError;
   String get location => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _ratingFromJson)
   double get rating => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _pricePerHourFromJson)
   int get pricePerHour => throw _privateConstructorUsedError;
   List<String> get skills => throw _privateConstructorUsedError;
   List<String> get portfolio => throw _privateConstructorUsedError;
   bool get isAvailable => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _completedJobsFromJson)
   int get completedJobs => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _totalReviewsFromJson)
   int get totalReviews => throw _privateConstructorUsedError;
-  @JsonKey(name: 'reviewCount')
+  @JsonKey(name: 'reviewCount', fromJson: _reviewCountFromJson)
   int get reviewCount => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _dateTimeFromJsonNullable)
   DateTime? get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _dateTimeFromJsonNullable)
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this Prestataire to a JSON map.
@@ -67,16 +73,17 @@ abstract class $PrestataireCopyWith<$Res> {
     String category,
     String location,
     String description,
-    double rating,
-    int pricePerHour,
+    @JsonKey(fromJson: _ratingFromJson) double rating,
+    @JsonKey(fromJson: _pricePerHourFromJson) int pricePerHour,
     List<String> skills,
     List<String> portfolio,
     bool isAvailable,
-    int completedJobs,
-    int totalReviews,
-    @JsonKey(name: 'reviewCount') int reviewCount,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    @JsonKey(fromJson: _completedJobsFromJson) int completedJobs,
+    @JsonKey(fromJson: _totalReviewsFromJson) int totalReviews,
+    @JsonKey(name: 'reviewCount', fromJson: _reviewCountFromJson)
+    int reviewCount,
+    @JsonKey(fromJson: _dateTimeFromJsonNullable) DateTime? createdAt,
+    @JsonKey(fromJson: _dateTimeFromJsonNullable) DateTime? updatedAt,
   });
 }
 
@@ -230,16 +237,17 @@ abstract class _$$PrestataireImplCopyWith<$Res>
     String category,
     String location,
     String description,
-    double rating,
-    int pricePerHour,
+    @JsonKey(fromJson: _ratingFromJson) double rating,
+    @JsonKey(fromJson: _pricePerHourFromJson) int pricePerHour,
     List<String> skills,
     List<String> portfolio,
     bool isAvailable,
-    int completedJobs,
-    int totalReviews,
-    @JsonKey(name: 'reviewCount') int reviewCount,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    @JsonKey(fromJson: _completedJobsFromJson) int completedJobs,
+    @JsonKey(fromJson: _totalReviewsFromJson) int totalReviews,
+    @JsonKey(name: 'reviewCount', fromJson: _reviewCountFromJson)
+    int reviewCount,
+    @JsonKey(fromJson: _dateTimeFromJsonNullable) DateTime? createdAt,
+    @JsonKey(fromJson: _dateTimeFromJsonNullable) DateTime? updatedAt,
   });
 }
 
@@ -385,16 +393,17 @@ class _$PrestataireImpl implements _Prestataire {
     required this.category,
     required this.location,
     required this.description,
-    required this.rating,
-    required this.pricePerHour,
+    @JsonKey(fromJson: _ratingFromJson) required this.rating,
+    @JsonKey(fromJson: _pricePerHourFromJson) required this.pricePerHour,
     final List<String> skills = const [],
     final List<String> portfolio = const [],
     this.isAvailable = true,
-    this.completedJobs = 0,
-    this.totalReviews = 0,
-    @JsonKey(name: 'reviewCount') this.reviewCount = 0,
-    this.createdAt,
-    this.updatedAt,
+    @JsonKey(fromJson: _completedJobsFromJson) this.completedJobs = 0,
+    @JsonKey(fromJson: _totalReviewsFromJson) this.totalReviews = 0,
+    @JsonKey(name: 'reviewCount', fromJson: _reviewCountFromJson)
+    this.reviewCount = 0,
+    @JsonKey(fromJson: _dateTimeFromJsonNullable) this.createdAt,
+    @JsonKey(fromJson: _dateTimeFromJsonNullable) this.updatedAt,
   }) : _skills = skills,
        _portfolio = portfolio;
 
@@ -418,8 +427,10 @@ class _$PrestataireImpl implements _Prestataire {
   @override
   final String description;
   @override
+  @JsonKey(fromJson: _ratingFromJson)
   final double rating;
   @override
+  @JsonKey(fromJson: _pricePerHourFromJson)
   final int pricePerHour;
   final List<String> _skills;
   @override
@@ -443,17 +454,19 @@ class _$PrestataireImpl implements _Prestataire {
   @JsonKey()
   final bool isAvailable;
   @override
-  @JsonKey()
+  @JsonKey(fromJson: _completedJobsFromJson)
   final int completedJobs;
   @override
-  @JsonKey()
+  @JsonKey(fromJson: _totalReviewsFromJson)
   final int totalReviews;
   @override
-  @JsonKey(name: 'reviewCount')
+  @JsonKey(name: 'reviewCount', fromJson: _reviewCountFromJson)
   final int reviewCount;
   @override
+  @JsonKey(fromJson: _dateTimeFromJsonNullable)
   final DateTime? createdAt;
   @override
+  @JsonKey(fromJson: _dateTimeFromJsonNullable)
   final DateTime? updatedAt;
 
   @override
@@ -547,16 +560,17 @@ abstract class _Prestataire implements Prestataire {
     required final String category,
     required final String location,
     required final String description,
-    required final double rating,
-    required final int pricePerHour,
+    @JsonKey(fromJson: _ratingFromJson) required final double rating,
+    @JsonKey(fromJson: _pricePerHourFromJson) required final int pricePerHour,
     final List<String> skills,
     final List<String> portfolio,
     final bool isAvailable,
-    final int completedJobs,
-    final int totalReviews,
-    @JsonKey(name: 'reviewCount') final int reviewCount,
-    final DateTime? createdAt,
-    final DateTime? updatedAt,
+    @JsonKey(fromJson: _completedJobsFromJson) final int completedJobs,
+    @JsonKey(fromJson: _totalReviewsFromJson) final int totalReviews,
+    @JsonKey(name: 'reviewCount', fromJson: _reviewCountFromJson)
+    final int reviewCount,
+    @JsonKey(fromJson: _dateTimeFromJsonNullable) final DateTime? createdAt,
+    @JsonKey(fromJson: _dateTimeFromJsonNullable) final DateTime? updatedAt,
   }) = _$PrestataireImpl;
 
   factory _Prestataire.fromJson(Map<String, dynamic> json) =
@@ -579,8 +593,10 @@ abstract class _Prestataire implements Prestataire {
   @override
   String get description;
   @override
+  @JsonKey(fromJson: _ratingFromJson)
   double get rating;
   @override
+  @JsonKey(fromJson: _pricePerHourFromJson)
   int get pricePerHour;
   @override
   List<String> get skills;
@@ -589,15 +605,19 @@ abstract class _Prestataire implements Prestataire {
   @override
   bool get isAvailable;
   @override
+  @JsonKey(fromJson: _completedJobsFromJson)
   int get completedJobs;
   @override
+  @JsonKey(fromJson: _totalReviewsFromJson)
   int get totalReviews;
   @override
-  @JsonKey(name: 'reviewCount')
+  @JsonKey(name: 'reviewCount', fromJson: _reviewCountFromJson)
   int get reviewCount;
   @override
+  @JsonKey(fromJson: _dateTimeFromJsonNullable)
   DateTime? get createdAt;
   @override
+  @JsonKey(fromJson: _dateTimeFromJsonNullable)
   DateTime? get updatedAt;
 
   /// Create a copy of Prestataire

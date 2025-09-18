@@ -14,18 +14,59 @@ class ServiceRequest with _$ServiceRequest {
     required String clientName,
     required String clientPhone,
     required String location,
-    required double budget,
-    required DateTime createdAt,
-    required DateTime deadline,
+    @JsonKey(fromJson: _latitudeFromJson) double? latitude,
+    @JsonKey(fromJson: _longitudeFromJson) double? longitude,
+    @JsonKey(fromJson: _budgetFromJson) required double budget,
+    @JsonKey(fromJson: _dateTimeFromJson) required DateTime createdAt,
+    @JsonKey(fromJson: _dateTimeFromJson) required DateTime deadline,
     @Default('pending') String status,
     String? assignedPrestataireId,
     String? prestataireName,
     String? assignedPrestataireName,
     String? notes,
-    DateTime? completionDate,
+    @JsonKey(fromJson: _dateTimeFromJsonNullable) DateTime? completionDate,
     String? completionNotes,
   }) = _ServiceRequest;
 
   factory ServiceRequest.fromJson(Map<String, dynamic> json) =>
       _$ServiceRequestFromJson(json);
+}
+
+// Fonctions de conversion pour gérer les types mixtes
+double? _latitudeFromJson(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  return null;
+}
+
+double? _longitudeFromJson(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  return null;
+}
+
+double _budgetFromJson(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? 0.0;
+  return 0.0;
+}
+
+DateTime _dateTimeFromJson(dynamic value) {
+  if (value == null) return DateTime.now();
+  if (value is DateTime) return value;
+  if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+  return DateTime.now();
+}
+
+DateTime? _dateTimeFromJsonNullable(dynamic value) {
+  if (value == null) return null;
+  if (value is DateTime) return value;
+  if (value is String) return DateTime.tryParse(value);
+  return null;
 }

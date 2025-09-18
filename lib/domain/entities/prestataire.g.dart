@@ -17,8 +17,8 @@ _$PrestataireImpl _$$PrestataireImplFromJson(
   category: json['category'] as String,
   location: json['location'] as String,
   description: json['description'] as String,
-  rating: (json['rating'] as num).toDouble(),
-  pricePerHour: (json['pricePerHour'] as num).toInt(),
+  rating: _ratingFromJson(json['rating']),
+  pricePerHour: _pricePerHourFromJson(json['pricePerHour']),
   skills:
       (json['skills'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const [],
@@ -26,17 +26,20 @@ _$PrestataireImpl _$$PrestataireImplFromJson(
       (json['portfolio'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const [],
   isAvailable: json['isAvailable'] as bool? ?? true,
-  completedJobs: (json['completedJobs'] as num?)?.toInt() ?? 0,
-  totalReviews: (json['totalReviews'] as num?)?.toInt() ?? 0,
-  reviewCount: (json['reviewCount'] as num?)?.toInt() ?? 0,
-  createdAt:
-      json['createdAt'] == null
-          ? null
-          : DateTime.parse(json['createdAt'] as String),
-  updatedAt:
-      json['updatedAt'] == null
-          ? null
-          : DateTime.parse(json['updatedAt'] as String),
+  completedJobs:
+      json['completedJobs'] == null
+          ? 0
+          : _completedJobsFromJson(json['completedJobs']),
+  totalReviews:
+      json['totalReviews'] == null
+          ? 0
+          : _totalReviewsFromJson(json['totalReviews']),
+  reviewCount:
+      json['reviewCount'] == null
+          ? 0
+          : _reviewCountFromJson(json['reviewCount']),
+  createdAt: _dateTimeFromJsonNullable(json['createdAt']),
+  updatedAt: _dateTimeFromJsonNullable(json['updatedAt']),
 );
 
 Map<String, dynamic> _$$PrestataireImplToJson(_$PrestataireImpl instance) =>

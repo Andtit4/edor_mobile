@@ -29,6 +29,10 @@ mixin _$ServiceRequestModel {
   String get clientName => throw _privateConstructorUsedError;
   String get clientPhone => throw _privateConstructorUsedError;
   String get location => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _latitudeFromJson)
+  double? get latitude => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _longitudeFromJson)
+  double? get longitude => throw _privateConstructorUsedError;
   @JsonKey(fromJson: _budgetFromJson)
   double get budget => throw _privateConstructorUsedError;
   @JsonKey(fromJson: _dateTimeFromJson)
@@ -70,6 +74,8 @@ abstract class $ServiceRequestModelCopyWith<$Res> {
     String clientName,
     String clientPhone,
     String location,
+    @JsonKey(fromJson: _latitudeFromJson) double? latitude,
+    @JsonKey(fromJson: _longitudeFromJson) double? longitude,
     @JsonKey(fromJson: _budgetFromJson) double budget,
     @JsonKey(fromJson: _dateTimeFromJson) DateTime createdAt,
     @JsonKey(fromJson: _dateTimeFromJson) DateTime deadline,
@@ -106,6 +112,8 @@ class _$ServiceRequestModelCopyWithImpl<$Res, $Val extends ServiceRequestModel>
     Object? clientName = null,
     Object? clientPhone = null,
     Object? location = null,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
     Object? budget = null,
     Object? createdAt = null,
     Object? deadline = null,
@@ -159,6 +167,16 @@ class _$ServiceRequestModelCopyWithImpl<$Res, $Val extends ServiceRequestModel>
                     ? _value.location
                     : location // ignore: cast_nullable_to_non_nullable
                         as String,
+            latitude:
+                freezed == latitude
+                    ? _value.latitude
+                    : latitude // ignore: cast_nullable_to_non_nullable
+                        as double?,
+            longitude:
+                freezed == longitude
+                    ? _value.longitude
+                    : longitude // ignore: cast_nullable_to_non_nullable
+                        as double?,
             budget:
                 null == budget
                     ? _value.budget
@@ -233,6 +251,8 @@ abstract class _$$ServiceRequestModelImplCopyWith<$Res>
     String clientName,
     String clientPhone,
     String location,
+    @JsonKey(fromJson: _latitudeFromJson) double? latitude,
+    @JsonKey(fromJson: _longitudeFromJson) double? longitude,
     @JsonKey(fromJson: _budgetFromJson) double budget,
     @JsonKey(fromJson: _dateTimeFromJson) DateTime createdAt,
     @JsonKey(fromJson: _dateTimeFromJson) DateTime deadline,
@@ -268,6 +288,8 @@ class __$$ServiceRequestModelImplCopyWithImpl<$Res>
     Object? clientName = null,
     Object? clientPhone = null,
     Object? location = null,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
     Object? budget = null,
     Object? createdAt = null,
     Object? deadline = null,
@@ -321,6 +343,16 @@ class __$$ServiceRequestModelImplCopyWithImpl<$Res>
                 ? _value.location
                 : location // ignore: cast_nullable_to_non_nullable
                     as String,
+        latitude:
+            freezed == latitude
+                ? _value.latitude
+                : latitude // ignore: cast_nullable_to_non_nullable
+                    as double?,
+        longitude:
+            freezed == longitude
+                ? _value.longitude
+                : longitude // ignore: cast_nullable_to_non_nullable
+                    as double?,
         budget:
             null == budget
                 ? _value.budget
@@ -388,6 +420,8 @@ class _$ServiceRequestModelImpl implements _ServiceRequestModel {
     required this.clientName,
     required this.clientPhone,
     required this.location,
+    @JsonKey(fromJson: _latitudeFromJson) this.latitude,
+    @JsonKey(fromJson: _longitudeFromJson) this.longitude,
     @JsonKey(fromJson: _budgetFromJson) required this.budget,
     @JsonKey(fromJson: _dateTimeFromJson) required this.createdAt,
     @JsonKey(fromJson: _dateTimeFromJson) required this.deadline,
@@ -420,6 +454,12 @@ class _$ServiceRequestModelImpl implements _ServiceRequestModel {
   @override
   final String location;
   @override
+  @JsonKey(fromJson: _latitudeFromJson)
+  final double? latitude;
+  @override
+  @JsonKey(fromJson: _longitudeFromJson)
+  final double? longitude;
+  @override
   @JsonKey(fromJson: _budgetFromJson)
   final double budget;
   @override
@@ -447,7 +487,7 @@ class _$ServiceRequestModelImpl implements _ServiceRequestModel {
 
   @override
   String toString() {
-    return 'ServiceRequestModel(id: $id, title: $title, description: $description, category: $category, clientId: $clientId, clientName: $clientName, clientPhone: $clientPhone, location: $location, budget: $budget, createdAt: $createdAt, deadline: $deadline, status: $status, assignedPrestataireId: $assignedPrestataireId, prestataireName: $prestataireName, assignedPrestataireName: $assignedPrestataireName, notes: $notes, completionDate: $completionDate, completionNotes: $completionNotes)';
+    return 'ServiceRequestModel(id: $id, title: $title, description: $description, category: $category, clientId: $clientId, clientName: $clientName, clientPhone: $clientPhone, location: $location, latitude: $latitude, longitude: $longitude, budget: $budget, createdAt: $createdAt, deadline: $deadline, status: $status, assignedPrestataireId: $assignedPrestataireId, prestataireName: $prestataireName, assignedPrestataireName: $assignedPrestataireName, notes: $notes, completionDate: $completionDate, completionNotes: $completionNotes)';
   }
 
   @override
@@ -469,6 +509,10 @@ class _$ServiceRequestModelImpl implements _ServiceRequestModel {
                 other.clientPhone == clientPhone) &&
             (identical(other.location, location) ||
                 other.location == location) &&
+            (identical(other.latitude, latitude) ||
+                other.latitude == latitude) &&
+            (identical(other.longitude, longitude) ||
+                other.longitude == longitude) &&
             (identical(other.budget, budget) || other.budget == budget) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
@@ -493,7 +537,7 @@ class _$ServiceRequestModelImpl implements _ServiceRequestModel {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     title,
@@ -503,6 +547,8 @@ class _$ServiceRequestModelImpl implements _ServiceRequestModel {
     clientName,
     clientPhone,
     location,
+    latitude,
+    longitude,
     budget,
     createdAt,
     deadline,
@@ -513,7 +559,7 @@ class _$ServiceRequestModelImpl implements _ServiceRequestModel {
     notes,
     completionDate,
     completionNotes,
-  );
+  ]);
 
   /// Create a copy of ServiceRequestModel
   /// with the given fields replaced by the non-null parameter values.
@@ -542,6 +588,8 @@ abstract class _ServiceRequestModel implements ServiceRequestModel {
     required final String clientName,
     required final String clientPhone,
     required final String location,
+    @JsonKey(fromJson: _latitudeFromJson) final double? latitude,
+    @JsonKey(fromJson: _longitudeFromJson) final double? longitude,
     @JsonKey(fromJson: _budgetFromJson) required final double budget,
     @JsonKey(fromJson: _dateTimeFromJson) required final DateTime createdAt,
     @JsonKey(fromJson: _dateTimeFromJson) required final DateTime deadline,
@@ -574,6 +622,12 @@ abstract class _ServiceRequestModel implements ServiceRequestModel {
   String get clientPhone;
   @override
   String get location;
+  @override
+  @JsonKey(fromJson: _latitudeFromJson)
+  double? get latitude;
+  @override
+  @JsonKey(fromJson: _longitudeFromJson)
+  double? get longitude;
   @override
   @JsonKey(fromJson: _budgetFromJson)
   double get budget;

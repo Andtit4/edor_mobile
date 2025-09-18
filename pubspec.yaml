@@ -59,6 +59,13 @@ dependencies:
   # Local Storage
   shared_preferences: ^2.2.3
   
+  # Geolocation
+  geolocator: ^10.1.0
+  geocoding: ^2.1.1
+  
+  # Google Maps
+  url_launcher: ^6.2.2
+  
   # Functional Programming
   fpdart: ^1.1.0
   

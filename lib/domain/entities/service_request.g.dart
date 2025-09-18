@@ -16,18 +16,17 @@ _$ServiceRequestImpl _$$ServiceRequestImplFromJson(Map<String, dynamic> json) =>
       clientName: json['clientName'] as String,
       clientPhone: json['clientPhone'] as String,
       location: json['location'] as String,
-      budget: (json['budget'] as num).toDouble(),
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      deadline: DateTime.parse(json['deadline'] as String),
+      latitude: _latitudeFromJson(json['latitude']),
+      longitude: _longitudeFromJson(json['longitude']),
+      budget: _budgetFromJson(json['budget']),
+      createdAt: _dateTimeFromJson(json['createdAt']),
+      deadline: _dateTimeFromJson(json['deadline']),
       status: json['status'] as String? ?? 'pending',
       assignedPrestataireId: json['assignedPrestataireId'] as String?,
       prestataireName: json['prestataireName'] as String?,
       assignedPrestataireName: json['assignedPrestataireName'] as String?,
       notes: json['notes'] as String?,
-      completionDate:
-          json['completionDate'] == null
-              ? null
-              : DateTime.parse(json['completionDate'] as String),
+      completionDate: _dateTimeFromJsonNullable(json['completionDate']),
       completionNotes: json['completionNotes'] as String?,
     );
 
@@ -42,6 +41,8 @@ Map<String, dynamic> _$$ServiceRequestImplToJson(
   'clientName': instance.clientName,
   'clientPhone': instance.clientPhone,
   'location': instance.location,
+  'latitude': instance.latitude,
+  'longitude': instance.longitude,
   'budget': instance.budget,
   'createdAt': instance.createdAt.toIso8601String(),
   'deadline': instance.deadline.toIso8601String(),

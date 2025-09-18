@@ -9,6 +9,8 @@ export class ServiceRequestResponseDto {
   clientName: string;
   clientPhone: string;
   location: string;
+  latitude?: number;
+  longitude?: number;
   budget: number;
   deadline: Date;
   status: string;

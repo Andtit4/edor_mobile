@@ -60,8 +60,9 @@ export class ServiceRequestsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.serviceRequestsService.findOne(id);
+  @UseGuards(JwtAuthGuard)
+  findOne(@Param('id') id: string, @Request() req) {
+    return this.serviceRequestsService.findOne(id, req.user.id, req.user.role);
   }
 
   @Put(':id')

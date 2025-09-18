@@ -29,14 +29,22 @@ mixin _$ServiceRequest {
   String get clientName => throw _privateConstructorUsedError;
   String get clientPhone => throw _privateConstructorUsedError;
   String get location => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _latitudeFromJson)
+  double? get latitude => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _longitudeFromJson)
+  double? get longitude => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _budgetFromJson)
   double get budget => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _dateTimeFromJson)
   DateTime get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _dateTimeFromJson)
   DateTime get deadline => throw _privateConstructorUsedError;
   String get status => throw _privateConstructorUsedError;
   String? get assignedPrestataireId => throw _privateConstructorUsedError;
   String? get prestataireName => throw _privateConstructorUsedError;
   String? get assignedPrestataireName => throw _privateConstructorUsedError;
   String? get notes => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _dateTimeFromJsonNullable)
   DateTime? get completionDate => throw _privateConstructorUsedError;
   String? get completionNotes => throw _privateConstructorUsedError;
 
@@ -66,15 +74,17 @@ abstract class $ServiceRequestCopyWith<$Res> {
     String clientName,
     String clientPhone,
     String location,
-    double budget,
-    DateTime createdAt,
-    DateTime deadline,
+    @JsonKey(fromJson: _latitudeFromJson) double? latitude,
+    @JsonKey(fromJson: _longitudeFromJson) double? longitude,
+    @JsonKey(fromJson: _budgetFromJson) double budget,
+    @JsonKey(fromJson: _dateTimeFromJson) DateTime createdAt,
+    @JsonKey(fromJson: _dateTimeFromJson) DateTime deadline,
     String status,
     String? assignedPrestataireId,
     String? prestataireName,
     String? assignedPrestataireName,
     String? notes,
-    DateTime? completionDate,
+    @JsonKey(fromJson: _dateTimeFromJsonNullable) DateTime? completionDate,
     String? completionNotes,
   });
 }
@@ -102,6 +112,8 @@ class _$ServiceRequestCopyWithImpl<$Res, $Val extends ServiceRequest>
     Object? clientName = null,
     Object? clientPhone = null,
     Object? location = null,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
     Object? budget = null,
     Object? createdAt = null,
     Object? deadline = null,
@@ -155,6 +167,16 @@ class _$ServiceRequestCopyWithImpl<$Res, $Val extends ServiceRequest>
                     ? _value.location
                     : location // ignore: cast_nullable_to_non_nullable
                         as String,
+            latitude:
+                freezed == latitude
+                    ? _value.latitude
+                    : latitude // ignore: cast_nullable_to_non_nullable
+                        as double?,
+            longitude:
+                freezed == longitude
+                    ? _value.longitude
+                    : longitude // ignore: cast_nullable_to_non_nullable
+                        as double?,
             budget:
                 null == budget
                     ? _value.budget
@@ -229,15 +251,17 @@ abstract class _$$ServiceRequestImplCopyWith<$Res>
     String clientName,
     String clientPhone,
     String location,
-    double budget,
-    DateTime createdAt,
-    DateTime deadline,
+    @JsonKey(fromJson: _latitudeFromJson) double? latitude,
+    @JsonKey(fromJson: _longitudeFromJson) double? longitude,
+    @JsonKey(fromJson: _budgetFromJson) double budget,
+    @JsonKey(fromJson: _dateTimeFromJson) DateTime createdAt,
+    @JsonKey(fromJson: _dateTimeFromJson) DateTime deadline,
     String status,
     String? assignedPrestataireId,
     String? prestataireName,
     String? assignedPrestataireName,
     String? notes,
-    DateTime? completionDate,
+    @JsonKey(fromJson: _dateTimeFromJsonNullable) DateTime? completionDate,
     String? completionNotes,
   });
 }
@@ -264,6 +288,8 @@ class __$$ServiceRequestImplCopyWithImpl<$Res>
     Object? clientName = null,
     Object? clientPhone = null,
     Object? location = null,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
     Object? budget = null,
     Object? createdAt = null,
     Object? deadline = null,
@@ -317,6 +343,16 @@ class __$$ServiceRequestImplCopyWithImpl<$Res>
                 ? _value.location
                 : location // ignore: cast_nullable_to_non_nullable
                     as String,
+        latitude:
+            freezed == latitude
+                ? _value.latitude
+                : latitude // ignore: cast_nullable_to_non_nullable
+                    as double?,
+        longitude:
+            freezed == longitude
+                ? _value.longitude
+                : longitude // ignore: cast_nullable_to_non_nullable
+                    as double?,
         budget:
             null == budget
                 ? _value.budget
@@ -384,15 +420,17 @@ class _$ServiceRequestImpl implements _ServiceRequest {
     required this.clientName,
     required this.clientPhone,
     required this.location,
-    required this.budget,
-    required this.createdAt,
-    required this.deadline,
+    @JsonKey(fromJson: _latitudeFromJson) this.latitude,
+    @JsonKey(fromJson: _longitudeFromJson) this.longitude,
+    @JsonKey(fromJson: _budgetFromJson) required this.budget,
+    @JsonKey(fromJson: _dateTimeFromJson) required this.createdAt,
+    @JsonKey(fromJson: _dateTimeFromJson) required this.deadline,
     this.status = 'pending',
     this.assignedPrestataireId,
     this.prestataireName,
     this.assignedPrestataireName,
     this.notes,
-    this.completionDate,
+    @JsonKey(fromJson: _dateTimeFromJsonNullable) this.completionDate,
     this.completionNotes,
   });
 
@@ -416,10 +454,19 @@ class _$ServiceRequestImpl implements _ServiceRequest {
   @override
   final String location;
   @override
+  @JsonKey(fromJson: _latitudeFromJson)
+  final double? latitude;
+  @override
+  @JsonKey(fromJson: _longitudeFromJson)
+  final double? longitude;
+  @override
+  @JsonKey(fromJson: _budgetFromJson)
   final double budget;
   @override
+  @JsonKey(fromJson: _dateTimeFromJson)
   final DateTime createdAt;
   @override
+  @JsonKey(fromJson: _dateTimeFromJson)
   final DateTime deadline;
   @override
   @JsonKey()
@@ -433,13 +480,14 @@ class _$ServiceRequestImpl implements _ServiceRequest {
   @override
   final String? notes;
   @override
+  @JsonKey(fromJson: _dateTimeFromJsonNullable)
   final DateTime? completionDate;
   @override
   final String? completionNotes;
 
   @override
   String toString() {
-    return 'ServiceRequest(id: $id, title: $title, description: $description, category: $category, clientId: $clientId, clientName: $clientName, clientPhone: $clientPhone, location: $location, budget: $budget, createdAt: $createdAt, deadline: $deadline, status: $status, assignedPrestataireId: $assignedPrestataireId, prestataireName: $prestataireName, assignedPrestataireName: $assignedPrestataireName, notes: $notes, completionDate: $completionDate, completionNotes: $completionNotes)';
+    return 'ServiceRequest(id: $id, title: $title, description: $description, category: $category, clientId: $clientId, clientName: $clientName, clientPhone: $clientPhone, location: $location, latitude: $latitude, longitude: $longitude, budget: $budget, createdAt: $createdAt, deadline: $deadline, status: $status, assignedPrestataireId: $assignedPrestataireId, prestataireName: $prestataireName, assignedPrestataireName: $assignedPrestataireName, notes: $notes, completionDate: $completionDate, completionNotes: $completionNotes)';
   }
 
   @override
@@ -461,6 +509,10 @@ class _$ServiceRequestImpl implements _ServiceRequest {
                 other.clientPhone == clientPhone) &&
             (identical(other.location, location) ||
                 other.location == location) &&
+            (identical(other.latitude, latitude) ||
+                other.latitude == latitude) &&
+            (identical(other.longitude, longitude) ||
+                other.longitude == longitude) &&
             (identical(other.budget, budget) || other.budget == budget) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
@@ -485,7 +537,7 @@ class _$ServiceRequestImpl implements _ServiceRequest {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     title,
@@ -495,6 +547,8 @@ class _$ServiceRequestImpl implements _ServiceRequest {
     clientName,
     clientPhone,
     location,
+    latitude,
+    longitude,
     budget,
     createdAt,
     deadline,
@@ -505,7 +559,7 @@ class _$ServiceRequestImpl implements _ServiceRequest {
     notes,
     completionDate,
     completionNotes,
-  );
+  ]);
 
   /// Create a copy of ServiceRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -534,14 +588,17 @@ abstract class _ServiceRequest implements ServiceRequest {
     required final String clientName,
     required final String clientPhone,
     required final String location,
-    required final double budget,
-    required final DateTime createdAt,
-    required final DateTime deadline,
+    @JsonKey(fromJson: _latitudeFromJson) final double? latitude,
+    @JsonKey(fromJson: _longitudeFromJson) final double? longitude,
+    @JsonKey(fromJson: _budgetFromJson) required final double budget,
+    @JsonKey(fromJson: _dateTimeFromJson) required final DateTime createdAt,
+    @JsonKey(fromJson: _dateTimeFromJson) required final DateTime deadline,
     final String status,
     final String? assignedPrestataireId,
     final String? prestataireName,
     final String? assignedPrestataireName,
     final String? notes,
+    @JsonKey(fromJson: _dateTimeFromJsonNullable)
     final DateTime? completionDate,
     final String? completionNotes,
   }) = _$ServiceRequestImpl;
@@ -566,10 +623,19 @@ abstract class _ServiceRequest implements ServiceRequest {
   @override
   String get location;
   @override
+  @JsonKey(fromJson: _latitudeFromJson)
+  double? get latitude;
+  @override
+  @JsonKey(fromJson: _longitudeFromJson)
+  double? get longitude;
+  @override
+  @JsonKey(fromJson: _budgetFromJson)
   double get budget;
   @override
+  @JsonKey(fromJson: _dateTimeFromJson)
   DateTime get createdAt;
   @override
+  @JsonKey(fromJson: _dateTimeFromJson)
   DateTime get deadline;
   @override
   String get status;
@@ -582,6 +648,7 @@ abstract class _ServiceRequest implements ServiceRequest {
   @override
   String? get notes;
   @override
+  @JsonKey(fromJson: _dateTimeFromJsonNullable)
   DateTime? get completionDate;
   @override
   String? get completionNotes;

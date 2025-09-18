@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../providers/auth_provider.dart';
@@ -31,6 +33,7 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
   String _selectedUrgency = 'Normal';
   bool _isSubmitting = false;
   int _currentStep = 0;
+  Position? _currentPosition;
 
   late AnimationController _progressAnimationController;
   late Animation<double> _progressAnimation;
@@ -89,6 +92,592 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
     _progressAnimationController.dispose();
     _fabAnimationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      // Vérifier si le service de localisation est activé
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Le service de localisation est désactivé. Veuillez l\'activer dans les paramètres.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Vérifier les permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Permission de localisation refusée'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Permission de localisation définitivement refusée. Veuillez l\'activer dans les paramètres.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Afficher un indicateur de chargement
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      // Obtenir la position actuelle avec précision maximale
+      Position? position;
+      try {
+        // Essayer d'abord avec la meilleure précision disponible
+        position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.bestForNavigation,
+          timeLimit: const Duration(seconds: 60),
+        );
+        
+        print('[DEBUG] Première lecture - Précision: ${position.accuracy}m');
+        
+        // Si la précision est > 20m, essayer plusieurs lectures pour améliorer
+        if (position?.accuracy != null && position!.accuracy > 20) {
+          print('[DEBUG] Précision insuffisante, tentative d\'amélioration...');
+          
+          // Faire 2 lectures supplémentaires et garder la meilleure
+          for (int i = 0; i < 2; i++) {
+            try {
+              await Future.delayed(const Duration(seconds: 2)); // Attendre entre les lectures
+              final newPosition = await Geolocator.getCurrentPosition(
+                desiredAccuracy: LocationAccuracy.high,
+                timeLimit: const Duration(seconds: 30),
+              );
+              
+              print('[DEBUG] Lecture ${i + 2} - Précision: ${newPosition.accuracy}m');
+              
+              // Garder la position avec la meilleure précision
+              if (position?.accuracy != null && newPosition.accuracy < position!.accuracy) {
+                position = newPosition;
+                print('[DEBUG] Nouvelle meilleure position: ${position.accuracy}m');
+              }
+              
+              // Si on a une bonne précision, arrêter
+              if (position?.accuracy != null && position!.accuracy <= 10) {
+                break;
+              }
+            } catch (e) {
+              print('[DEBUG] Erreur lecture ${i + 2}: $e');
+            }
+          }
+        }
+        
+        print('[DEBUG] Position finale avec précision: ${position?.accuracy ?? 'inconnue'}m');
+        
+      } catch (e) {
+        print('[DEBUG] Erreur haute précision, tentative précision moyenne: $e');
+        // Si la haute précision échoue, essayer avec précision moyenne
+        try {
+          position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.medium,
+            timeLimit: const Duration(seconds: 30),
+          );
+          print('[DEBUG] Position moyenne obtenue avec précision: ${position.accuracy}m');
+        } catch (e2) {
+          print('[DEBUG] Erreur précision moyenne, utilisation dernière position: $e2');
+          // En dernier recours, utiliser la dernière position connue
+          position = await Geolocator.getLastKnownPosition();
+          if (position == null) {
+            throw Exception('Impossible d\'obtenir la position actuelle ou la dernière position connue');
+          }
+          print('[DEBUG] Dernière position connue avec précision: ${position.accuracy}m');
+        }
+      }
+
+      // Vérifier que la position n'est pas null
+      if (position == null) {
+        throw Exception('Position null reçue');
+      }
+
+      // Fermer l'indicateur de chargement
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Obtenir l'adresse à partir des coordonnées
+      String? quartier;
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+
+        if (placemarks.isNotEmpty) {
+          Placemark place = placemarks[0];
+          // Extraire le quartier (sublocality ou locality)
+          quartier = place.subLocality ?? place.locality;
+        }
+      } catch (geocodingError) {
+        print('[DEBUG] Erreur géocodage: $geocodingError');
+        quartier = null;
+      }
+
+      // Afficher la boîte de dialogue de confirmation
+      if (mounted) {
+        bool confirmed = await _showLocationConfirmationDialog(position, quartier);
+        
+        // Si l'utilisateur veut refaire la détection, relancer le processus
+        while (!confirmed && mounted) {
+          // Relancer la détection
+          confirmed = await _getCurrentLocationWithConfirmation();
+          if (confirmed) {
+            // Mettre à jour la position et le quartier
+            setState(() {
+              _currentPosition = position;
+              _locationController.text = quartier ?? '';
+            });
+            break;
+          }
+        }
+        
+        if (confirmed && mounted) {
+          setState(() {
+            _currentPosition = position;
+            _locationController.text = quartier ?? '';
+          });
+        }
+      }
+    } catch (e) {
+      // Fermer l'indicateur de chargement s'il est ouvert
+      if (mounted) {
+        try {
+          Navigator.of(context).pop();
+        } catch (popError) {
+          // Ignorer l'erreur si le dialog n'est pas ouvert
+        }
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de la détection de position précise: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<bool> _getCurrentLocationWithConfirmation() async {
+    try {
+      // Vérifier si le service de localisation est activé
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Le service de localisation est désactivé. Veuillez l\'activer dans les paramètres.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return false;
+      }
+
+      // Vérifier les permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Permission de localisation refusée'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return false;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Permission de localisation définitivement refusée. Veuillez l\'activer dans les paramètres.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return false;
+      }
+
+      // Afficher un indicateur de chargement
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      // Obtenir la position actuelle avec précision maximale
+      Position? position;
+      try {
+        // Essayer d'abord avec la meilleure précision disponible
+        position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.bestForNavigation,
+          timeLimit: const Duration(seconds: 60),
+        );
+        
+        print('[DEBUG] Première lecture - Précision: ${position.accuracy}m');
+        
+        // Si la précision est > 20m, essayer plusieurs lectures pour améliorer
+        if (position?.accuracy != null && position!.accuracy > 20) {
+          print('[DEBUG] Précision insuffisante, tentative d\'amélioration...');
+          
+          // Faire 2 lectures supplémentaires et garder la meilleure
+          for (int i = 0; i < 2; i++) {
+            try {
+              await Future.delayed(const Duration(seconds: 2)); // Attendre entre les lectures
+              final newPosition = await Geolocator.getCurrentPosition(
+                desiredAccuracy: LocationAccuracy.high,
+                timeLimit: const Duration(seconds: 30),
+              );
+              
+              print('[DEBUG] Lecture ${i + 2} - Précision: ${newPosition.accuracy}m');
+              
+              // Garder la position avec la meilleure précision
+              if (position?.accuracy != null && newPosition.accuracy < position!.accuracy) {
+                position = newPosition;
+                print('[DEBUG] Nouvelle meilleure position: ${position.accuracy}m');
+              }
+              
+              // Si on a une bonne précision, arrêter
+              if (position?.accuracy != null && position!.accuracy <= 10) {
+                break;
+              }
+            } catch (e) {
+              print('[DEBUG] Erreur lecture ${i + 2}: $e');
+            }
+          }
+        }
+        
+        print('[DEBUG] Position finale avec précision: ${position?.accuracy ?? 'inconnue'}m');
+        
+      } catch (e) {
+        print('[DEBUG] Erreur haute précision, tentative précision moyenne: $e');
+        // Si la haute précision échoue, essayer avec précision moyenne
+        try {
+          position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.medium,
+            timeLimit: const Duration(seconds: 30),
+          );
+          print('[DEBUG] Position moyenne obtenue avec précision: ${position.accuracy}m');
+        } catch (e2) {
+          print('[DEBUG] Erreur précision moyenne, utilisation dernière position: $e2');
+          // En dernier recours, utiliser la dernière position connue
+          position = await Geolocator.getLastKnownPosition();
+          if (position == null) {
+            throw Exception('Impossible d\'obtenir la position actuelle ou la dernière position connue');
+          }
+          print('[DEBUG] Dernière position connue avec précision: ${position.accuracy}m');
+        }
+      }
+
+      // Vérifier que la position n'est pas null
+      if (position == null) {
+        throw Exception('Position null reçue');
+      }
+
+      // Fermer l'indicateur de chargement
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Obtenir l'adresse à partir des coordonnées
+      String? quartier;
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+
+        if (placemarks.isNotEmpty) {
+          Placemark place = placemarks[0];
+          // Extraire le quartier (sublocality ou locality)
+          quartier = place.subLocality ?? place.locality;
+        }
+      } catch (geocodingError) {
+        print('[DEBUG] Erreur géocodage: $geocodingError');
+        quartier = null;
+      }
+
+      // Afficher la boîte de dialogue de confirmation
+      if (mounted) {
+        return await _showLocationConfirmationDialog(position, quartier);
+      }
+      
+      return false;
+    } catch (e) {
+      // Fermer l'indicateur de chargement s'il est ouvert
+      if (mounted) {
+        try {
+          Navigator.of(context).pop();
+        } catch (popError) {
+          // Ignorer l'erreur si le dialog n'est pas ouvert
+        }
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de la détection de position précise: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+      return false;
+    }
+  }
+
+  Future<bool> _showLocationConfirmationDialog(Position position, String? quartier) async {
+    final accuracy = position.accuracy;
+    final latitude = position.latitude;
+    final longitude = position.longitude;
+    
+    // Déterminer la couleur et le message selon la précision
+    Color accuracyColor;
+    String accuracyMessage;
+    IconData accuracyIcon;
+    
+    if (accuracy <= 10) {
+      accuracyColor = Colors.green;
+      accuracyMessage = 'Excellente précision';
+      accuracyIcon = Icons.check_circle;
+    } else if (accuracy <= 20) {
+      accuracyColor = Colors.orange;
+      accuracyMessage = 'Bonne précision';
+      accuracyIcon = Icons.warning;
+    } else {
+      accuracyColor = Colors.red;
+      accuracyMessage = 'Précision faible';
+      accuracyIcon = Icons.error;
+    }
+
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(accuracyIcon, color: accuracyColor, size: 28),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Confirmer la position',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Précision
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: accuracyColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: accuracyColor.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(accuracyIcon, color: accuracyColor, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            accuracyMessage,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: accuracyColor,
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            'Rayon de précision: ${accuracy.toStringAsFixed(1)} mètres',
+                            style: TextStyle(
+                              color: accuracyColor,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Coordonnées
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Coordonnées GPS:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Latitude: ${latitude.toStringAsFixed(6)}',
+                      style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
+                    ),
+                    Text(
+                      'Longitude: ${longitude.toStringAsFixed(6)}',
+                      style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
+                    ),
+                  ],
+                ),
+              ),
+              
+              if (quartier != null && quartier.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.location_on, color: Colors.blue[700], size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Quartier détecté:',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              quartier,
+                              style: TextStyle(
+                                color: Colors.blue[700],
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              
+              const SizedBox(height: 16),
+              
+              // Message d'information
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber[50],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.amber.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.amber[700], size: 20),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Cette position sera utilisée pour guider le prestataire vers votre emplacement exact.',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text(
+                'Refaire la détection',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: accuracyColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Confirmer'),
+            ),
+          ],
+        );
+      },
+    ) ?? false;
   }
 
   @override
@@ -339,16 +928,64 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
           _buildSectionCard(
             title: 'Localisation',
             icon: Icons.location_on,
-            child: CustomTextField(
-              controller: _locationController,
-              hint: 'Ex: Lomé, Agoè-Nyivé, Rue de la Paix',
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Veuillez saisir votre localisation';
-                }
-                return null;
-              },
-              label: 'Votre localisation',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomTextField(
+                  controller: _locationController,
+                  hint: 'Ex: Agoè-Nyivé, Adidogomé, Tokoin, etc. (optionnel si GPS activé)',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez saisir votre quartier';
+                    }
+                    return null;
+                  },
+                  label: 'Votre quartier (pour information)',
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: _getCurrentLocationWithConfirmation,
+                    icon: const Icon(Icons.my_location, size: 18),
+                    label: const Text('Détecter ma position précise (GPS)'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF8B5CF6),
+                      side: const BorderSide(color: Color(0xFF8B5CF6)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+                if (_currentPosition != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.green.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green, size: 16),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Position enregistrée (précision: ${_currentPosition!.accuracy.toStringAsFixed(1)}m): ${_currentPosition!.latitude.toStringAsFixed(6)}, ${_currentPosition!.longitude.toStringAsFixed(6)}',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: Colors.green[700],
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           
@@ -970,6 +1607,8 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
         clientName: '${user.firstName} ${user.lastName}',
         clientPhone: user.phone,
         location: _locationController.text.trim(),
+        latitude: _currentPosition?.latitude,
+        longitude: _currentPosition?.longitude,
         budget: double.parse(_budgetController.text.trim()),
         deadline: _selectedDate ?? DateTime.now().add(const Duration(days: 7)),
         notes: _selectedUrgency != null ? 'Urgence: $_selectedUrgency' : null,

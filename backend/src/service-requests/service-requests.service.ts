@@ -107,7 +107,7 @@ export class ServiceRequestsService {
     });
   }
 
-  async findOne(id: string): Promise<ServiceRequestResponseDto> {
+  async findOne(id: string, requestingUserId?: string, userRole?: string): Promise<ServiceRequestResponseDto> {
     const serviceRequest = await this.serviceRequestRepository.findOne({
       where: { id },
       relations: ['assignedPrestataire'],
@@ -124,7 +124,26 @@ export class ServiceRequestsService {
         serviceRequest.prestataireName || 'Prestataire inconnu',
     };
 
-    return new ServiceRequestResponseDto(requestWithNames);
+    // Contrôle d'accès aux coordonnées GPS
+    const response = new ServiceRequestResponseDto(requestWithNames);
+    
+    // Si la demande est terminée, masquer les coordonnées pour tous les prestataires
+    if (serviceRequest.status === ServiceRequestStatus.COMPLETED) {
+      response.latitude = undefined;
+      response.longitude = undefined;
+    }
+    // Si c'est un prestataire qui demande et que ce n'est pas le prestataire assigné
+    else if (userRole === 'prestataire' && serviceRequest.assignedPrestataireId !== requestingUserId) {
+      response.latitude = undefined;
+      response.longitude = undefined;
+    }
+    // Si c'est un client qui demande et que ce n'est pas son client
+    else if (userRole === 'client' && serviceRequest.clientId !== requestingUserId) {
+      response.latitude = undefined;
+      response.longitude = undefined;
+    }
+
+    return response;
   }
 
   async update(

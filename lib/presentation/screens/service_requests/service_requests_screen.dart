@@ -1,6 +1,7 @@
 // lib/presentation/screens/service_requests/service_requests_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../domain/entities/service_request.dart';
 import '../../../domain/entities/user.dart';
@@ -84,6 +85,35 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  Future<void> _openGoogleMaps(double latitude, double longitude) async {
+    final url = 'https://www.google.com/maps/dir/?api=1&destination=$latitude,$longitude';
+    final uri = Uri.parse(url);
+    
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Impossible d\'ouvrir Google Maps'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de l\'ouverture de Google Maps: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -506,6 +536,28 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
                 ),
             ],
           ),
+          // Bouton Google Maps pour les coordonnées disponibles
+          if (request.latitude != null && request.longitude != null && 
+              (request.status == 'assigned' || request.status == 'in_progress'))
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _openGoogleMaps(request.latitude!, request.longitude!),
+                  icon: const Icon(Icons.directions, size: 18),
+                  label: const Text('Ouvrir dans Google Maps'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF4285F4),
+                    side: const BorderSide(color: Color(0xFF4285F4)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
