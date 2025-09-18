@@ -4,10 +4,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PrestatairesService } from './prestataire.service';
 // import { PrestatairesController } from './prestataires.controller';
 import { Prestataire } from '../entities/prestataire.entity';
+import { Review } from '../entities/review.entity';
+import { ServiceRequest } from '../entities/service-request.entity';
 import { PrestatairesController } from './prestataire.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Prestataire])],
+  imports: [TypeOrmModule.forFeature([Prestataire, Review, ServiceRequest])],
   controllers: [PrestatairesController],
   providers: [PrestatairesService],
   exports: [PrestatairesService],

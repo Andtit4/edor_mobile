@@ -21,6 +21,7 @@ class Prestataire with _$Prestataire {
     @Default(true) bool isAvailable,
     @Default(0) int completedJobs,
     @Default(0) int totalReviews,
+    @JsonKey(name: 'reviewCount') @Default(0) int reviewCount,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _Prestataire;

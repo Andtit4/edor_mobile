@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/datasources/remote/prestataire_remote_data_source.dart';
 import '../../domain/entities/prestataire.dart';
 import '../../core/network/network_info.dart';
-import '../../core/errors/failures.dart';
 
 final prestataireRemoteDataSourceProvider = Provider<PrestataireRemoteDataSource>((ref) {
   return PrestataireRemoteDataSourceImpl(

@@ -28,6 +28,7 @@ _$PrestataireImpl _$$PrestataireImplFromJson(
   isAvailable: json['isAvailable'] as bool? ?? true,
   completedJobs: (json['completedJobs'] as num?)?.toInt() ?? 0,
   totalReviews: (json['totalReviews'] as num?)?.toInt() ?? 0,
+  reviewCount: (json['reviewCount'] as num?)?.toInt() ?? 0,
   createdAt:
       json['createdAt'] == null
           ? null
@@ -55,6 +56,7 @@ Map<String, dynamic> _$$PrestataireImplToJson(_$PrestataireImpl instance) =>
       'isAvailable': instance.isAvailable,
       'completedJobs': instance.completedJobs,
       'totalReviews': instance.totalReviews,
+      'reviewCount': instance.reviewCount,
       'createdAt': instance.createdAt?.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
     };

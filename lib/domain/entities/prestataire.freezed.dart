@@ -36,6 +36,8 @@ mixin _$Prestataire {
   bool get isAvailable => throw _privateConstructorUsedError;
   int get completedJobs => throw _privateConstructorUsedError;
   int get totalReviews => throw _privateConstructorUsedError;
+  @JsonKey(name: 'reviewCount')
+  int get reviewCount => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -72,6 +74,7 @@ abstract class $PrestataireCopyWith<$Res> {
     bool isAvailable,
     int completedJobs,
     int totalReviews,
+    @JsonKey(name: 'reviewCount') int reviewCount,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -107,6 +110,7 @@ class _$PrestataireCopyWithImpl<$Res, $Val extends Prestataire>
     Object? isAvailable = null,
     Object? completedJobs = null,
     Object? totalReviews = null,
+    Object? reviewCount = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -187,6 +191,11 @@ class _$PrestataireCopyWithImpl<$Res, $Val extends Prestataire>
                     ? _value.totalReviews
                     : totalReviews // ignore: cast_nullable_to_non_nullable
                         as int,
+            reviewCount:
+                null == reviewCount
+                    ? _value.reviewCount
+                    : reviewCount // ignore: cast_nullable_to_non_nullable
+                        as int,
             createdAt:
                 freezed == createdAt
                     ? _value.createdAt
@@ -228,6 +237,7 @@ abstract class _$$PrestataireImplCopyWith<$Res>
     bool isAvailable,
     int completedJobs,
     int totalReviews,
+    @JsonKey(name: 'reviewCount') int reviewCount,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -262,6 +272,7 @@ class __$$PrestataireImplCopyWithImpl<$Res>
     Object? isAvailable = null,
     Object? completedJobs = null,
     Object? totalReviews = null,
+    Object? reviewCount = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -342,6 +353,11 @@ class __$$PrestataireImplCopyWithImpl<$Res>
                 ? _value.totalReviews
                 : totalReviews // ignore: cast_nullable_to_non_nullable
                     as int,
+        reviewCount:
+            null == reviewCount
+                ? _value.reviewCount
+                : reviewCount // ignore: cast_nullable_to_non_nullable
+                    as int,
         createdAt:
             freezed == createdAt
                 ? _value.createdAt
@@ -376,6 +392,7 @@ class _$PrestataireImpl implements _Prestataire {
     this.isAvailable = true,
     this.completedJobs = 0,
     this.totalReviews = 0,
+    @JsonKey(name: 'reviewCount') this.reviewCount = 0,
     this.createdAt,
     this.updatedAt,
   }) : _skills = skills,
@@ -432,13 +449,16 @@ class _$PrestataireImpl implements _Prestataire {
   @JsonKey()
   final int totalReviews;
   @override
+  @JsonKey(name: 'reviewCount')
+  final int reviewCount;
+  @override
   final DateTime? createdAt;
   @override
   final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'Prestataire(id: $id, name: $name, email: $email, avatar: $avatar, phone: $phone, category: $category, location: $location, description: $description, rating: $rating, pricePerHour: $pricePerHour, skills: $skills, portfolio: $portfolio, isAvailable: $isAvailable, completedJobs: $completedJobs, totalReviews: $totalReviews, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Prestataire(id: $id, name: $name, email: $email, avatar: $avatar, phone: $phone, category: $category, location: $location, description: $description, rating: $rating, pricePerHour: $pricePerHour, skills: $skills, portfolio: $portfolio, isAvailable: $isAvailable, completedJobs: $completedJobs, totalReviews: $totalReviews, reviewCount: $reviewCount, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -471,6 +491,8 @@ class _$PrestataireImpl implements _Prestataire {
                 other.completedJobs == completedJobs) &&
             (identical(other.totalReviews, totalReviews) ||
                 other.totalReviews == totalReviews) &&
+            (identical(other.reviewCount, reviewCount) ||
+                other.reviewCount == reviewCount) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -496,6 +518,7 @@ class _$PrestataireImpl implements _Prestataire {
     isAvailable,
     completedJobs,
     totalReviews,
+    reviewCount,
     createdAt,
     updatedAt,
   );
@@ -531,6 +554,7 @@ abstract class _Prestataire implements Prestataire {
     final bool isAvailable,
     final int completedJobs,
     final int totalReviews,
+    @JsonKey(name: 'reviewCount') final int reviewCount,
     final DateTime? createdAt,
     final DateTime? updatedAt,
   }) = _$PrestataireImpl;
@@ -568,6 +592,9 @@ abstract class _Prestataire implements Prestataire {
   int get completedJobs;
   @override
   int get totalReviews;
+  @override
+  @JsonKey(name: 'reviewCount')
+  int get reviewCount;
   @override
   DateTime? get createdAt;
   @override

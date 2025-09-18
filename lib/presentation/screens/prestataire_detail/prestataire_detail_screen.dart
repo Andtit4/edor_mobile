@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../providers/prestataire_provider.dart';
-import '../../router/app_routes.dart';
+import '../../providers/review_provider.dart';
 
 class PrestataireDetailScreen extends ConsumerWidget {
   final String prestataireId;
@@ -21,7 +21,6 @@ class PrestataireDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       body: _buildBody(context, ref, prestataireState),
-      bottomNavigationBar: _buildBottomNavigationBar(context, ref, prestataireState),
     );
   }
 
@@ -43,10 +42,10 @@ class PrestataireDetailScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             Text('Erreur: ${state.error}'),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => context.pop(),
-              child: const Text('Retour'),
-            ),
+              ElevatedButton(
+                onPressed: () => context.pop(),
+                child: const Text('Retour'),
+              ),
           ],
         ),
       );
@@ -84,81 +83,6 @@ class PrestataireDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildBottomNavigationBar(BuildContext context, WidgetRef ref, PrestataireState state) {
-    if (state.isLoading || state.error != null || state.prestataire == null) {
-      return const SizedBox.shrink();
-    }
-
-    final prestataire = state.prestataire!;
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'À partir de',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  Text(
-                    '${prestataire.pricePerHour}€/h',
-                    style: AppTextStyles.h3.copyWith(
-                      color: const Color(0xFF8B5CF6),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              flex: 2,
-              child: ElevatedButton(
-                onPressed: () {
-                  context.push(
-                    AppRoutes.reservation,
-                    extra: {'prestataireId': prestataire.id},
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8B5CF6),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  'Réserver',
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildAppBar(BuildContext context, prestataire) {
     return SliverAppBar(
@@ -214,7 +138,7 @@ class PrestataireDetailScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '(${prestataire.totalReviews} avis)',
+                        '(${prestataire.reviewCount} avis)',
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: Colors.white.withOpacity(0.8),
                         ),
@@ -337,7 +261,7 @@ class PrestataireDetailScreen extends ConsumerWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '(${prestataire.totalReviews} avis)',
+                          '(${prestataire.reviewCount} avis)',
                           style: AppTextStyles.bodySmall.copyWith(
                             color: Colors.grey[600],
                           ),
@@ -557,64 +481,104 @@ class PrestataireDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildReviewsSection(prestataire) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                'Avis',
-                style: AppTextStyles.h4.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1F2937),
-                ),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: () {
-                  // Voir tous les avis
-                },
-                child: Text(
-                  'Voir tout',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: const Color(0xFF8B5CF6),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+    return Consumer(
+      builder: (context, ref, child) {
+        final reviewsState = ref.watch(prestataireReviewsProvider(prestataire.id));
+        
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          // Mock reviews
-          _buildReviewItem(
-            'Marie L.',
-            'Excellent service, très professionnel!',
-            5,
-            'Il y a 2 jours',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Avis (${prestataire.reviewCount})',
+                    style: AppTextStyles.h4.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF1F2937),
+                    ),
+                  ),
+                  const Spacer(),
+                  if (reviewsState.reviews.length > 3)
+                    TextButton(
+                      onPressed: () {
+                        // Voir tous les avis
+                      },
+                      child: Text(
+                        'Voir tout',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: const Color(0xFF8B5CF6),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              if (reviewsState.isLoading)
+                const Center(child: CircularProgressIndicator())
+              else if (reviewsState.error != null)
+                Center(
+                  child: Text(
+                    'Erreur lors du chargement des avis',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: Colors.red,
+                    ),
+                  ),
+                )
+              else if (reviewsState.reviews.isEmpty)
+                Center(
+                  child: Text(
+                    'Aucun avis pour le moment',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                )
+              else
+                ...reviewsState.reviews.take(3).map((review) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _buildReviewItem(
+                    review.clientName ?? 'Client anonyme',
+                    review.comment ?? 'Aucun commentaire',
+                    review.rating,
+                    _formatDate(review.createdAt),
+                  ),
+                )).toList(),
+            ],
           ),
-          const SizedBox(height: 12),
-          _buildReviewItem(
-            'Jean P.',
-            'Travail de qualité, je recommande.',
-            4,
-            'Il y a 1 semaine',
-          ),
-        ],
-      ),
+        );
+      },
     );
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'Date inconnue';
+    
+    final now = DateTime.now();
+    final difference = now.difference(date);
+    
+    if (difference.inDays > 0) {
+      return 'Il y a ${difference.inDays} jour${difference.inDays > 1 ? 's' : ''}';
+    } else if (difference.inHours > 0) {
+      return 'Il y a ${difference.inHours} heure${difference.inHours > 1 ? 's' : ''}';
+    } else if (difference.inMinutes > 0) {
+      return 'Il y a ${difference.inMinutes} minute${difference.inMinutes > 1 ? 's' : ''}';
+    } else {
+      return 'À l\'instant';
+    }
   }
 
   Widget _buildReviewItem(String name, String comment, int rating, String date) {

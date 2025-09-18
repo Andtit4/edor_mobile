@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Review } from '../entities/review.entity';
 import { ServiceRequest } from '../entities/service-request.entity';
 import { CreateReviewDto } from './dto/create-review.dto';
+import { ReviewResponseDto } from './dto/review-response.dto';
 
 @Injectable()
 export class ReviewsService {
@@ -55,11 +56,24 @@ export class ReviewsService {
     return this.reviewRepository.save(review);
   }
 
-  async findByPrestataire(prestataireId: string): Promise<Review[]> {
-    return this.reviewRepository.find({
+  async findByPrestataire(prestataireId: string): Promise<ReviewResponseDto[]> {
+    const reviews = await this.reviewRepository.find({
       where: { prestataireId },
       relations: ['client', 'serviceRequest'],
       order: { createdAt: 'DESC' },
+    });
+
+    return reviews.map(review => {
+      const reviewWithNames = {
+        ...review,
+        clientName: review.client ? 
+          `${review.client.firstName} ${review.client.lastName}` : 
+          'Client inconnu',
+        serviceRequestTitle: review.serviceRequest ? 
+          review.serviceRequest.title : 
+          'Demande inconnue',
+      };
+      return new ReviewResponseDto(reviewWithNames);
     });
   }
 

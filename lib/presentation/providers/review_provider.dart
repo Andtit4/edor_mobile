@@ -1,35 +1,37 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/review.dart';
 import '../../data/datasources/remote/review_remote_data_source.dart';
+import '../../domain/entities/review.dart';
 import '../../core/network/network_info.dart';
-import 'package:http/http.dart' as http;
 
-// Data Source Provider
 final reviewRemoteDataSourceProvider = Provider<ReviewRemoteDataSource>((ref) {
   return ReviewRemoteDataSourceImpl(
-    client: http.Client(),
+    client: ref.read(httpClientProvider),
     networkInfo: ref.read(networkInfoProvider),
   );
 });
 
-// Review State
-class ReviewState {
+// Provider pour les reviews d'un prestataire
+final prestataireReviewsProvider = StateNotifierProvider.family<PrestataireReviewsNotifier, PrestataireReviewsState, String>((ref, prestataireId) {
+  return PrestataireReviewsNotifier(ref.read(reviewRemoteDataSourceProvider), prestataireId);
+});
+
+class PrestataireReviewsState {
   final List<Review> reviews;
   final bool isLoading;
   final String? error;
 
-  const ReviewState({
+  PrestataireReviewsState({
     this.reviews = const [],
     this.isLoading = false,
     this.error,
   });
 
-  ReviewState copyWith({
+  PrestataireReviewsState copyWith({
     List<Review>? reviews,
     bool? isLoading,
     String? error,
   }) {
-    return ReviewState(
+    return PrestataireReviewsState(
       reviews: reviews ?? this.reviews,
       isLoading: isLoading ?? this.isLoading,
       error: error,
@@ -37,29 +39,29 @@ class ReviewState {
   }
 }
 
-// Review Notifier
-class ReviewNotifier extends StateNotifier<ReviewState> {
+class PrestataireReviewsNotifier extends StateNotifier<PrestataireReviewsState> {
   final ReviewRemoteDataSource _remoteDataSource;
+  final String _prestataireId;
 
-  ReviewNotifier(this._remoteDataSource) : super(const ReviewState());
+  PrestataireReviewsNotifier(this._remoteDataSource, this._prestataireId) : super(PrestataireReviewsState()) {
+    loadReviews();
+  }
 
-  Future<void> loadPrestataireReviews({
-    required String prestataireId,
-    required String token,
-  }) async {
+  Future<void> loadReviews() async {
     state = state.copyWith(isLoading: true, error: null);
-
+    
     try {
-      final reviews = await _remoteDataSource.getPrestataireReviews(
-        prestataireId: prestataireId,
-        token: token,
-      );
-
+      final reviews = await _remoteDataSource.getReviewsByPrestataire(_prestataireId);
+      print('DEBUG: Reviews reçues dans le provider: ${reviews.length} reviews');
+      for (var review in reviews) {
+        print('DEBUG: Provider Review - clientName: ${review.clientName}, comment: ${review.comment}, rating: ${review.rating}');
+      }
       state = state.copyWith(
-        isLoading: false,
         reviews: reviews,
+        isLoading: false,
       );
     } catch (e) {
+      print('DEBUG: Erreur dans le provider: $e');
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),
@@ -67,67 +69,7 @@ class ReviewNotifier extends StateNotifier<ReviewState> {
     }
   }
 
-  Future<Review?> createReview({
-    required String serviceRequestId,
-    required String prestataireId,
-    required int rating,
-    String? comment,
-    required String token,
-  }) async {
-    try {
-      final review = await _remoteDataSource.createReview(
-        serviceRequestId: serviceRequestId,
-        prestataireId: prestataireId,
-        rating: rating,
-        comment: comment,
-        token: token,
-      );
-
-      final updatedReviews = [...state.reviews, review];
-      state = state.copyWith(reviews: updatedReviews);
-
-      return review;
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
-      return null;
-    }
-  }
-
-  Future<double> getPrestataireAverageRating({
-    required String prestataireId,
-    required String token,
-  }) async {
-    try {
-      return await _remoteDataSource.getPrestataireAverageRating(
-        prestataireId: prestataireId,
-        token: token,
-      );
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
-      return 0.0;
-    }
-  }
-
-  Future<int> getPrestataireReviewsCount({
-    required String prestataireId,
-    required String token,
-  }) async {
-    try {
-      return await _remoteDataSource.getPrestataireReviewsCount(
-        prestataireId: prestataireId,
-        token: token,
-      );
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
-      return 0;
-    }
+  void clearError() {
+    state = state.copyWith(error: null);
   }
 }
-
-// Review Provider
-final reviewProvider = StateNotifierProvider<ReviewNotifier, ReviewState>(
-  (ref) {
-    final remoteDataSource = ref.watch(reviewRemoteDataSourceProvider);
-    return ReviewNotifier(remoteDataSource);
-  },
-);
