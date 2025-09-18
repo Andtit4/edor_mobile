@@ -20,6 +20,10 @@ class PriceNegotiationModel with _$PriceNegotiationModel {
     String? parentNegotiationId,
     String? createdAt,
     String? updatedAt,
+    // Informations supplémentaires
+    String? prestataireName,
+    String? serviceRequestTitle,
+    String? clientName,
   }) = _PriceNegotiationModel;
 
   factory PriceNegotiationModel.fromJson(Map<String, dynamic> json) {
@@ -45,6 +49,10 @@ extension PriceNegotiationModelExtension on PriceNegotiationModel {
       parentNegotiationId: parentNegotiationId,
       createdAt: createdAt != null ? DateTime.tryParse(createdAt!) : null,
       updatedAt: updatedAt != null ? DateTime.tryParse(updatedAt!) : null,
+      // Informations supplémentaires
+      prestataireName: prestataireName,
+      serviceRequestTitle: serviceRequestTitle,
+      clientName: clientName,
     );
   }
 

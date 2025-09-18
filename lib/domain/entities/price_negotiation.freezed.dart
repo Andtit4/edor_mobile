@@ -31,7 +31,11 @@ mixin _$PriceNegotiation {
   bool get isFromPrestataire => throw _privateConstructorUsedError;
   String? get parentNegotiationId => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
-  DateTime? get updatedAt => throw _privateConstructorUsedError;
+  DateTime? get updatedAt =>
+      throw _privateConstructorUsedError; // Informations supplémentaires
+  String? get prestataireName => throw _privateConstructorUsedError;
+  String? get serviceRequestTitle => throw _privateConstructorUsedError;
+  String? get clientName => throw _privateConstructorUsedError;
 
   /// Serializes this PriceNegotiation to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -62,6 +66,9 @@ abstract class $PriceNegotiationCopyWith<$Res> {
     String? parentNegotiationId,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? prestataireName,
+    String? serviceRequestTitle,
+    String? clientName,
   });
 }
 
@@ -91,6 +98,9 @@ class _$PriceNegotiationCopyWithImpl<$Res, $Val extends PriceNegotiation>
     Object? parentNegotiationId = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
+    Object? prestataireName = freezed,
+    Object? serviceRequestTitle = freezed,
+    Object? clientName = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -149,6 +159,21 @@ class _$PriceNegotiationCopyWithImpl<$Res, $Val extends PriceNegotiation>
                     ? _value.updatedAt
                     : updatedAt // ignore: cast_nullable_to_non_nullable
                         as DateTime?,
+            prestataireName:
+                freezed == prestataireName
+                    ? _value.prestataireName
+                    : prestataireName // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            serviceRequestTitle:
+                freezed == serviceRequestTitle
+                    ? _value.serviceRequestTitle
+                    : serviceRequestTitle // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            clientName:
+                freezed == clientName
+                    ? _value.clientName
+                    : clientName // ignore: cast_nullable_to_non_nullable
+                        as String?,
           )
           as $Val,
     );
@@ -176,6 +201,9 @@ abstract class _$$PriceNegotiationImplCopyWith<$Res>
     String? parentNegotiationId,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? prestataireName,
+    String? serviceRequestTitle,
+    String? clientName,
   });
 }
 
@@ -204,6 +232,9 @@ class __$$PriceNegotiationImplCopyWithImpl<$Res>
     Object? parentNegotiationId = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
+    Object? prestataireName = freezed,
+    Object? serviceRequestTitle = freezed,
+    Object? clientName = freezed,
   }) {
     return _then(
       _$PriceNegotiationImpl(
@@ -262,6 +293,21 @@ class __$$PriceNegotiationImplCopyWithImpl<$Res>
                 ? _value.updatedAt
                 : updatedAt // ignore: cast_nullable_to_non_nullable
                     as DateTime?,
+        prestataireName:
+            freezed == prestataireName
+                ? _value.prestataireName
+                : prestataireName // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        serviceRequestTitle:
+            freezed == serviceRequestTitle
+                ? _value.serviceRequestTitle
+                : serviceRequestTitle // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        clientName:
+            freezed == clientName
+                ? _value.clientName
+                : clientName // ignore: cast_nullable_to_non_nullable
+                    as String?,
       ),
     );
   }
@@ -282,6 +328,9 @@ class _$PriceNegotiationImpl implements _PriceNegotiation {
     this.parentNegotiationId,
     this.createdAt,
     this.updatedAt,
+    this.prestataireName,
+    this.serviceRequestTitle,
+    this.clientName,
   });
 
   factory _$PriceNegotiationImpl.fromJson(Map<String, dynamic> json) =>
@@ -311,10 +360,17 @@ class _$PriceNegotiationImpl implements _PriceNegotiation {
   final DateTime? createdAt;
   @override
   final DateTime? updatedAt;
+  // Informations supplémentaires
+  @override
+  final String? prestataireName;
+  @override
+  final String? serviceRequestTitle;
+  @override
+  final String? clientName;
 
   @override
   String toString() {
-    return 'PriceNegotiation(id: $id, serviceRequestId: $serviceRequestId, prestataireId: $prestataireId, clientId: $clientId, proposedPrice: $proposedPrice, message: $message, status: $status, isFromPrestataire: $isFromPrestataire, parentNegotiationId: $parentNegotiationId, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'PriceNegotiation(id: $id, serviceRequestId: $serviceRequestId, prestataireId: $prestataireId, clientId: $clientId, proposedPrice: $proposedPrice, message: $message, status: $status, isFromPrestataire: $isFromPrestataire, parentNegotiationId: $parentNegotiationId, createdAt: $createdAt, updatedAt: $updatedAt, prestataireName: $prestataireName, serviceRequestTitle: $serviceRequestTitle, clientName: $clientName)';
   }
 
   @override
@@ -340,7 +396,13 @@ class _$PriceNegotiationImpl implements _PriceNegotiation {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.prestataireName, prestataireName) ||
+                other.prestataireName == prestataireName) &&
+            (identical(other.serviceRequestTitle, serviceRequestTitle) ||
+                other.serviceRequestTitle == serviceRequestTitle) &&
+            (identical(other.clientName, clientName) ||
+                other.clientName == clientName));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -358,6 +420,9 @@ class _$PriceNegotiationImpl implements _PriceNegotiation {
     parentNegotiationId,
     createdAt,
     updatedAt,
+    prestataireName,
+    serviceRequestTitle,
+    clientName,
   );
 
   /// Create a copy of PriceNegotiation
@@ -390,6 +455,9 @@ abstract class _PriceNegotiation implements PriceNegotiation {
     final String? parentNegotiationId,
     final DateTime? createdAt,
     final DateTime? updatedAt,
+    final String? prestataireName,
+    final String? serviceRequestTitle,
+    final String? clientName,
   }) = _$PriceNegotiationImpl;
 
   factory _PriceNegotiation.fromJson(Map<String, dynamic> json) =
@@ -416,7 +484,13 @@ abstract class _PriceNegotiation implements PriceNegotiation {
   @override
   DateTime? get createdAt;
   @override
-  DateTime? get updatedAt;
+  DateTime? get updatedAt; // Informations supplémentaires
+  @override
+  String? get prestataireName;
+  @override
+  String? get serviceRequestTitle;
+  @override
+  String? get clientName;
 
   /// Create a copy of PriceNegotiation
   /// with the given fields replaced by the non-null parameter values.

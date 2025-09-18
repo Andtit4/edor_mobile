@@ -11,6 +11,7 @@ import { User, UserRole } from '../entities/user.entity';
 import { Prestataire } from '../entities/prestataire.entity';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,7 @@ export class AuthService {
     @InjectRepository(Prestataire)
     private prestataireRepository: Repository<Prestataire>,
     private jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
 
   async register(
@@ -77,6 +79,9 @@ export class AuthService {
         role: savedPrestataire.role,
       });
 
+      // Envoyer l'email de bienvenue
+      await this.emailService.sendWelcomeEmail(email, firstName, lastName, 'prestataire');
+
       // Retourner le prestataire sans le mot de passe
       const { password: _, ...prestataireWithoutPassword } = savedPrestataire;
       return { user: prestataireWithoutPassword as Prestataire, token };
@@ -106,6 +111,9 @@ export class AuthService {
         email: savedUser.email,
         role: savedUser.role,
       });
+
+      // Envoyer l'email de bienvenue
+      await this.emailService.sendWelcomeEmail(email, firstName, lastName, 'client');
 
       // Retourner l'utilisateur sans le mot de passe
       const { password: _, ...userWithoutPassword } = savedUser;

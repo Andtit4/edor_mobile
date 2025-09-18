@@ -6,6 +6,8 @@ import '../../../domain/entities/price_negotiation.dart';
 import '../../../domain/entities/user.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/price_negotiation_provider.dart';
+import '../../providers/service_request_provider.dart';
+import 'completion_dialog.dart';
 
 class NegotiationWidgets {
   static Widget buildNegotiationsList(WidgetRef ref) {
@@ -150,14 +152,14 @@ class NegotiationWidgets {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Prestataire ${negotiation.prestataireId.substring(0, 8)}...',
+                        'Prestataire ${negotiation.prestataireName ?? negotiation.prestataireId.substring(0, 8)}...',
                         style: AppTextStyles.h4.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Demande ${negotiation.serviceRequestId.substring(0, 8)}...',
+                        'Demande ${negotiation.serviceRequestTitle ?? negotiation.serviceRequestId.substring(0, 8)}...',
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: Colors.grey[600],
                         ),
@@ -294,6 +296,58 @@ class NegotiationWidgets {
                   ),
                 ],
               ),
+            ] else if (negotiation.status == NegotiationStatus.accepted) ...[
+              // Vérifier si la demande de service n'est pas encore clôturée
+              Consumer(
+                builder: (context, ref, child) {
+                  final serviceRequestState = ref.watch(serviceRequestProvider);
+                  final serviceRequest = serviceRequestState.myRequests
+                      .where((request) => request.id == negotiation.serviceRequestId)
+                      .firstOrNull;
+                  
+                  // Afficher le bouton seulement si la demande n'est pas encore "completed"
+                  if (serviceRequest != null && serviceRequest.status != 'completed') {
+                    return SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => _showCompletionDialog(negotiation, ref, context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF8B5CF6),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text('Clôturer cette offre'),
+                      ),
+                    );
+                  } else {
+                    // Afficher un message indiquant que l'offre est clôturée
+                    return Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.green[50],
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.green[200]!),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.green[600], size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Offre clôturée',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: Colors.green[700],
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+              ),
             ],
           ],
         ),
@@ -356,7 +410,7 @@ class NegotiationWidgets {
       builder: (context) => AlertDialog(
         title: const Text('Accepter cette offre'),
         content: Text(
-          'Êtes-vous sûr de vouloir accepter l\'offre du prestataire ${negotiation.prestataireId.substring(0, 8)}... pour ${negotiation.proposedPrice.toStringAsFixed(0)} FCFA ?\n\nCette action assignera définitivement le prestataire à votre demande et rejettera toutes les autres offres.',
+          'Êtes-vous sûr de vouloir accepter l\'offre du prestataire ${negotiation.prestataireName ?? negotiation.prestataireId.substring(0, 8)}... pour ${negotiation.proposedPrice.toStringAsFixed(0)} FCFA ?\n\nCette action assignera définitivement le prestataire à votre demande et rejettera toutes les autres offres.',
         ),
         actions: [
           TextButton(
@@ -439,7 +493,7 @@ class NegotiationWidgets {
       builder: (context) => AlertDialog(
         title: const Text('Refuser cette offre'),
         content: Text(
-          'Êtes-vous sûr de vouloir refuser l\'offre du prestataire ${negotiation.prestataireId.substring(0, 8)}... ?',
+          'Êtes-vous sûr de vouloir refuser l\'offre du prestataire ${negotiation.prestataireName ?? negotiation.prestataireId.substring(0, 8)}... ?',
         ),
         actions: [
           TextButton(
@@ -509,5 +563,12 @@ class NegotiationWidgets {
         );
       }
     }
+  }
+
+  static void _showCompletionDialog(PriceNegotiation negotiation, WidgetRef ref, BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => CompletionDialog(negotiation: negotiation),
+    );
   }
 }

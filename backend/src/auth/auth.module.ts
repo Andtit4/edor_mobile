@@ -9,6 +9,7 @@ import { AuthController } from './auth.controller';
 import { User } from '../entities/user.entity';
 import { Prestataire } from '../entities/prestataire.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       secret: process.env.JWT_SECRET || 'your-super-secret-jwt-key-here-make-it-long-and-random-at-least-32-characters',
       signOptions: { expiresIn: '24h' },
     }),
+    EmailModule,
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],

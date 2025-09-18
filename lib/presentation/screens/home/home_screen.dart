@@ -490,108 +490,261 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _buildPrestataireListItem(Prestataire prestataire) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ListTile(
-        leading: CircleAvatar(
-          radius: 25,
-          backgroundImage: prestataire.avatar != null
-              ? NetworkImage(prestataire.avatar!)
-              : null,
-          child: prestataire.avatar == null
-              ? const Icon(Icons.person, color: Colors.grey)
-              : null,
-        ),
-        title: Text(
-          prestataire.name,
-          style: AppTextStyles.h6.copyWith(
-            fontWeight: FontWeight.bold,
+    final colors = {
+      'Plomberie': const Color(0xFF8B5CF6),
+      'Électricité': const Color(0xFF06B6D4),
+      'Peinture': const Color(0xFF10B981),
+      'Bricolage': const Color(0xFFF59E0B),
+      'Jardinage': const Color(0xFFEF4444),
+      'Nettoyage': const Color(0xFF8B5CF6),
+    };
+
+    final color = colors[prestataire.category] ?? const Color(0xFF8B5CF6);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
           ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              prestataire.category,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: const Color(0xFF8B5CF6),
-                fontWeight: FontWeight.w600,
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              // Prestataire Avatar
+              CircleAvatar(
+                radius: 25,
+                backgroundColor: color.withOpacity(0.1),
+                backgroundImage: prestataire.avatar != null 
+                    ? NetworkImage(prestataire.avatar!) 
+                    : null,
+                child: prestataire.avatar == null
+                    ? Text(
+                        prestataire.name.isNotEmpty ? prestataire.name[0].toUpperCase() : 'P',
+                        style: TextStyle(
+                          color: color,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : null,
               ),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(
-                  Icons.star,
-                  size: 14,
-                  color: Colors.amber[600],
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '${prestataire.rating.toStringAsFixed(1)} (${prestataire.totalReviews})',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Icon(
-                  Icons.location_on,
-                  size: 14,
-                  color: Colors.grey[600],
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    prestataire.location,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: Colors.grey[600],
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      prestataire.name,
+                      style: AppTextStyles.h4.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1F2937),
+                      ),
                     ),
-                    overflow: TextOverflow.ellipsis,
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        prestataire.category,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: color,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Status Badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: prestataire.isAvailable 
+                      ? const Color(0xFF10B981).withOpacity(0.1)
+                      : Colors.grey.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: prestataire.isAvailable 
+                        ? const Color(0xFF10B981)
+                        : Colors.grey,
+                    width: 1,
                   ),
                 ),
-              ],
-            ),
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: prestataire.isAvailable 
-                    ? const Color(0xFF10B981) 
-                    : Colors.grey[400],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                prestataire.isAvailable ? 'Disponible' : 'Indisponible',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            if (prestataire.pricePerHour > 0) ...[
-              const SizedBox(height: 4),
-              Text(
-                '${prestataire.pricePerHour.toStringAsFixed(0)}€/h',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: const Color(0xFF10B981),
-                  fontWeight: FontWeight.w600,
+                child: Text(
+                  prestataire.isAvailable ? 'Disponible' : 'Indisponible',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: prestataire.isAvailable 
+                        ? const Color(0xFF10B981)
+                        : Colors.grey[600],
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+          // Description
+          if (prestataire.description.isNotEmpty) ...[
+            Text(
+              prestataire.description,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Colors.grey[600],
+                height: 1.4,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 16),
           ],
-        ),
-        onTap: () {
-          // Navigation vers le profil du prestataire
-          context.push('/prestataire/${prestataire.id}', extra: prestataire.id);
-        },
+          // Rating and Location
+          Row(
+            children: [
+              // Rating
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.star,
+                      size: 16,
+                      color: Colors.amber[600],
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${prestataire.rating.toStringAsFixed(1)}',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: Colors.amber[700],
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '(${prestataire.totalReviews})',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Location
+              Expanded(
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      size: 16,
+                      color: Colors.grey[600],
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        prestataire.location,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Price and Completed Jobs
+          Row(
+            children: [
+              if (prestataire.pricePerHour > 0) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF10B981).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${prestataire.pricePerHour.toStringAsFixed(0)}€/h',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: const Color(0xFF10B981),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF8B5CF6).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${prestataire.completedJobs} travaux',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: const Color(0xFF8B5CF6),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Action Buttons
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    context.push('/prestataire/${prestataire.id}', extra: prestataire.id);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF8B5CF6),
+                    side: const BorderSide(color: Color(0xFF8B5CF6)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Voir profil'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    _contactPrestataire(prestataire);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8B5CF6),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Contacter'),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -762,5 +915,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       default:
         return status;
     }
+  }
+
+  void _contactPrestataire(Prestataire prestataire) {
+    // Navigation vers la page des messages ou création d'une conversation
+    context.push(AppRoutes.messages);
   }
 }

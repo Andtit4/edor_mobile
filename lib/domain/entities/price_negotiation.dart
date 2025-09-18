@@ -25,6 +25,10 @@ class PriceNegotiation with _$PriceNegotiation {
     String? parentNegotiationId,
     DateTime? createdAt,
     DateTime? updatedAt,
+    // Informations supplémentaires
+    String? prestataireName,
+    String? serviceRequestTitle,
+    String? clientName,
   }) = _PriceNegotiation;
 
   factory PriceNegotiation.fromJson(Map<String, dynamic> json) =>

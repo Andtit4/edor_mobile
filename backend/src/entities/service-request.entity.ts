@@ -66,6 +66,12 @@ import {
   
 	@Column({ type: 'text', nullable: true })
 	notes: string;
+
+	@Column({ type: 'date', nullable: true })
+	completionDate: Date;
+
+	@Column({ type: 'text', nullable: true })
+	completionNotes: string;
   
 	@CreateDateColumn()
 	createdAt: Date;

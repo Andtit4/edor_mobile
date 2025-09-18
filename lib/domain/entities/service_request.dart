@@ -20,7 +20,10 @@ class ServiceRequest with _$ServiceRequest {
     @Default('pending') String status,
     String? assignedPrestataireId,
     String? prestataireName,
+    String? assignedPrestataireName,
     String? notes,
+    DateTime? completionDate,
+    String? completionNotes,
   }) = _ServiceRequest;
 
   factory ServiceRequest.fromJson(Map<String, dynamic> json) =>

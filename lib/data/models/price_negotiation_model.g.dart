@@ -20,6 +20,9 @@ PriceNegotiationModel _$PriceNegotiationModelFromJson(
   parentNegotiationId: json['parentNegotiationId'] as String?,
   createdAt: json['createdAt'] as String?,
   updatedAt: json['updatedAt'] as String?,
+  prestataireName: json['prestataireName'] as String?,
+  serviceRequestTitle: json['serviceRequestTitle'] as String?,
+  clientName: json['clientName'] as String?,
 );
 
 Map<String, dynamic> _$PriceNegotiationModelToJson(
@@ -36,4 +39,7 @@ Map<String, dynamic> _$PriceNegotiationModelToJson(
   'parentNegotiationId': instance.parentNegotiationId,
   'createdAt': instance.createdAt,
   'updatedAt': instance.updatedAt,
+  'prestataireName': instance.prestataireName,
+  'serviceRequestTitle': instance.serviceRequestTitle,
+  'clientName': instance.clientName,
 };

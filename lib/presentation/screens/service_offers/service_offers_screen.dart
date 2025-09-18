@@ -1113,109 +1113,115 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
   }
 
   Widget _buildRequestCard(ServiceRequest request) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    request.title,
-                    style: AppTextStyles.h4.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1F2937),
-                    ),
-                  ),
-                ),
-                _buildStatusChip(request.status),
-              ],
+    return GestureDetector(
+      onTap: () {
+        // Afficher un dialog avec les détails de la demande
+        _showRequestDetailsDialog(request);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
-            const SizedBox(height: 8),
-            Text(
-              request.description,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: Colors.grey[600],
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Icon(
-                  Icons.location_on,
-                  size: 16,
-                  color: Colors.grey[600],
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  request.location,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '${request.budget.toStringAsFixed(0)} FCFA',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF8B5CF6),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  Icons.schedule,
-                  size: 16,
-                  color: Colors.grey[600],
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'Échéance: ${_formatDate(request.deadline)}',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const Spacer(),
-                if (request.assignedPrestataireId != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
                     child: Text(
-                      'Assigné',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: Colors.green[700],
-                        fontWeight: FontWeight.w600,
+                      request.title,
+                      style: AppTextStyles.h4.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1F2937),
                       ),
                     ),
                   ),
-              ],
-            ),
-            // Les négociations sont maintenant gérées dans l'onglet "Offres"
-            // Plus besoin d'afficher NegotiationListWidget ici
-          ],
+                  _buildStatusChip(request.status),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                request.description,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: Colors.grey[600],
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    size: 16,
+                    color: Colors.grey[600],
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    request.location,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${request.budget.toStringAsFixed(0)} FCFA',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF8B5CF6),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(
+                    Icons.schedule,
+                    size: 16,
+                    color: Colors.grey[600],
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Échéance: ${_formatDate(request.deadline)}',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const Spacer(),
+                  if (request.assignedPrestataireId != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'Assigné',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Colors.green[700],
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              // Les négociations sont maintenant gérées dans l'onglet "Offres"
+              // Plus besoin d'afficher NegotiationListWidget ici
+            ],
+          ),
         ),
       ),
     );
@@ -1973,5 +1979,181 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     } else {
       print('Not loading negotiations - conditions not met');
     }
+  }
+
+  void _showRequestDetailsDialog(ServiceRequest request) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: _getCategoryColor(request.category).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.work,
+                color: _getCategoryColor(request.category),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                request.title,
+                style: AppTextStyles.h4.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1F2937),
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Catégorie
+              _buildDetailRow(Icons.category, 'Catégorie', request.category),
+              const SizedBox(height: 12),
+              
+              // Description
+              _buildDetailRow(Icons.description, 'Description', request.description),
+              const SizedBox(height: 12),
+              
+              // Client
+              _buildDetailRow(Icons.person, 'Client', request.clientName),
+              const SizedBox(height: 12),
+              
+              // Téléphone
+              _buildDetailRow(Icons.phone, 'Téléphone', request.clientPhone),
+              const SizedBox(height: 12),
+              
+              // Localisation
+              _buildDetailRow(Icons.location_on, 'Lieu', request.location),
+              const SizedBox(height: 12),
+              
+              // Budget
+              _buildDetailRow(Icons.attach_money, 'Budget', '${request.budget.toStringAsFixed(0)} FCFA'),
+              const SizedBox(height: 12),
+              
+              // Échéance
+              _buildDetailRow(Icons.calendar_today, 'Échéance', _formatDate(request.deadline)),
+              const SizedBox(height: 12),
+              
+              // Statut
+              _buildDetailRow(
+                Icons.info_outline, 
+                'Statut', 
+                _getStatusText(request.status),
+                color: _getStatusColor(request.status),
+              ),
+              
+              // Prestataire assigné
+              if (request.assignedPrestataireId != null) ...[
+                const SizedBox(height: 12),
+                _buildDetailRow(Icons.assignment_ind, 'Prestataire assigné', request.assignedPrestataireName ?? request.prestataireName ?? 'Inconnu'),
+              ],
+              
+              // Notes
+              if (request.notes != null && request.notes!.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                _buildDetailRow(Icons.notes, 'Notes', request.notes!),
+              ],
+              
+              // Date de création
+              const SizedBox(height: 12),
+              _buildDetailRow(Icons.access_time, 'Créée le', _formatDateTime(request.createdAt)),
+              
+              // Date de réalisation
+              if (request.completionDate != null) ...[
+                const SizedBox(height: 12),
+                _buildDetailRow(Icons.check_circle_outline, 'Date de réalisation', _formatDate(request.completionDate!)),
+              ],
+              
+              // Remarques de clôture
+              if (request.completionNotes != null && request.completionNotes!.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                _buildDetailRow(Icons.rate_review, 'Remarques de clôture', request.completionNotes!),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fermer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String label, String value, {Color? color}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: Colors.grey[600], size: 20),
+        const SizedBox(width: 10),
+        Expanded(
+          flex: 2,
+          child: Text(
+            '$label :',
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[700],
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Text(
+            value,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: color ?? Colors.black87,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getCategoryColor(String category) {
+    final colors = {
+      'Plomberie': const Color(0xFF8B5CF6),
+      'Électricité': const Color(0xFF06B6D4),
+      'Peinture': const Color(0xFF10B981),
+      'Bricolage': const Color(0xFFF59E0B),
+      'Jardinage': const Color(0xFFEF4444),
+      'Nettoyage': const Color(0xFF8B5CF6),
+    };
+    return colors[category] ?? const Color(0xFF8B5CF6);
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return Colors.orange;
+      case 'assigned':
+        return Colors.blue;
+      case 'in_progress':
+        return Colors.purple;
+      case 'completed':
+        return Colors.green;
+      case 'cancelled':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 }

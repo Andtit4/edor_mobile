@@ -9,6 +9,8 @@ import { ServiceOffersModule } from './service-offers/service-offers.module';
 import { ServiceRequestsModule } from './service-requests/service-requests.module';
 import { MessagesModule } from './messages/messages.module';
 import { PriceNegotiationsModule } from './price-negotiations/price-negotiations.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { PriceNegotiationsModule } from './price-negotiations/price-negotiations
     ServiceRequestsModule,
     MessagesModule,
     PriceNegotiationsModule,
+    ReviewsModule,
+    EmailModule,
   ],
 })
 export class AppModule {}

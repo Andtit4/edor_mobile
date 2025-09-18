@@ -23,7 +23,10 @@ _$ServiceRequestModelImpl _$$ServiceRequestModelImplFromJson(
   status: json['status'] as String? ?? 'pending',
   assignedPrestataireId: json['assignedPrestataireId'] as String?,
   prestataireName: json['prestataireName'] as String?,
+  assignedPrestataireName: json['assignedPrestataireName'] as String?,
   notes: json['notes'] as String?,
+  completionDate: _dateTimeFromJsonNullable(json['completionDate']),
+  completionNotes: json['completionNotes'] as String?,
 );
 
 Map<String, dynamic> _$$ServiceRequestModelImplToJson(
@@ -43,5 +46,8 @@ Map<String, dynamic> _$$ServiceRequestModelImplToJson(
   'status': instance.status,
   'assignedPrestataireId': instance.assignedPrestataireId,
   'prestataireName': instance.prestataireName,
+  'assignedPrestataireName': instance.assignedPrestataireName,
   'notes': instance.notes,
+  'completionDate': instance.completionDate?.toIso8601String(),
+  'completionNotes': instance.completionNotes,
 };

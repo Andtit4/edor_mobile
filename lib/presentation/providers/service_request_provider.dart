@@ -300,6 +300,35 @@ class ServiceRequestNotifier extends StateNotifier<ServiceRequestState> {
     }
   }
 
+  Future<Map<String, dynamic>?> completeServiceRequest({
+    required String id,
+    required DateTime completionDate,
+    String? completionNotes,
+    required int rating,
+    String? reviewComment,
+    required String token,
+  }) async {
+    try {
+      final result = await _remoteDataSource.completeServiceRequest(
+        id: id,
+        completionDate: completionDate,
+        completionNotes: completionNotes,
+        rating: rating,
+        reviewComment: reviewComment,
+        token: token,
+      );
+
+      // Recharger les demandes pour avoir les données mises à jour
+      await loadMyRequests(token);
+      await loadAllRequests();
+
+      return result;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return null;
+    }
+  }
+
   void clearError() {
     state = state.copyWith(error: null);
   }

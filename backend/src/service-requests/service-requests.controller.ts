@@ -11,14 +11,17 @@ import {
   Request,
 } from '@nestjs/common';
 import { ServiceRequestsService } from './service-requests.service';
+import { ServiceCompletionService } from './service-completion.service';
 // import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateServiceRequestDto } from './dto/create-service-request';
+import { CompleteServiceRequestDto } from './dto/complete-service-request.dto';
 
 @Controller('service-requests')
 export class ServiceRequestsController {
   constructor(
     private readonly serviceRequestsService: ServiceRequestsService,
+    private readonly serviceCompletionService: ServiceCompletionService,
   ) {}
 
   @Post()
@@ -79,6 +82,20 @@ export class ServiceRequestsController {
       id,
       body.prestataireId,
       body.prestataireName,
+    );
+  }
+
+  @Put(':id/complete')
+  @UseGuards(JwtAuthGuard)
+  completeServiceRequest(
+    @Param('id') id: string,
+    @Body() completeServiceRequestDto: CompleteServiceRequestDto,
+    @Request() req,
+  ) {
+    return this.serviceCompletionService.completeServiceRequestWithReview(
+      id,
+      completeServiceRequestDto,
+      req.user.id,
     );
   }
 

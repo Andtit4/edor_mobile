@@ -35,7 +35,10 @@ mixin _$ServiceRequest {
   String get status => throw _privateConstructorUsedError;
   String? get assignedPrestataireId => throw _privateConstructorUsedError;
   String? get prestataireName => throw _privateConstructorUsedError;
+  String? get assignedPrestataireName => throw _privateConstructorUsedError;
   String? get notes => throw _privateConstructorUsedError;
+  DateTime? get completionDate => throw _privateConstructorUsedError;
+  String? get completionNotes => throw _privateConstructorUsedError;
 
   /// Serializes this ServiceRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -69,7 +72,10 @@ abstract class $ServiceRequestCopyWith<$Res> {
     String status,
     String? assignedPrestataireId,
     String? prestataireName,
+    String? assignedPrestataireName,
     String? notes,
+    DateTime? completionDate,
+    String? completionNotes,
   });
 }
 
@@ -102,7 +108,10 @@ class _$ServiceRequestCopyWithImpl<$Res, $Val extends ServiceRequest>
     Object? status = null,
     Object? assignedPrestataireId = freezed,
     Object? prestataireName = freezed,
+    Object? assignedPrestataireName = freezed,
     Object? notes = freezed,
+    Object? completionDate = freezed,
+    Object? completionNotes = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -176,10 +185,25 @@ class _$ServiceRequestCopyWithImpl<$Res, $Val extends ServiceRequest>
                     ? _value.prestataireName
                     : prestataireName // ignore: cast_nullable_to_non_nullable
                         as String?,
+            assignedPrestataireName:
+                freezed == assignedPrestataireName
+                    ? _value.assignedPrestataireName
+                    : assignedPrestataireName // ignore: cast_nullable_to_non_nullable
+                        as String?,
             notes:
                 freezed == notes
                     ? _value.notes
                     : notes // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            completionDate:
+                freezed == completionDate
+                    ? _value.completionDate
+                    : completionDate // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+            completionNotes:
+                freezed == completionNotes
+                    ? _value.completionNotes
+                    : completionNotes // ignore: cast_nullable_to_non_nullable
                         as String?,
           )
           as $Val,
@@ -211,7 +235,10 @@ abstract class _$$ServiceRequestImplCopyWith<$Res>
     String status,
     String? assignedPrestataireId,
     String? prestataireName,
+    String? assignedPrestataireName,
     String? notes,
+    DateTime? completionDate,
+    String? completionNotes,
   });
 }
 
@@ -243,7 +270,10 @@ class __$$ServiceRequestImplCopyWithImpl<$Res>
     Object? status = null,
     Object? assignedPrestataireId = freezed,
     Object? prestataireName = freezed,
+    Object? assignedPrestataireName = freezed,
     Object? notes = freezed,
+    Object? completionDate = freezed,
+    Object? completionNotes = freezed,
   }) {
     return _then(
       _$ServiceRequestImpl(
@@ -317,10 +347,25 @@ class __$$ServiceRequestImplCopyWithImpl<$Res>
                 ? _value.prestataireName
                 : prestataireName // ignore: cast_nullable_to_non_nullable
                     as String?,
+        assignedPrestataireName:
+            freezed == assignedPrestataireName
+                ? _value.assignedPrestataireName
+                : assignedPrestataireName // ignore: cast_nullable_to_non_nullable
+                    as String?,
         notes:
             freezed == notes
                 ? _value.notes
                 : notes // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        completionDate:
+            freezed == completionDate
+                ? _value.completionDate
+                : completionDate // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+        completionNotes:
+            freezed == completionNotes
+                ? _value.completionNotes
+                : completionNotes // ignore: cast_nullable_to_non_nullable
                     as String?,
       ),
     );
@@ -345,7 +390,10 @@ class _$ServiceRequestImpl implements _ServiceRequest {
     this.status = 'pending',
     this.assignedPrestataireId,
     this.prestataireName,
+    this.assignedPrestataireName,
     this.notes,
+    this.completionDate,
+    this.completionNotes,
   });
 
   factory _$ServiceRequestImpl.fromJson(Map<String, dynamic> json) =>
@@ -381,11 +429,17 @@ class _$ServiceRequestImpl implements _ServiceRequest {
   @override
   final String? prestataireName;
   @override
+  final String? assignedPrestataireName;
+  @override
   final String? notes;
+  @override
+  final DateTime? completionDate;
+  @override
+  final String? completionNotes;
 
   @override
   String toString() {
-    return 'ServiceRequest(id: $id, title: $title, description: $description, category: $category, clientId: $clientId, clientName: $clientName, clientPhone: $clientPhone, location: $location, budget: $budget, createdAt: $createdAt, deadline: $deadline, status: $status, assignedPrestataireId: $assignedPrestataireId, prestataireName: $prestataireName, notes: $notes)';
+    return 'ServiceRequest(id: $id, title: $title, description: $description, category: $category, clientId: $clientId, clientName: $clientName, clientPhone: $clientPhone, location: $location, budget: $budget, createdAt: $createdAt, deadline: $deadline, status: $status, assignedPrestataireId: $assignedPrestataireId, prestataireName: $prestataireName, assignedPrestataireName: $assignedPrestataireName, notes: $notes, completionDate: $completionDate, completionNotes: $completionNotes)';
   }
 
   @override
@@ -417,7 +471,16 @@ class _$ServiceRequestImpl implements _ServiceRequest {
                 other.assignedPrestataireId == assignedPrestataireId) &&
             (identical(other.prestataireName, prestataireName) ||
                 other.prestataireName == prestataireName) &&
-            (identical(other.notes, notes) || other.notes == notes));
+            (identical(
+                  other.assignedPrestataireName,
+                  assignedPrestataireName,
+                ) ||
+                other.assignedPrestataireName == assignedPrestataireName) &&
+            (identical(other.notes, notes) || other.notes == notes) &&
+            (identical(other.completionDate, completionDate) ||
+                other.completionDate == completionDate) &&
+            (identical(other.completionNotes, completionNotes) ||
+                other.completionNotes == completionNotes));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -438,7 +501,10 @@ class _$ServiceRequestImpl implements _ServiceRequest {
     status,
     assignedPrestataireId,
     prestataireName,
+    assignedPrestataireName,
     notes,
+    completionDate,
+    completionNotes,
   );
 
   /// Create a copy of ServiceRequest
@@ -474,7 +540,10 @@ abstract class _ServiceRequest implements ServiceRequest {
     final String status,
     final String? assignedPrestataireId,
     final String? prestataireName,
+    final String? assignedPrestataireName,
     final String? notes,
+    final DateTime? completionDate,
+    final String? completionNotes,
   }) = _$ServiceRequestImpl;
 
   factory _ServiceRequest.fromJson(Map<String, dynamic> json) =
@@ -509,7 +578,13 @@ abstract class _ServiceRequest implements ServiceRequest {
   @override
   String? get prestataireName;
   @override
+  String? get assignedPrestataireName;
+  @override
   String? get notes;
+  @override
+  DateTime? get completionDate;
+  @override
+  String? get completionNotes;
 
   /// Create a copy of ServiceRequest
   /// with the given fields replaced by the non-null parameter values.

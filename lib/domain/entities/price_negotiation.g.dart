@@ -28,6 +28,9 @@ _$PriceNegotiationImpl _$$PriceNegotiationImplFromJson(
       json['updatedAt'] == null
           ? null
           : DateTime.parse(json['updatedAt'] as String),
+  prestataireName: json['prestataireName'] as String?,
+  serviceRequestTitle: json['serviceRequestTitle'] as String?,
+  clientName: json['clientName'] as String?,
 );
 
 Map<String, dynamic> _$$PriceNegotiationImplToJson(
@@ -44,6 +47,9 @@ Map<String, dynamic> _$$PriceNegotiationImplToJson(
   'parentNegotiationId': instance.parentNegotiationId,
   'createdAt': instance.createdAt?.toIso8601String(),
   'updatedAt': instance.updatedAt?.toIso8601String(),
+  'prestataireName': instance.prestataireName,
+  'serviceRequestTitle': instance.serviceRequestTitle,
+  'clientName': instance.clientName,
 };
 
 const _$NegotiationStatusEnumMap = {

@@ -22,7 +22,13 @@ _$ServiceRequestImpl _$$ServiceRequestImplFromJson(Map<String, dynamic> json) =>
       status: json['status'] as String? ?? 'pending',
       assignedPrestataireId: json['assignedPrestataireId'] as String?,
       prestataireName: json['prestataireName'] as String?,
+      assignedPrestataireName: json['assignedPrestataireName'] as String?,
       notes: json['notes'] as String?,
+      completionDate:
+          json['completionDate'] == null
+              ? null
+              : DateTime.parse(json['completionDate'] as String),
+      completionNotes: json['completionNotes'] as String?,
     );
 
 Map<String, dynamic> _$$ServiceRequestImplToJson(
@@ -42,5 +48,8 @@ Map<String, dynamic> _$$ServiceRequestImplToJson(
   'status': instance.status,
   'assignedPrestataireId': instance.assignedPrestataireId,
   'prestataireName': instance.prestataireName,
+  'assignedPrestataireName': instance.assignedPrestataireName,
   'notes': instance.notes,
+  'completionDate': instance.completionDate?.toIso8601String(),
+  'completionNotes': instance.completionNotes,
 };

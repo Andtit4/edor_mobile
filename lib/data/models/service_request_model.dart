@@ -22,7 +22,10 @@ class ServiceRequestModel with _$ServiceRequestModel {
     @Default('pending') String status,
     String? assignedPrestataireId,
     String? prestataireName,
+    String? assignedPrestataireName,
     String? notes,
+    @JsonKey(fromJson: _dateTimeFromJsonNullable) DateTime? completionDate,
+    String? completionNotes,
   }) = _ServiceRequestModel;
 
   factory ServiceRequestModel.fromJson(Map<String, dynamic> json) => 
@@ -47,7 +50,10 @@ extension ServiceRequestModelExtension on ServiceRequestModel {
       status: status,
       assignedPrestataireId: assignedPrestataireId,
       prestataireName: prestataireName,
+      assignedPrestataireName: assignedPrestataireName,
       notes: notes,
+      completionDate: completionDate,
+      completionNotes: completionNotes,
     );
   }
 }
@@ -66,4 +72,11 @@ DateTime _dateTimeFromJson(dynamic value) {
   if (value is DateTime) return value;
   if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
   return DateTime.now();
+}
+
+DateTime? _dateTimeFromJsonNullable(dynamic value) {
+  if (value == null) return null;
+  if (value is DateTime) return value;
+  if (value is String) return DateTime.tryParse(value);
+  return null;
 }

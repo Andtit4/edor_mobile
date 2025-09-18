@@ -6,6 +6,7 @@ import { PriceNegotiation, NegotiationStatus } from '../entities/price-negotiati
 import { ServiceRequest, ServiceRequestStatus } from '../entities/service-request.entity';
 import { CreatePriceNegotiationDto } from './dto/create-price-negotiation.dto';
 import { UpdatePriceNegotiationDto } from './dto/update-price-negotiation.dto';
+import { PriceNegotiationResponseDto } from './dto/price-negotiation-response.dto';
 
 @Injectable()
 export class PriceNegotiationsService {
@@ -72,7 +73,7 @@ export class PriceNegotiationsService {
     return this.priceNegotiationRepository.save(negotiation);
   }
 
-  async findByServiceRequest(serviceRequestId: string, userId: string): Promise<PriceNegotiation[]> {
+  async findByServiceRequest(serviceRequestId: string, userId: string): Promise<PriceNegotiationResponseDto[]> {
     // Vérifier que l'utilisateur a accès à cette demande
     const serviceRequest = await this.serviceRequestRepository.findOne({
       where: { id: serviceRequestId },
@@ -86,10 +87,29 @@ export class PriceNegotiationsService {
       throw new ForbiddenException('Accès non autorisé à cette demande');
     }
 
-    return this.priceNegotiationRepository.find({
-      where: { serviceRequestId },
-      relations: ['prestataire', 'client'],
-      order: { createdAt: 'ASC' },
+    const negotiations = await this.priceNegotiationRepository
+      .createQueryBuilder('negotiation')
+      .leftJoinAndSelect('negotiation.serviceRequest', 'serviceRequest')
+      .leftJoinAndSelect('negotiation.prestataire', 'prestataire')
+      .leftJoinAndSelect('negotiation.client', 'client')
+      .where('negotiation.serviceRequestId = :serviceRequestId', { serviceRequestId })
+      .orderBy('negotiation.createdAt', 'ASC')
+      .getMany();
+
+    return negotiations.map(negotiation => {
+      const negotiationWithNames = {
+        ...negotiation,
+        prestataireName: negotiation.prestataire ? 
+          `${negotiation.prestataire.firstName} ${negotiation.prestataire.lastName}` : 
+          'Prestataire inconnu',
+        serviceRequestTitle: negotiation.serviceRequest ? 
+          negotiation.serviceRequest.title : 
+          'Demande inconnue',
+        clientName: negotiation.client ? 
+          `${negotiation.client.firstName} ${negotiation.client.lastName}` : 
+          'Client inconnu',
+      };
+      return new PriceNegotiationResponseDto(negotiationWithNames);
     });
   }
 
@@ -177,16 +197,35 @@ export class PriceNegotiationsService {
   }
 
   // Récupérer toutes les négociations d'un client
-  async findByClient(clientId: string): Promise<PriceNegotiation[]> {
-    return this.priceNegotiationRepository.find({
-      where: { clientId },
-      relations: ['serviceRequest', 'prestataire', 'client'],
-      order: { createdAt: 'DESC' },
+  async findByClient(clientId: string): Promise<PriceNegotiationResponseDto[]> {
+    const negotiations = await this.priceNegotiationRepository
+      .createQueryBuilder('negotiation')
+      .leftJoinAndSelect('negotiation.serviceRequest', 'serviceRequest')
+      .leftJoinAndSelect('negotiation.prestataire', 'prestataire')
+      .leftJoinAndSelect('negotiation.client', 'client')
+      .where('negotiation.clientId = :clientId', { clientId })
+      .orderBy('negotiation.createdAt', 'DESC')
+      .getMany();
+
+    return negotiations.map(negotiation => {
+      const negotiationWithNames = {
+        ...negotiation,
+        prestataireName: negotiation.prestataire ? 
+          `${negotiation.prestataire.firstName} ${negotiation.prestataire.lastName}` : 
+          'Prestataire inconnu',
+        serviceRequestTitle: negotiation.serviceRequest ? 
+          negotiation.serviceRequest.title : 
+          'Demande inconnue',
+        clientName: negotiation.client ? 
+          `${negotiation.client.firstName} ${negotiation.client.lastName}` : 
+          'Client inconnu',
+      };
+      return new PriceNegotiationResponseDto(negotiationWithNames);
     });
   }
 
   // Accepter une négociation (assigner le prestataire et rejeter les autres)
-  async acceptNegotiation(negotiationId: string, clientId: string): Promise<PriceNegotiation> {
+  async acceptNegotiation(negotiationId: string, clientId: string): Promise<PriceNegotiationResponseDto> {
     const negotiation = await this.priceNegotiationRepository.findOne({
       where: { id: negotiationId },
       relations: ['serviceRequest', 'prestataire'],
@@ -223,7 +262,7 @@ export class PriceNegotiationsService {
       .andWhere('id != :negotiationId', { negotiationId })
       .execute();
 
-    // Retourner la négociation acceptée
+    // Retourner la négociation acceptée avec les noms
     const acceptedNegotiation = await this.priceNegotiationRepository.findOne({
       where: { id: negotiationId },
       relations: ['serviceRequest', 'prestataire', 'client'],
@@ -233,6 +272,19 @@ export class PriceNegotiationsService {
       throw new NotFoundException('Négociation acceptée non trouvée');
     }
 
-    return acceptedNegotiation;
+    const negotiationWithNames = {
+      ...acceptedNegotiation,
+      prestataireName: acceptedNegotiation.prestataire ? 
+        `${acceptedNegotiation.prestataire.firstName} ${acceptedNegotiation.prestataire.lastName}` : 
+        'Prestataire inconnu',
+      serviceRequestTitle: acceptedNegotiation.serviceRequest ? 
+        acceptedNegotiation.serviceRequest.title : 
+        'Demande inconnue',
+      clientName: acceptedNegotiation.client ? 
+        `${acceptedNegotiation.client.firstName} ${acceptedNegotiation.client.lastName}` : 
+        'Client inconnu',
+    };
+
+    return new PriceNegotiationResponseDto(negotiationWithNames);
   }
 }

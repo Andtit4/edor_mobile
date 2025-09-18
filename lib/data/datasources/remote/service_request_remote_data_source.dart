@@ -26,6 +26,14 @@ abstract class ServiceRequestRemoteDataSource {
   Future<ServiceRequest> updateServiceRequest(String id, Map<String, dynamic> data, String token);
   Future<void> deleteServiceRequest(String id, String token);
   Future<ServiceRequest> assignPrestataire(String id, String prestataireId, String prestataireName, String token);
+  Future<Map<String, dynamic>> completeServiceRequest({
+    required String id,
+    required DateTime completionDate,
+    String? completionNotes,
+    required int rating,
+    String? reviewComment,
+    required String token,
+  });
 }
 
 class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSource {
@@ -242,6 +250,40 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       return ServiceRequestModel.fromJson(data).toEntity();
+    } else {
+      throw ServerException(message: 'Erreur du serveur: ${response.statusCode}');
+    }
+  }
+
+  Future<Map<String, dynamic>> completeServiceRequest({
+    required String id,
+    required DateTime completionDate,
+    String? completionNotes,
+    required int rating,
+    String? reviewComment,
+    required String token,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      throw const ServerException(message: 'Pas de connexion internet');
+    }
+
+    final response = await client.put(
+      Uri.parse('$baseUrl/service-requests/$id/complete'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: json.encode({
+        'completionDate': completionDate.toIso8601String().split('T')[0], // Format YYYY-MM-DD
+        'completionNotes': completionNotes,
+        'rating': rating,
+        'reviewComment': reviewComment,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data;
     } else {
       throw ServerException(message: 'Erreur du serveur: ${response.statusCode}');
     }
