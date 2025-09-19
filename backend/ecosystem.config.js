@@ -2,7 +2,6 @@ module.exports = {
     apps: [{
         name: 'edor-api',
         script: 'dist/main.js',
-        cwd: '/var/www/edor-api/backend',
         instances: 1,
         exec_mode: 'fork',
         env: {
@@ -48,9 +47,9 @@ module.exports = {
         max_memory_restart: '1G',
 
         // Logs
-        log_file: '/var/www/edor-api/backend/logs/combined.log',
-        out_file: '/var/www/edor-api/backend/logs/out.log',
-        error_file: '/var/www/edor-api/backend/logs/error.log',
+        log_file: './logs/combined.log',
+        out_file: './logs/out.log',
+        error_file: './logs/error.log',
         log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
 
         // Configuration avancée
@@ -59,7 +58,7 @@ module.exports = {
         restart_delay: 4000,
 
         // Variables d'environnement depuis .env
-        env_file: '/var/www/edor-api/backend/.env',
+        env_file: '.env',
 
         // Health check
         health_check_grace_period: 3000,
@@ -71,10 +70,7 @@ module.exports = {
         listen_timeout: 3000,
 
         // Graceful shutdown
-        kill_retry_time: 100,
-
-        // Working directory pour les uploads
-        working_dir: '/var/www/edor-api/backend'
+        kill_retry_time: 100
     }],
 
     // Configuration de déploiement
@@ -87,7 +83,7 @@ module.exports = {
             path: '/var/www/edor-api',
             'pre-deploy-local': '',
             'post-deploy': 'cd backend && npm install && npm run build && pm2 reload ecosystem.config.js --env production',
-            'pre-setup': 'mkdir -p /var/www/edor-api/backend/uploads/profiles && mkdir -p /var/www/edor-api/backend/uploads/service-requests && mkdir -p /var/www/edor-api/backend/logs && chmod 755 /var/www/edor-api/backend/uploads'
+            'pre-setup': 'mkdir -p backend/uploads/profiles && mkdir -p backend/uploads/service-requests && mkdir -p backend/logs && chmod 755 backend/uploads'
         }
     }
 };
