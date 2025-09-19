@@ -3,8 +3,8 @@ export const emailConfig = {
   port: parseInt(process.env.MAIL_PORT || '587'),
   secure: false, // true pour 465, false pour autres ports
   auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
+    user: 'lirsitogo2021@gmail.com',
+    pass: 'phlelzqtfdpuvalx',
   },
   defaults: {
     from: `"Edor" <${process.env.MAIL_FROM || 'noreply@edor.com'}>`,
