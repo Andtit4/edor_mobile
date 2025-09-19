@@ -1,0 +1,26 @@
+# Dockerfile avec copie des fichiers compilés
+FROM node:18-alpine
+
+# Installer curl pour le healthcheck
+RUN apk add --no-cache curl
+
+# Définir le répertoire de travail
+WORKDIR /app
+
+# Copier les fichiers package.json et package-lock.json
+COPY package*.json ./
+
+# Installer SEULEMENT les dépendances de production
+RUN npm ci --only=production
+
+# Copier les fichiers compilés depuis le build local
+COPY dist/ ./dist/
+
+# Copier les autres fichiers nécessaires
+COPY uploads/ ./uploads/ 2>/dev/null || mkdir -p uploads/profiles uploads/service-requests
+
+# Exposer le port 8090
+EXPOSE 8090
+
+# Commande pour démarrer l'application
+CMD ["node", "dist/main.js"]
