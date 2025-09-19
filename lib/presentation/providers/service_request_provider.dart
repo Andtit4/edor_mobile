@@ -123,12 +123,14 @@ class ServiceRequestNotifier extends StateNotifier<ServiceRequestState> {
     required String category,
     required String clientName,
     required String clientPhone,
+    String? clientImage,
     required String location,
     double? latitude,
     double? longitude,
     required double budget,
     required DateTime deadline,
     String? notes,
+    List<String>? photos,
     required String token,
   }) async {
     state = state.copyWith(isCreating: true, error: null);
@@ -140,12 +142,14 @@ class ServiceRequestNotifier extends StateNotifier<ServiceRequestState> {
         category,
         clientName,
         clientPhone,
+        clientImage,
         location,
         latitude,
         longitude,
         budget,
         deadline,
         notes,
+        photos,
         token,
       );
       

@@ -8,8 +8,11 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/service_request_provider.dart';
+import '../../providers/service_request_images_provider.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/custom_button.dart';
+import '../../widgets/image_gallery.dart';
+import '../../widgets/photo_viewer.dart';
 
 class CreateRequestScreen extends ConsumerStatefulWidget {
   const CreateRequestScreen({super.key});
@@ -1002,10 +1005,10 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
               Expanded(
                 child: _buildSectionCard(
                   title: 'Budget (FCFA)',
-                  icon: Icons.euro,
+                  icon: Icons.attach_money,
                   child: CustomTextField(
                     controller: _budgetController,
-                    hint: '50000',
+                    hint: '50000 FCFA',
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -1046,6 +1049,15 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
                 ),
               ),
             ],
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // Photos (optionnelles)
+          _buildSectionCard(
+            title: 'Photos (optionnelles)',
+            icon: Icons.photo_camera,
+            child: _buildPhotosSection(),
           ),
           
           const SizedBox(height: 20),
@@ -1617,18 +1629,37 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
       print('Deadline: ${_selectedDate ?? DateTime.now().add(const Duration(days: 7))}');
       print('===============================');
       
+      // Upload des photos si il y en a
+      List<String> photoUrls = [];
+      final imagesState = ref.read(serviceRequestImagesProvider);
+      if (imagesState.selectedImages.isNotEmpty) {
+        print('Upload des photos...');
+        await ref.read(serviceRequestImagesProvider.notifier).uploadImages(token);
+        final updatedState = ref.read(serviceRequestImagesProvider);
+        photoUrls = updatedState.uploadedImageUrls;
+        print('Photos uploadées: $photoUrls');
+      }
+      
+      print('=== CREATING SERVICE REQUEST ===');
+      print('User profileImage: ${user.profileImage}');
+      print('Client name: ${user.firstName} ${user.lastName}');
+      print('Client phone: ${user.phone}');
+      print('===============================');
+      
       final newRequest = await ref.read(serviceRequestProvider.notifier).createRequest(
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         category: _selectedCategory!,
         clientName: '${user.firstName} ${user.lastName}',
         clientPhone: user.phone,
+        clientImage: user.profileImage,
         location: _locationController.text.trim(),
         latitude: latitude,
         longitude: longitude,
         budget: double.parse(_budgetController.text.trim()),
         deadline: _selectedDate ?? DateTime.now().add(const Duration(days: 7)),
         notes: _selectedUrgency != null ? 'Urgence: $_selectedUrgency' : null,
+        photos: photoUrls,
         token: token,
       );
 
@@ -1661,5 +1692,117 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
         setState(() => _isSubmitting = false);
       }
     }
+  }
+
+  Widget _buildPhotosSection() {
+    return Consumer(
+      builder: (context, ref, child) {
+        final imagesState = ref.watch(serviceRequestImagesProvider);
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Description
+            Text(
+              'Ajoutez des photos pour mieux décrire votre demande (max 10 photos)',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 12),
+            
+            // Bouton d'ajout de photos
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  ref.read(serviceRequestImagesProvider.notifier).pickImages();
+                },
+                icon: const Icon(Icons.add_photo_alternate, size: 18),
+                label: const Text('Ajouter des photos'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF8B5CF6),
+                  side: const BorderSide(color: Color(0xFF8B5CF6)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+            
+            // Affichage des photos sélectionnées
+            if (imagesState.selectedImages.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Text(
+                'Photos sélectionnées (${imagesState.selectedImages.length})',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              
+              // Galerie des photos sélectionnées
+              ImageGallery(
+                imageUrls: imagesState.selectedImages,
+                height: 120,
+                maxImagesToShow: 4,
+                onTap: () {
+                  showPhotoViewer(
+                    context,
+                    imageUrls: imagesState.selectedImages,
+                    title: 'Photos de la demande',
+                  );
+                },
+              ),
+              
+              // Bouton de suppression
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  TextButton.icon(
+                    onPressed: () {
+                      ref.read(serviceRequestImagesProvider.notifier).clearImages();
+                    },
+                    icon: const Icon(Icons.delete_outline, size: 16),
+                    label: const Text('Supprimer toutes les photos'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            
+            // Message d'erreur
+            if (imagesState.error != null) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.red, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        imagesState.error!,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Colors.red[700],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        );
+      },
+    );
   }
 }

@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../providers/prestataire_provider.dart';
 import '../../providers/review_provider.dart';
+import '../../../core/utils/price_converter.dart';
 
 class PrestataireDetailScreen extends ConsumerWidget {
   final String prestataireId;
@@ -299,8 +300,8 @@ class PrestataireDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(width: 24),
               _buildInfoItem(
-                Icons.euro,
-                '${prestataire.pricePerHour}€/h',
+                Icons.attach_money,
+                PriceConverter.formatEuroToFcfaPerHour(prestataire.pricePerHour),
                 Colors.green,
               ),
               const SizedBox(width: 24),

@@ -6,6 +6,7 @@ import '../../providers/message_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../domain/entities/user.dart';
+import '../../widgets/profile_avatar.dart';
 
 class MessagesScreen extends ConsumerStatefulWidget {
   const MessagesScreen({super.key});
@@ -173,17 +174,11 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.all(16),
-        leading: CircleAvatar(
-          radius: 25,
-          backgroundColor: const Color(0xFF8B5CF6).withOpacity(0.1),
-          child: Text(
-            otherUserName.isNotEmpty ? otherUserName[0].toUpperCase() : 'U',
-            style: const TextStyle(
-              color: Color(0xFF8B5CF6),
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+        leading: ProfileAvatar(
+          imageUrl: null, // TODO: Ajouter otherUserImage dans Conversation
+          name: otherUserName,
+          size: 50.0,
+          showBorder: true,
         ),
         title: Text(
           otherUserName ,

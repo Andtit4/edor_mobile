@@ -5,6 +5,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../domain/entities/price_negotiation.dart';
 import '../providers/price_negotiation_provider.dart';
 import '../providers/auth_provider.dart';
+import '../../core/utils/price_converter.dart';
 
 class PriceNegotiationDialog extends ConsumerStatefulWidget {
   final String serviceRequestId;
@@ -60,7 +61,7 @@ class _PriceNegotiationDialogState extends ConsumerState<PriceNegotiationDialog>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Budget actuel: ${widget.currentBudget.toStringAsFixed(2)} €',
+              'Budget actuel: ${PriceConverter.formatEuroToFcfa(widget.currentBudget)}',
               style: AppTextStyles.bodyLarge.copyWith(
                 color: Colors.grey[600],
               ),
@@ -78,7 +79,7 @@ class _PriceNegotiationDialogState extends ConsumerState<PriceNegotiationDialog>
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 hintText: 'Entrez le prix proposé',
-                prefixText: '€ ',
+                prefixText: 'FCFA ',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

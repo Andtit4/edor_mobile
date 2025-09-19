@@ -14,6 +14,10 @@ import '../../providers/message_provider.dart';
 import '../../providers/price_negotiation_provider.dart';
 import 'negotiation_widgets.dart';
 import 'package:go_router/go_router.dart';
+import '../../widgets/profile_avatar.dart';
+import '../../widgets/image_gallery.dart';
+import '../../widgets/photo_viewer.dart';
+import '../../../core/utils/price_converter.dart';
 // import '../../../router/app_routes.dart';
 
 class ServiceOffersScreen extends ConsumerStatefulWidget {
@@ -1218,6 +1222,40 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                     ),
                 ],
               ),
+              
+              // Photos de la demande
+              if (request.photos.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.photo_camera,
+                      size: 16,
+                      color: Colors.grey[600],
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Photos (${request.photos.length})',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                CompactImageGallery(
+                  imageUrls: request.photos,
+                  onTap: () {
+                    showPhotoViewer(
+                      context,
+                      imageUrls: request.photos,
+                      title: request.title,
+                    );
+                  },
+                ),
+              ],
+              
               // Les négociations sont maintenant gérées dans l'onglet "Offres"
               // Plus besoin d'afficher NegotiationListWidget ici
             ],
@@ -1328,22 +1366,11 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
           Row(
             children: [
               // Prestataire Avatar
-              CircleAvatar(
-                radius: 25,
-                backgroundColor: color.withOpacity(0.1),
-                backgroundImage: prestataire.avatar != null 
-                    ? NetworkImage(prestataire.avatar!) 
-                    : null,
-                child: prestataire.avatar == null
-                    ? Text(
-                        prestataire.name.isNotEmpty ? prestataire.name[0].toUpperCase() : 'P',
-                        style: TextStyle(
-                          color: color,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                    : null,
+              PrestataireAvatar(
+                imageUrl: prestataire.profileImage ?? prestataire.avatar,
+                name: prestataire.name,
+                size: 50.0,
+                showBorder: true,
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -1444,13 +1471,13 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
               Row(
                 children: [
                   Icon(
-                    Icons.euro,
+                    Icons.attach_money,
                     size: 16,
                     color: Colors.grey[600],
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${prestataire.pricePerHour.toStringAsFixed(0)}€/h',
+                    PriceConverter.formatEuroToFcfaPerHour(prestataire.pricePerHour),
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: Colors.grey[600],
                       fontWeight: FontWeight.w600,
@@ -1562,7 +1589,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
               style: AppTextStyles.bodyMedium,
             ),
             Text(
-              'Prix: ${prestataire.pricePerHour.toStringAsFixed(0)}€/h',
+              'Prix: ${PriceConverter.formatEuroToFcfaPerHour(prestataire.pricePerHour)}',
               style: AppTextStyles.bodyMedium,
             ),
             Text(

@@ -28,6 +28,7 @@ mixin _$ServiceRequest {
   String get clientId => throw _privateConstructorUsedError;
   String get clientName => throw _privateConstructorUsedError;
   String get clientPhone => throw _privateConstructorUsedError;
+  String? get clientImage => throw _privateConstructorUsedError;
   String get location => throw _privateConstructorUsedError;
   @JsonKey(fromJson: _latitudeFromJson)
   double? get latitude => throw _privateConstructorUsedError;
@@ -47,6 +48,7 @@ mixin _$ServiceRequest {
   @JsonKey(fromJson: _dateTimeFromJsonNullable)
   DateTime? get completionDate => throw _privateConstructorUsedError;
   String? get completionNotes => throw _privateConstructorUsedError;
+  List<String> get photos => throw _privateConstructorUsedError;
 
   /// Serializes this ServiceRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -73,6 +75,7 @@ abstract class $ServiceRequestCopyWith<$Res> {
     String clientId,
     String clientName,
     String clientPhone,
+    String? clientImage,
     String location,
     @JsonKey(fromJson: _latitudeFromJson) double? latitude,
     @JsonKey(fromJson: _longitudeFromJson) double? longitude,
@@ -86,6 +89,7 @@ abstract class $ServiceRequestCopyWith<$Res> {
     String? notes,
     @JsonKey(fromJson: _dateTimeFromJsonNullable) DateTime? completionDate,
     String? completionNotes,
+    List<String> photos,
   });
 }
 
@@ -111,6 +115,7 @@ class _$ServiceRequestCopyWithImpl<$Res, $Val extends ServiceRequest>
     Object? clientId = null,
     Object? clientName = null,
     Object? clientPhone = null,
+    Object? clientImage = freezed,
     Object? location = null,
     Object? latitude = freezed,
     Object? longitude = freezed,
@@ -124,6 +129,7 @@ class _$ServiceRequestCopyWithImpl<$Res, $Val extends ServiceRequest>
     Object? notes = freezed,
     Object? completionDate = freezed,
     Object? completionNotes = freezed,
+    Object? photos = null,
   }) {
     return _then(
       _value.copyWith(
@@ -162,6 +168,11 @@ class _$ServiceRequestCopyWithImpl<$Res, $Val extends ServiceRequest>
                     ? _value.clientPhone
                     : clientPhone // ignore: cast_nullable_to_non_nullable
                         as String,
+            clientImage:
+                freezed == clientImage
+                    ? _value.clientImage
+                    : clientImage // ignore: cast_nullable_to_non_nullable
+                        as String?,
             location:
                 null == location
                     ? _value.location
@@ -227,6 +238,11 @@ class _$ServiceRequestCopyWithImpl<$Res, $Val extends ServiceRequest>
                     ? _value.completionNotes
                     : completionNotes // ignore: cast_nullable_to_non_nullable
                         as String?,
+            photos:
+                null == photos
+                    ? _value.photos
+                    : photos // ignore: cast_nullable_to_non_nullable
+                        as List<String>,
           )
           as $Val,
     );
@@ -250,6 +266,7 @@ abstract class _$$ServiceRequestImplCopyWith<$Res>
     String clientId,
     String clientName,
     String clientPhone,
+    String? clientImage,
     String location,
     @JsonKey(fromJson: _latitudeFromJson) double? latitude,
     @JsonKey(fromJson: _longitudeFromJson) double? longitude,
@@ -263,6 +280,7 @@ abstract class _$$ServiceRequestImplCopyWith<$Res>
     String? notes,
     @JsonKey(fromJson: _dateTimeFromJsonNullable) DateTime? completionDate,
     String? completionNotes,
+    List<String> photos,
   });
 }
 
@@ -287,6 +305,7 @@ class __$$ServiceRequestImplCopyWithImpl<$Res>
     Object? clientId = null,
     Object? clientName = null,
     Object? clientPhone = null,
+    Object? clientImage = freezed,
     Object? location = null,
     Object? latitude = freezed,
     Object? longitude = freezed,
@@ -300,6 +319,7 @@ class __$$ServiceRequestImplCopyWithImpl<$Res>
     Object? notes = freezed,
     Object? completionDate = freezed,
     Object? completionNotes = freezed,
+    Object? photos = null,
   }) {
     return _then(
       _$ServiceRequestImpl(
@@ -338,6 +358,11 @@ class __$$ServiceRequestImplCopyWithImpl<$Res>
                 ? _value.clientPhone
                 : clientPhone // ignore: cast_nullable_to_non_nullable
                     as String,
+        clientImage:
+            freezed == clientImage
+                ? _value.clientImage
+                : clientImage // ignore: cast_nullable_to_non_nullable
+                    as String?,
         location:
             null == location
                 ? _value.location
@@ -403,6 +428,11 @@ class __$$ServiceRequestImplCopyWithImpl<$Res>
                 ? _value.completionNotes
                 : completionNotes // ignore: cast_nullable_to_non_nullable
                     as String?,
+        photos:
+            null == photos
+                ? _value._photos
+                : photos // ignore: cast_nullable_to_non_nullable
+                    as List<String>,
       ),
     );
   }
@@ -419,6 +449,7 @@ class _$ServiceRequestImpl implements _ServiceRequest {
     required this.clientId,
     required this.clientName,
     required this.clientPhone,
+    this.clientImage,
     required this.location,
     @JsonKey(fromJson: _latitudeFromJson) this.latitude,
     @JsonKey(fromJson: _longitudeFromJson) this.longitude,
@@ -432,7 +463,8 @@ class _$ServiceRequestImpl implements _ServiceRequest {
     this.notes,
     @JsonKey(fromJson: _dateTimeFromJsonNullable) this.completionDate,
     this.completionNotes,
-  });
+    final List<String> photos = const [],
+  }) : _photos = photos;
 
   factory _$ServiceRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$ServiceRequestImplFromJson(json);
@@ -451,6 +483,8 @@ class _$ServiceRequestImpl implements _ServiceRequest {
   final String clientName;
   @override
   final String clientPhone;
+  @override
+  final String? clientImage;
   @override
   final String location;
   @override
@@ -484,10 +518,18 @@ class _$ServiceRequestImpl implements _ServiceRequest {
   final DateTime? completionDate;
   @override
   final String? completionNotes;
+  final List<String> _photos;
+  @override
+  @JsonKey()
+  List<String> get photos {
+    if (_photos is EqualUnmodifiableListView) return _photos;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_photos);
+  }
 
   @override
   String toString() {
-    return 'ServiceRequest(id: $id, title: $title, description: $description, category: $category, clientId: $clientId, clientName: $clientName, clientPhone: $clientPhone, location: $location, latitude: $latitude, longitude: $longitude, budget: $budget, createdAt: $createdAt, deadline: $deadline, status: $status, assignedPrestataireId: $assignedPrestataireId, prestataireName: $prestataireName, assignedPrestataireName: $assignedPrestataireName, notes: $notes, completionDate: $completionDate, completionNotes: $completionNotes)';
+    return 'ServiceRequest(id: $id, title: $title, description: $description, category: $category, clientId: $clientId, clientName: $clientName, clientPhone: $clientPhone, clientImage: $clientImage, location: $location, latitude: $latitude, longitude: $longitude, budget: $budget, createdAt: $createdAt, deadline: $deadline, status: $status, assignedPrestataireId: $assignedPrestataireId, prestataireName: $prestataireName, assignedPrestataireName: $assignedPrestataireName, notes: $notes, completionDate: $completionDate, completionNotes: $completionNotes, photos: $photos)';
   }
 
   @override
@@ -507,6 +549,8 @@ class _$ServiceRequestImpl implements _ServiceRequest {
                 other.clientName == clientName) &&
             (identical(other.clientPhone, clientPhone) ||
                 other.clientPhone == clientPhone) &&
+            (identical(other.clientImage, clientImage) ||
+                other.clientImage == clientImage) &&
             (identical(other.location, location) ||
                 other.location == location) &&
             (identical(other.latitude, latitude) ||
@@ -532,7 +576,8 @@ class _$ServiceRequestImpl implements _ServiceRequest {
             (identical(other.completionDate, completionDate) ||
                 other.completionDate == completionDate) &&
             (identical(other.completionNotes, completionNotes) ||
-                other.completionNotes == completionNotes));
+                other.completionNotes == completionNotes) &&
+            const DeepCollectionEquality().equals(other._photos, _photos));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -546,6 +591,7 @@ class _$ServiceRequestImpl implements _ServiceRequest {
     clientId,
     clientName,
     clientPhone,
+    clientImage,
     location,
     latitude,
     longitude,
@@ -559,6 +605,7 @@ class _$ServiceRequestImpl implements _ServiceRequest {
     notes,
     completionDate,
     completionNotes,
+    const DeepCollectionEquality().hash(_photos),
   ]);
 
   /// Create a copy of ServiceRequest
@@ -587,6 +634,7 @@ abstract class _ServiceRequest implements ServiceRequest {
     required final String clientId,
     required final String clientName,
     required final String clientPhone,
+    final String? clientImage,
     required final String location,
     @JsonKey(fromJson: _latitudeFromJson) final double? latitude,
     @JsonKey(fromJson: _longitudeFromJson) final double? longitude,
@@ -601,6 +649,7 @@ abstract class _ServiceRequest implements ServiceRequest {
     @JsonKey(fromJson: _dateTimeFromJsonNullable)
     final DateTime? completionDate,
     final String? completionNotes,
+    final List<String> photos,
   }) = _$ServiceRequestImpl;
 
   factory _ServiceRequest.fromJson(Map<String, dynamic> json) =
@@ -620,6 +669,8 @@ abstract class _ServiceRequest implements ServiceRequest {
   String get clientName;
   @override
   String get clientPhone;
+  @override
+  String? get clientImage;
   @override
   String get location;
   @override
@@ -652,6 +703,8 @@ abstract class _ServiceRequest implements ServiceRequest {
   DateTime? get completionDate;
   @override
   String? get completionNotes;
+  @override
+  List<String> get photos;
 
   /// Create a copy of ServiceRequest
   /// with the given fields replaced by the non-null parameter values.

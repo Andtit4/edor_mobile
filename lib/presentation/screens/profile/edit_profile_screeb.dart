@@ -123,9 +123,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     print('==================');
     
     if (imageUrl != null && mounted) {
+      print('=== UPDATING PROFILE IMAGE ===');
+      print('Image URL to update: $imageUrl');
+      
       // Mettre à jour l'utilisateur dans le provider auth
       final authNotifier = ref.read(authProvider.notifier);
       await authNotifier.updateProfileImage(imageUrl);
+      
+      // Vérifier que l'utilisateur a été mis à jour
+      final updatedAuthState = ref.read(authProvider);
+      print('Updated user profileImage: ${updatedAuthState.user?.profileImage}');
+      print('===============================');
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

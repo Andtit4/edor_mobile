@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../widgets/profile_avatar.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -52,30 +53,45 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Row(
                   children: [
                     // Profile Picture
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.purple.withOpacity(0.1),
-                        border: Border.all(
-                          color: AppColors.borderColor,
-                          width: 2,
-                        ),
-                      ),
-                      child: currentUser?.email != null
-                          ? ClipOval(
-                              child: Image.network(
-                                currentUser!.email!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return _buildAvatarFallback(currentUser.firstName);
-                                },
-                              ),
-                            )
-                          : _buildAvatarFallback(currentUser?.firstName ?? 'U'),
+                    ProfileAvatar(
+                      imageUrl: currentUser?.profileImage,
+                      name: currentUser?.firstName,
+                      size: 60.0,
+                      showBorder: true,
                     ),
                     const SizedBox(width: 16),
+                    
+                    
+                    // Debug info temporaire
+                    if (currentUser?.profileImage != null) ...[
+                      /* Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.yellow.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Debug - Image URL:',
+                              style: AppTextStyles.caption.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              currentUser!.profileImage!,
+                              style: AppTextStyles.caption.copyWith(
+                                fontSize: 10,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ), */
+                      const SizedBox(height: 8),
+                    ],
                     
                     // User Info
                     Expanded(

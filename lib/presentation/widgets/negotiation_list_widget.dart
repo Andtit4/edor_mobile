@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/utils/price_converter.dart';
 import '../../domain/entities/price_negotiation.dart';
 import '../providers/price_negotiation_provider.dart';
 import '../providers/auth_provider.dart';
@@ -144,7 +145,7 @@ class NegotiationListWidget extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${negotiation.proposedPrice.toStringAsFixed(2)} €',
+                PriceConverter.formatEuroToFcfa(negotiation.proposedPrice),
                 style: AppTextStyles.h4.copyWith(
                   color: const Color(0xFF8B5CF6),
                   fontWeight: FontWeight.bold,

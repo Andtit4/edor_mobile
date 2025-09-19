@@ -41,6 +41,9 @@ import {
   
 	@Column()
 	clientPhone: string;
+
+	@Column({ nullable: true })
+	clientImage: string;
   
 	@Column()
 	location: string;
@@ -78,6 +81,9 @@ import {
 
 	@Column({ type: 'text', nullable: true })
 	completionNotes: string;
+
+	@Column({ type: 'json', nullable: true })
+	photos: string[]; // Array of image URLs
   
 	@CreateDateColumn()
 	createdAt: Date;

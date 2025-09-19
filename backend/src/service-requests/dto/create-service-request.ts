@@ -18,6 +18,10 @@ export class CreateServiceRequestDto {
   @IsString()
   clientPhone: string;
 
+  @IsOptional()
+  @IsString()
+  clientImage?: string;
+
   @IsString()
   location: string;
 
@@ -38,4 +42,7 @@ export class CreateServiceRequestDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @IsOptional()
+  photos?: string[]; // Array of image URLs
 }

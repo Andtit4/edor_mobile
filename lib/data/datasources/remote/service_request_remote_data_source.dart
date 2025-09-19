@@ -18,12 +18,14 @@ abstract class ServiceRequestRemoteDataSource {
     String category,
     String clientName,
     String clientPhone,
+    String? clientImage,
     String location,
     double? latitude,
     double? longitude,
     double budget,
     DateTime deadline,
     String? notes,
+    List<String>? photos,
     String token,
   );
   Future<ServiceRequest> updateServiceRequest(String id, Map<String, dynamic> data, String token);
@@ -145,12 +147,14 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
     String category,
     String clientName,
     String clientPhone,
+    String? clientImage,
     String location,
     double? latitude,
     double? longitude,
     double budget,
     DateTime deadline,
     String? notes,
+    List<String>? photos,
     String token,
   ) async {
     if (!await networkInfo.isConnected) {
@@ -173,12 +177,14 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
         'category': category,
         'clientName': clientName,
         'clientPhone': clientPhone,
+        'clientImage': clientImage,
         'location': location,
         'latitude': latitude,
         'longitude': longitude,
         'budget': budget,
         'deadline': deadline.toIso8601String(),
         'notes': notes,
+        'photos': photos,
       }),
     );
 

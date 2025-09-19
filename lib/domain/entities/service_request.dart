@@ -13,6 +13,7 @@ class ServiceRequest with _$ServiceRequest {
     required String clientId,
     required String clientName,
     required String clientPhone,
+    String? clientImage,
     required String location,
     @JsonKey(fromJson: _latitudeFromJson) double? latitude,
     @JsonKey(fromJson: _longitudeFromJson) double? longitude,
@@ -26,6 +27,7 @@ class ServiceRequest with _$ServiceRequest {
     String? notes,
     @JsonKey(fromJson: _dateTimeFromJsonNullable) DateTime? completionDate,
     String? completionNotes,
+    @Default([]) List<String> photos,
   }) = _ServiceRequest;
 
   factory ServiceRequest.fromJson(Map<String, dynamic> json) =>

@@ -25,6 +25,7 @@ mixin _$Prestataire {
   String get name => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
   String? get avatar => throw _privateConstructorUsedError;
+  String? get profileImage => throw _privateConstructorUsedError;
   String? get phone => throw _privateConstructorUsedError;
   String get category => throw _privateConstructorUsedError;
   String get location => throw _privateConstructorUsedError;
@@ -69,6 +70,7 @@ abstract class $PrestataireCopyWith<$Res> {
     String name,
     String email,
     String? avatar,
+    String? profileImage,
     String? phone,
     String category,
     String location,
@@ -106,6 +108,7 @@ class _$PrestataireCopyWithImpl<$Res, $Val extends Prestataire>
     Object? name = null,
     Object? email = null,
     Object? avatar = freezed,
+    Object? profileImage = freezed,
     Object? phone = freezed,
     Object? category = null,
     Object? location = null,
@@ -142,6 +145,11 @@ class _$PrestataireCopyWithImpl<$Res, $Val extends Prestataire>
                 freezed == avatar
                     ? _value.avatar
                     : avatar // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            profileImage:
+                freezed == profileImage
+                    ? _value.profileImage
+                    : profileImage // ignore: cast_nullable_to_non_nullable
                         as String?,
             phone:
                 freezed == phone
@@ -233,6 +241,7 @@ abstract class _$$PrestataireImplCopyWith<$Res>
     String name,
     String email,
     String? avatar,
+    String? profileImage,
     String? phone,
     String category,
     String location,
@@ -269,6 +278,7 @@ class __$$PrestataireImplCopyWithImpl<$Res>
     Object? name = null,
     Object? email = null,
     Object? avatar = freezed,
+    Object? profileImage = freezed,
     Object? phone = freezed,
     Object? category = null,
     Object? location = null,
@@ -305,6 +315,11 @@ class __$$PrestataireImplCopyWithImpl<$Res>
             freezed == avatar
                 ? _value.avatar
                 : avatar // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        profileImage:
+            freezed == profileImage
+                ? _value.profileImage
+                : profileImage // ignore: cast_nullable_to_non_nullable
                     as String?,
         phone:
             freezed == phone
@@ -389,6 +404,7 @@ class _$PrestataireImpl implements _Prestataire {
     required this.name,
     required this.email,
     this.avatar,
+    this.profileImage,
     this.phone,
     required this.category,
     required this.location,
@@ -418,6 +434,8 @@ class _$PrestataireImpl implements _Prestataire {
   final String email;
   @override
   final String? avatar;
+  @override
+  final String? profileImage;
   @override
   final String? phone;
   @override
@@ -471,7 +489,7 @@ class _$PrestataireImpl implements _Prestataire {
 
   @override
   String toString() {
-    return 'Prestataire(id: $id, name: $name, email: $email, avatar: $avatar, phone: $phone, category: $category, location: $location, description: $description, rating: $rating, pricePerHour: $pricePerHour, skills: $skills, portfolio: $portfolio, isAvailable: $isAvailable, completedJobs: $completedJobs, totalReviews: $totalReviews, reviewCount: $reviewCount, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Prestataire(id: $id, name: $name, email: $email, avatar: $avatar, profileImage: $profileImage, phone: $phone, category: $category, location: $location, description: $description, rating: $rating, pricePerHour: $pricePerHour, skills: $skills, portfolio: $portfolio, isAvailable: $isAvailable, completedJobs: $completedJobs, totalReviews: $totalReviews, reviewCount: $reviewCount, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -483,6 +501,8 @@ class _$PrestataireImpl implements _Prestataire {
             (identical(other.name, name) || other.name == name) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.avatar, avatar) || other.avatar == avatar) &&
+            (identical(other.profileImage, profileImage) ||
+                other.profileImage == profileImage) &&
             (identical(other.phone, phone) || other.phone == phone) &&
             (identical(other.category, category) ||
                 other.category == category) &&
@@ -514,12 +534,13 @@ class _$PrestataireImpl implements _Prestataire {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     name,
     email,
     avatar,
+    profileImage,
     phone,
     category,
     location,
@@ -534,7 +555,7 @@ class _$PrestataireImpl implements _Prestataire {
     reviewCount,
     createdAt,
     updatedAt,
-  );
+  ]);
 
   /// Create a copy of Prestataire
   /// with the given fields replaced by the non-null parameter values.
@@ -556,6 +577,7 @@ abstract class _Prestataire implements Prestataire {
     required final String name,
     required final String email,
     final String? avatar,
+    final String? profileImage,
     final String? phone,
     required final String category,
     required final String location,
@@ -584,6 +606,8 @@ abstract class _Prestataire implements Prestataire {
   String get email;
   @override
   String? get avatar;
+  @override
+  String? get profileImage;
   @override
   String? get phone;
   @override

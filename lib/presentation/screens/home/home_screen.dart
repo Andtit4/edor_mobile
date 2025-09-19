@@ -13,6 +13,10 @@ import '../../../domain/entities/prestataire.dart';
 import '../../../domain/entities/service_request.dart';
 import '../../../domain/entities/service_offer.dart';
 import '../../router/app_routes.dart';
+import '../../widgets/profile_avatar.dart';
+import '../../widgets/image_gallery.dart';
+import '../../widgets/photo_viewer.dart';
+import '../../../core/utils/price_converter.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -97,21 +101,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       padding: const EdgeInsets.all(20),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 25,
-            backgroundImage: user.profileImage != null 
-                ? NetworkImage(user.profileImage!) 
-                : null,
-            child: user.profileImage == null 
-                ? Text(
-                    user.firstName.isNotEmpty ? user.firstName[0].toUpperCase() : 'U',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  )
-                : null,
+          ProfileAvatar(
+            imageUrl: user.profileImage,
+            name: user.firstName,
+            size: 50.0,
+            showBorder: true,
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -481,29 +475,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           Row(
             children: [
               // Prestataire Avatar
-              CircleAvatar(
-                radius: 25,
-                backgroundColor: color.withOpacity(0.1),
-                backgroundImage: prestataire.avatar != null 
-                    ? NetworkImage(prestataire.avatar!) 
-                    : null,
-                child: prestataire.avatar == null
-                    ? Text(
-                        prestataire.name.isNotEmpty ? prestataire.name[0].toUpperCase() : 'P',
-                        style: TextStyle(
-                          color: color,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                    : null,
+              PrestataireAvatar(
+                imageUrl: prestataire.profileImage ?? prestataire.avatar,
+                name: prestataire.name,
+                size: 50.0,
+                showBorder: true,
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
                       prestataire.name,
                       style: AppTextStyles.h4.copyWith(
                         fontWeight: FontWeight.bold,
@@ -518,8 +501,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        prestataire.category,
-                        style: AppTextStyles.bodySmall.copyWith(
+              prestataire.category,
+              style: AppTextStyles.bodySmall.copyWith(
                           color: color,
                           fontWeight: FontWeight.w600,
                         ),
@@ -549,7 +532,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     color: prestataire.isAvailable 
                         ? const Color(0xFF10B981)
                         : Colors.grey[600],
-                    fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -581,14 +564,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.star,
+              children: [
+                Icon(
+                  Icons.star,
                       size: 16,
-                      color: Colors.amber[600],
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
+                  color: Colors.amber[600],
+                ),
+                const SizedBox(width: 4),
+                Text(
                       '${prestataire.rating.toStringAsFixed(1)}',
                       style: AppTextStyles.bodySmall.copyWith(
                         color: Colors.amber[700],
@@ -598,10 +581,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     const SizedBox(width: 4),
                     Text(
                       '(${prestataire.totalReviews})',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                    ),
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                ),
                   ],
                 ),
               ),
@@ -610,45 +593,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               Expanded(
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.location_on,
+                Icon(
+                  Icons.location_on,
                       size: 16,
+                  color: Colors.grey[600],
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    prestataire.location,
+                    style: AppTextStyles.bodySmall.copyWith(
                       color: Colors.grey[600],
                     ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        prestataire.location,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+                ),
+            ),
+          ],
+        ),
           const SizedBox(height: 16),
           // Price and Completed Jobs
           Row(
-            children: [
+          children: [
               if (prestataire.pricePerHour > 0) ...[
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
                     color: const Color(0xFF10B981).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '${prestataire.pricePerHour.toStringAsFixed(0)}€/h',
-                    style: AppTextStyles.bodySmall.copyWith(
+              ),
+              child: Text(
+                    PriceConverter.formatEuroToFcfaPerHour(prestataire.pricePerHour),
+                style: AppTextStyles.bodySmall.copyWith(
                       color: const Color(0xFF10B981),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  fontWeight: FontWeight.w600,
                 ),
+              ),
+            ),
                 const SizedBox(width: 12),
               ],
               Container(
@@ -659,9 +642,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
                 child: Text(
                   '${prestataire.completedJobs} travaux',
-                  style: AppTextStyles.bodySmall.copyWith(
+                style: AppTextStyles.bodySmall.copyWith(
                     color: const Color(0xFF8B5CF6),
-                    fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -674,8 +657,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               Expanded(
                 child: OutlinedButton(
                   onPressed: () {
-                    context.push('/prestataire/${prestataire.id}', extra: prestataire.id);
-                  },
+          context.push('/prestataire/${prestataire.id}', extra: prestataire.id);
+        },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: const Color(0xFF8B5CF6),
                     side: const BorderSide(color: Color(0xFF8B5CF6)),
@@ -801,12 +784,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(
-                Icons.person,
-                size: 16,
-                color: Colors.grey[600],
+              ClientAvatar(
+                imageUrl: request.clientImage,
+                name: request.clientName,
+                size: 24.0,
+                showBorder: false,
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 8),
               Text(
                 request.clientName,
                 style: AppTextStyles.bodySmall.copyWith(
@@ -830,12 +814,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
               ),
               Text(
-                '${request.budget.toStringAsFixed(0)}€',
+                PriceConverter.formatEuroToFcfa(request.budget),
                 style: AppTextStyles.bodySmall.copyWith(
                   color: color,
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              
+              // Photos de la demande
+              if (request.photos.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.photo_camera,
+                      size: 16,
+                      color: Colors.grey[600],
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Photos (${request.photos.length})',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                CompactImageGallery(
+                  imageUrls: request.photos,
+                  onTap: () {
+                    showPhotoViewer(
+                      context,
+                      imageUrls: request.photos,
+                      title: request.title,
+                    );
+                  },
+                ),
+              ],
             ],
           ),
         ],

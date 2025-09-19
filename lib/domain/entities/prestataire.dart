@@ -10,6 +10,7 @@ class Prestataire with _$Prestataire {
     required String name,
     required String email,
     String? avatar,
+    String? profileImage,
     String? phone,
     required String category,
     required String location,

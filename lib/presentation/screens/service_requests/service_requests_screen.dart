@@ -8,6 +8,8 @@ import '../../../domain/entities/user.dart';
 import '../../providers/service_request_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/price_negotiation_provider.dart';
+import '../../widgets/profile_avatar.dart';
+import '../../../core/utils/price_converter.dart';
 
 class ServiceRequestsScreen extends ConsumerStatefulWidget {
   const ServiceRequestsScreen({super.key});
@@ -427,12 +429,13 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(
-                Icons.person,
-                size: 16,
-                color: Colors.grey[600],
+              ClientAvatar(
+                imageUrl: request.clientImage,
+                name: request.clientName,
+                size: 24.0,
+                showBorder: false,
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 8),
               Text(
                 request.clientName,
                 style: AppTextStyles.bodySmall.copyWith(
@@ -456,7 +459,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
                 ),
               ),
               Text(
-                '${request.budget.toStringAsFixed(0)}€',
+                PriceConverter.formatEuroToFcfa(request.budget),
                 style: AppTextStyles.bodySmall.copyWith(
                   color: color,
                   fontWeight: FontWeight.w600,

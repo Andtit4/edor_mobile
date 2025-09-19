@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../providers/prestataire_provider.dart';
+import '../../../core/utils/price_converter.dart';
 
 class ReservationScreen extends ConsumerStatefulWidget {
   final String prestataireId;
@@ -103,7 +104,7 @@ class _ReservationScreenState extends ConsumerState<ReservationScreen> {
       return const Center(child: Text('Prestataire non trouvé'));
     }
 
-    final totalPrice = prestataire.pricePerHour * _duration;
+    final totalPrice = prestataire.pricePerHour.toDouble() * _duration;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -152,7 +153,7 @@ class _ReservationScreenState extends ConsumerState<ReservationScreen> {
                             ),
                           ),
                           Text(
-                            '${prestataire.pricePerHour}€/h',
+                            PriceConverter.formatEuroToFcfaPerHour(prestataire.pricePerHour),
                             style: AppTextStyles.bodyLarge.copyWith(
                               color: const Color(0xFF8B5CF6),
                               fontWeight: FontWeight.w600,
@@ -370,7 +371,7 @@ class _ReservationScreenState extends ConsumerState<ReservationScreen> {
                         style: AppTextStyles.bodyMedium,
                       ),
                       Text(
-                        '${prestataire.pricePerHour}€',
+                        PriceConverter.formatEuroToFcfa(prestataire.pricePerHour),
                         style: AppTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -388,7 +389,7 @@ class _ReservationScreenState extends ConsumerState<ReservationScreen> {
                         ),
                       ),
                       Text(
-                        '${totalPrice}€',
+                        PriceConverter.formatEuroToFcfa(totalPrice),
                         style: AppTextStyles.h4.copyWith(
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF8B5CF6),

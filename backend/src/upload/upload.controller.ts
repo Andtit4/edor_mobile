@@ -5,13 +5,14 @@ import {
   Get,
   UseInterceptors,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   Request,
   Param,
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UploadService } from './upload.service';
 import { AuthService } from '../auth/auth.service';
@@ -181,6 +182,99 @@ export class UploadController {
         this.uploadService.deleteProfileImage(filename);
       }
       throw new InternalServerErrorException('Erreur lors de l\'upload de l\'image');
+    }
+  }
+
+  @Post('service-request-images')
+  @UseInterceptors(FilesInterceptor('images', 10, {
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB per file
+    },
+    fileFilter: (req, file, cb) => {
+      console.log('FilesInterceptor - File:', {
+        fieldname: file.fieldname,
+        originalname: file.originalname,
+        mimetype: file.mimetype
+      });
+      
+      // Validation des types de fichiers
+      const allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (allowedMimes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new BadRequestException('Seuls les fichiers JPG, JPEG, PNG et GIF sont autorisés'), false);
+      }
+    }
+  }))
+  async uploadServiceRequestImages(
+    @UploadedFiles() files: any[],
+    @Request() req: any,
+  ) {
+    console.log('Upload multiple images request received:', {
+      filesCount: files?.length || 0,
+      files: files?.map(f => ({
+        originalname: f.originalname,
+        mimetype: f.mimetype,
+        size: f.size
+      }))
+    });
+
+    if (!files || files.length === 0) {
+      throw new BadRequestException('Aucun fichier fourni');
+    }
+
+    if (files.length > 10) {
+      throw new BadRequestException('Maximum 10 images autorisées');
+    }
+
+    // Validation de la taille pour chaque fichier
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    for (const file of files) {
+      if (file.size > maxSize) {
+        throw new BadRequestException(`Le fichier ${file.originalname} est trop volumineux (max 5MB)`);
+      }
+    }
+
+    try {
+      const userId = req.user.id;
+      console.log('Upload service request images for user:', userId);
+
+      const imageUrls: string[] = [];
+      const fs = require('fs');
+      const path = require('path');
+      const uploadPath = path.join(process.cwd(), 'uploads', 'service-requests');
+      
+      // Créer le dossier s'il n'existe pas
+      if (!fs.existsSync(uploadPath)) {
+        fs.mkdirSync(uploadPath, { recursive: true });
+      }
+
+      // Traiter chaque fichier
+      for (const file of files) {
+        // Générer un nom de fichier unique
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = file.originalname.split('.').pop();
+        const filename = `service-request-${uniqueSuffix}.${ext}`;
+        
+        // Sauvegarder le fichier
+        const filePath = path.join(uploadPath, filename);
+        fs.writeFileSync(filePath, file.buffer);
+        
+        // Générer l'URL
+        const imageUrl = this.uploadService.getServiceRequestImageUrl(filename);
+        imageUrls.push(imageUrl);
+        
+        console.log('Image sauvegardée:', filename, 'URL:', imageUrl);
+      }
+
+      return {
+        message: 'Images uploadées avec succès',
+        imageUrls,
+        count: imageUrls.length,
+      };
+    } catch (error) {
+      console.error('Erreur lors de l\'upload des images:', error);
+      throw new InternalServerErrorException('Erreur lors de l\'upload des images');
     }
   }
 }
