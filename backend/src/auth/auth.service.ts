@@ -178,4 +178,39 @@ export class AuthService {
     const { password: _, ...userWithoutPassword } = user;
     return userWithoutPassword as User;
   }
+
+  async updateProfileImage(id: string, imageUrl: string): Promise<User | Prestataire | null> {
+    console.log('=== UPDATE PROFILE IMAGE ===');
+    console.log('ID utilisateur:', id);
+    console.log('URL image:', imageUrl);
+    
+    // Chercher d'abord dans la table prestataire
+    let prestataire = await this.prestataireRepository.findOne({ where: { id } });
+    console.log('Prestataire trouvé:', !!prestataire);
+    
+    if (prestataire) {
+      console.log('Ancienne image prestataire:', prestataire.profileImage);
+      prestataire.profileImage = imageUrl;
+      const updatedPrestataire = await this.prestataireRepository.save(prestataire);
+      console.log('Nouvelle image prestataire:', updatedPrestataire.profileImage);
+      const { password: _, ...prestataireWithoutPassword } = updatedPrestataire;
+      return prestataireWithoutPassword as Prestataire;
+    }
+
+    // Sinon chercher dans la table user
+    const user = await this.userRepository.findOne({ where: { id } });
+    console.log('User trouvé:', !!user);
+    
+    if (!user) {
+      console.log('Aucun utilisateur trouvé avec cet ID');
+      return null;
+    }
+
+    console.log('Ancienne image user:', user.profileImage);
+    user.profileImage = imageUrl;
+    const updatedUser = await this.userRepository.save(user);
+    console.log('Nouvelle image user:', updatedUser.profileImage);
+    const { password: _, ...userWithoutPassword } = updatedUser;
+    return userWithoutPassword as User;
+  }
 }

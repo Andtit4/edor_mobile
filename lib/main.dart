@@ -4,9 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'presentation/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/config/app_config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Charger la configuration depuis le fichier .env
+  await AppConfig.loadFromEnvFile();
   
   final sharedPreferences = await SharedPreferences.getInstance();
   

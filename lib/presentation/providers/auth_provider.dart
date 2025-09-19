@@ -260,6 +260,53 @@ Future<void> register({
     state = state.copyWith(error: null);
   }
 
+  Future<void> updateProfileImage(String imageUrl) async {
+    print('=== UPDATE PROFILE IMAGE ===');
+    print('Current user: ${state.user}');
+    print('Image URL: $imageUrl');
+    
+    if (state.user != null) {
+      // Créer une copie de l'utilisateur avec la nouvelle image
+      final updatedUser = state.user!.copyWith(profileImage: imageUrl);
+      print('Updated user: $updatedUser');
+      
+      state = state.copyWith(user: updatedUser);
+      print('State updated with new user');
+    } else {
+      print('No user in state, cannot update profile image');
+    }
+    print('==================');
+  }
+
+  Future<void> updateProfile({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String phone,
+    required String bio,
+    required String address,
+    required String city,
+    required String postalCode,
+    required UserRole role,
+  }) async {
+    if (state.user != null) {
+      // Créer une copie de l'utilisateur avec les nouvelles données
+      final updatedUser = state.user!.copyWith(
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phone: phone,
+        bio: bio,
+        address: address,
+        city: city,
+        postalCode: postalCode,
+        role: role,
+      );
+      
+      state = state.copyWith(user: updatedUser);
+    }
+  }
+
   Future<void> refreshToken() async {
     final tokenResult = await _authRepository.getToken();
     tokenResult.fold(

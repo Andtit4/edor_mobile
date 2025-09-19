@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../core/errors/exceptions.dart';
 import '../../../core/network/network_info.dart';
+import '../../../core/config/app_config.dart';
 import '../../../domain/entities/service_offer.dart';
 
 abstract class ServiceOfferRemoteDataSource {
@@ -15,7 +16,6 @@ abstract class ServiceOfferRemoteDataSource {
 class ServiceOfferRemoteDataSourceImpl implements ServiceOfferRemoteDataSource {
   final http.Client client;
   final NetworkInfo networkInfo;
-  static const String baseUrl = 'http://localhost:3000';
 
   ServiceOfferRemoteDataSourceImpl({
     required this.client,
@@ -29,7 +29,7 @@ class ServiceOfferRemoteDataSourceImpl implements ServiceOfferRemoteDataSource {
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/service-offers'),
+      Uri.parse('${AppConfig.apiBaseUrl}/service-offers'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -48,7 +48,7 @@ class ServiceOfferRemoteDataSourceImpl implements ServiceOfferRemoteDataSource {
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/service-offers/category/$category'),
+      Uri.parse('${AppConfig.apiBaseUrl}/service-offers/category/$category'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -67,7 +67,7 @@ class ServiceOfferRemoteDataSourceImpl implements ServiceOfferRemoteDataSource {
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/service-offers/$id'),
+      Uri.parse('${AppConfig.apiBaseUrl}/service-offers/$id'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -86,11 +86,11 @@ class ServiceOfferRemoteDataSourceImpl implements ServiceOfferRemoteDataSource {
     }
 
     print('=== API CALL: GET MY OFFERS ===');
-    print('URL: $baseUrl/service-offers/my-offers');
+    print('URL: ${AppConfig.apiBaseUrl}/service-offers/my-offers');
     print('Token: ${token.substring(0, 20)}...');
 
     final response = await client.get(
-      Uri.parse('$baseUrl/service-offers/my-offers'),
+      Uri.parse('${AppConfig.apiBaseUrl}/service-offers/my-offers'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

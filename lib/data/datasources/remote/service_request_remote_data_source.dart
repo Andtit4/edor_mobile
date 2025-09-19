@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../core/errors/exceptions.dart';
 import '../../../core/network/network_info.dart';
+import '../../../core/config/app_config.dart';
 import '../../../domain/entities/service_request.dart';
 import '../../../data/models/service_request_model.dart'; // Ajouter cet import
 
@@ -41,7 +42,6 @@ abstract class ServiceRequestRemoteDataSource {
 class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSource {
   final http.Client client;
   final NetworkInfo networkInfo;
-  static const String baseUrl = 'http://localhost:3000';
 
   ServiceRequestRemoteDataSourceImpl({
     required this.client,
@@ -55,7 +55,7 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/service-requests'),
+      Uri.parse('${AppConfig.apiBaseUrl}/service-requests'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -74,11 +74,11 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
     }
 
     print('=== API CALL: GET MY REQUESTS ===');
-    print('URL: $baseUrl/service-requests/my-requests');
+    print('URL: ${AppConfig.apiBaseUrl}/service-requests/my-requests');
     print('Token: ${token.substring(0, 20)}...');
 
     final response = await client.get(
-      Uri.parse('$baseUrl/service-requests/my-requests'),
+      Uri.parse('${AppConfig.apiBaseUrl}/service-requests/my-requests'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -104,7 +104,7 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/service-requests/assigned-to-me'),
+      Uri.parse('${AppConfig.apiBaseUrl}/service-requests/assigned-to-me'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -126,7 +126,7 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/service-requests/$id'),
+      Uri.parse('${AppConfig.apiBaseUrl}/service-requests/$id'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -158,11 +158,11 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
     }
 
     print('=== API CALL: CREATE SERVICE REQUEST ===');
-    print('URL: $baseUrl/service-requests');
+    print('URL: ${AppConfig.apiBaseUrl}/service-requests');
     print('Token: ${token.substring(0, 20)}...');
 
     final response = await client.post(
-      Uri.parse('$baseUrl/service-requests'),
+      Uri.parse('${AppConfig.apiBaseUrl}/service-requests'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -200,7 +200,7 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
     }
 
     final response = await client.put(
-      Uri.parse('$baseUrl/service-requests/$id'),
+      Uri.parse('${AppConfig.apiBaseUrl}/service-requests/$id'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -223,7 +223,7 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
     }
 
     final response = await client.delete(
-      Uri.parse('$baseUrl/service-requests/$id'),
+      Uri.parse('${AppConfig.apiBaseUrl}/service-requests/$id'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -242,7 +242,7 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
     }
 
     final response = await client.put(
-      Uri.parse('$baseUrl/service-requests/$id/assign'),
+      Uri.parse('${AppConfig.apiBaseUrl}/service-requests/$id/assign'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -274,7 +274,7 @@ class ServiceRequestRemoteDataSourceImpl implements ServiceRequestRemoteDataSour
     }
 
     final response = await client.put(
-      Uri.parse('$baseUrl/service-requests/$id/complete'),
+      Uri.parse('${AppConfig.apiBaseUrl}/service-requests/$id/complete'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../core/errors/exceptions.dart';
 import '../../../core/network/network_info.dart';
+import '../../../core/config/app_config.dart';
 import '../../../domain/entities/review.dart';
 
 abstract class ReviewRemoteDataSource {
@@ -11,7 +12,6 @@ abstract class ReviewRemoteDataSource {
 class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
   final http.Client client;
   final NetworkInfo networkInfo;
-  static const String baseUrl = 'http://localhost:3000';
 
   ReviewRemoteDataSourceImpl({
     required this.client,
@@ -25,7 +25,7 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/reviews/prestataire/$prestataireId'),
+      Uri.parse('${AppConfig.apiBaseUrl}/reviews/prestataire/$prestataireId'),
       headers: {'Content-Type': 'application/json'},
     );
 

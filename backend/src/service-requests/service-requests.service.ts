@@ -22,6 +22,14 @@ export class ServiceRequestsService {
     clientId: string,
     clientEmail?: string,
   ): Promise<ServiceRequest> {
+    console.log('=== CREATING SERVICE REQUEST ===');
+    console.log('Client ID:', clientId);
+    console.log('Title:', createServiceRequestDto.title);
+    console.log('Location:', createServiceRequestDto.location);
+    console.log('Latitude:', createServiceRequestDto.latitude);
+    console.log('Longitude:', createServiceRequestDto.longitude);
+    console.log('===============================');
+    
     const serviceRequest = this.serviceRequestRepository.create({
       ...createServiceRequestDto,
       clientId,

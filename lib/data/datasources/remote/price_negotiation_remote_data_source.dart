@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../core/errors/exceptions.dart';
 import '../../../core/network/network_info.dart';
+import '../../../core/config/app_config.dart';
 import '../../../domain/entities/price_negotiation.dart';
 import '../../../data/models/price_negotiation_model.dart';
 
@@ -51,7 +52,6 @@ abstract class PriceNegotiationRemoteDataSource {
 class PriceNegotiationRemoteDataSourceImpl implements PriceNegotiationRemoteDataSource {
   final http.Client client;
   final NetworkInfo networkInfo;
-  static const String baseUrl = 'http://localhost:3000';
 
   PriceNegotiationRemoteDataSourceImpl({
     required this.client,
@@ -89,10 +89,10 @@ class PriceNegotiationRemoteDataSourceImpl implements PriceNegotiationRemoteData
     };
     
     print('Request body: $requestBody');
-    print('Sending POST to: $baseUrl/price-negotiations');
+    print('Sending POST to: ${AppConfig.apiBaseUrl}/price-negotiations');
 
     final response = await client.post(
-      Uri.parse('$baseUrl/price-negotiations'),
+      Uri.parse('${AppConfig.apiBaseUrl}/price-negotiations'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -123,7 +123,7 @@ class PriceNegotiationRemoteDataSourceImpl implements PriceNegotiationRemoteData
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/price-negotiations/service-request/$serviceRequestId'),
+      Uri.parse('${AppConfig.apiBaseUrl}/price-negotiations/service-request/$serviceRequestId'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -148,7 +148,7 @@ class PriceNegotiationRemoteDataSourceImpl implements PriceNegotiationRemoteData
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/price-negotiations/$id'),
+      Uri.parse('${AppConfig.apiBaseUrl}/price-negotiations/$id'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -174,7 +174,7 @@ class PriceNegotiationRemoteDataSourceImpl implements PriceNegotiationRemoteData
     }
 
     final response = await client.put(
-      Uri.parse('$baseUrl/price-negotiations/$id/status'),
+      Uri.parse('${AppConfig.apiBaseUrl}/price-negotiations/$id/status'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -200,7 +200,7 @@ class PriceNegotiationRemoteDataSourceImpl implements PriceNegotiationRemoteData
     }
 
     final response = await client.delete(
-      Uri.parse('$baseUrl/price-negotiations/$id'),
+      Uri.parse('${AppConfig.apiBaseUrl}/price-negotiations/$id'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -222,7 +222,7 @@ class PriceNegotiationRemoteDataSourceImpl implements PriceNegotiationRemoteData
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/price-negotiations/client/$clientId'),
+      Uri.parse('${AppConfig.apiBaseUrl}/price-negotiations/client/$clientId'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -247,7 +247,7 @@ class PriceNegotiationRemoteDataSourceImpl implements PriceNegotiationRemoteData
     }
 
     final response = await client.put(
-      Uri.parse('$baseUrl/price-negotiations/$id/accept'),
+      Uri.parse('${AppConfig.apiBaseUrl}/price-negotiations/$id/accept'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

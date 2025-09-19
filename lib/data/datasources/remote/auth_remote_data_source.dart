@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../core/errors/exceptions.dart';
 import '../../../core/network/network_info.dart';
+import '../../../core/config/app_config.dart';
 import '../../../domain/entities/user.dart';
 
 abstract class AuthRemoteDataSource {
@@ -26,7 +27,6 @@ abstract class AuthRemoteDataSource {
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final http.Client client;
   final NetworkInfo networkInfo;
-  static const String baseUrl = 'http://localhost:3000';
 
   AuthRemoteDataSourceImpl({
     required this.client,
@@ -40,7 +40,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
 
     final response = await client.post(
-      Uri.parse('$baseUrl/auth/login'),
+      Uri.parse('${AppConfig.apiBaseUrl}/auth/login'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'email': email,
@@ -90,12 +90,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
 
     print('=== API CALL: REGISTER ===');
-    print('URL: $baseUrl/auth/register');
+    print('URL: ${AppConfig.apiBaseUrl}/auth/register');
     print('Email: $email');
     print('Role: $role');
 
     final response = await client.post(
-      Uri.parse('$baseUrl/auth/register'),
+      Uri.parse('${AppConfig.apiBaseUrl}/auth/register'),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -134,7 +134,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/auth/profile'),
+      Uri.parse('${AppConfig.apiBaseUrl}/auth/profile'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

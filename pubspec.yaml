@@ -43,6 +43,7 @@ dependencies:
   
   # HTTP & Networking
   dio: ^5.4.3+1
+  http_parser: ^4.0.2
   
   # UI & Images
   cached_network_image: ^3.3.1
@@ -65,6 +66,9 @@ dependencies:
   
   # Google Maps
   url_launcher: ^6.2.2
+  
+  # Image Picker
+  image_picker: ^1.0.7
   
   # Functional Programming
   fpdart: ^1.1.0

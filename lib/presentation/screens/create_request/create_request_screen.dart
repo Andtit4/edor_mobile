@@ -27,7 +27,8 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
   final _budgetController = TextEditingController();
   final _phoneController = TextEditingController();
   final _notesController = TextEditingController();
-
+  double latitude = 0.0;
+  double longitude = 0.0;
   String _selectedCategory = 'Plomberie';
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 7));
   String _selectedUrgency = 'Normal';
@@ -94,7 +95,7 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
     super.dispose();
   }
 
-  Future<void> _getCurrentLocation() async {
+  Future<bool> _getCurrentLocation() async {
     try {
       // Vérifier si le service de localisation est activé
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -107,7 +108,7 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
             ),
           );
         }
-        return;
+        return false;
       }
 
       // Vérifier les permissions
@@ -123,7 +124,7 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
               ),
             );
           }
-          return;
+          return false;
         }
       }
 
@@ -136,7 +137,7 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
             ),
           );
         }
-        return;
+        return false;
       }
 
       // Afficher un indicateur de chargement
@@ -191,8 +192,13 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
             }
           }
         }
+
+        setState(() {
+          latitude = position?.latitude ?? 0.0;
+          longitude = position?.longitude ?? 0.0;
+        });
         
-        print('[DEBUG] Position finale avec précision: ${position?.accuracy ?? 'inconnue'}m');
+        print('[DEBUG] Position finale avec précision: ${position?.accuracy ?? 'inconnue'}m  ${latitude}, ${longitude}');
         
       } catch (e) {
         print('[DEBUG] Erreur haute précision, tentative précision moyenne: $e');
@@ -243,30 +249,26 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
       }
 
       // Afficher la boîte de dialogue de confirmation
+      print('[DEBUG] === ARRIVÉ À LA CONFIRMATION ===');
+      print('[DEBUG] Position: ${position?.latitude}, ${position?.longitude}');
+      print('[DEBUG] Quartier: $quartier');
       if (mounted) {
         bool confirmed = await _showLocationConfirmationDialog(position, quartier);
         
-        // Si l'utilisateur veut refaire la détection, relancer le processus
-        while (!confirmed && mounted) {
-          // Relancer la détection
-          confirmed = await _getCurrentLocationWithConfirmation();
-          if (confirmed) {
-            // Mettre à jour la position et le quartier
-            setState(() {
-              _currentPosition = position;
-              _locationController.text = quartier ?? '';
-            });
-            break;
-          }
-        }
-        
-        if (confirmed && mounted) {
+        if (confirmed) {
+          print('[DEBUG] Position confirmée - Latitude: ${position.latitude}, Longitude: ${position.longitude}');
           setState(() {
             _currentPosition = position;
             _locationController.text = quartier ?? '';
           });
+          print('[DEBUG] _currentPosition mis à jour: $_currentPosition');
+        } else {
+          print('[DEBUG] Position non confirmée, relancer la détection');
+          // Relancer la détection si l'utilisateur a choisi de refaire
+          return await _getCurrentLocationWithConfirmation();
         }
       }
+      return true; // Position confirmée
     } catch (e) {
       // Fermer l'indicateur de chargement s'il est ouvert
       if (mounted) {
@@ -286,6 +288,7 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
           ),
         );
       }
+      return false; // Erreur
     }
   }
 
@@ -468,8 +471,6 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
 
   Future<bool> _showLocationConfirmationDialog(Position position, String? quartier) async {
     final accuracy = position.accuracy;
-    final latitude = position.latitude;
-    final longitude = position.longitude;
     
     // Déterminer la couleur et le message selon la précision
     Color accuracyColor;
@@ -576,11 +577,11 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Latitude: ${latitude.toStringAsFixed(6)}',
+                      'Latitude: ${position.latitude.toStringAsFixed(6)}',
                       style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
                     ),
                     Text(
-                      'Longitude: ${longitude.toStringAsFixed(6)}',
+                      'Longitude: ${position.longitude.toStringAsFixed(6)}',
                       style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
                     ),
                   ],
@@ -655,6 +656,7 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(false);
+                
               },
               child: const Text(
                 'Refaire la détection',
@@ -663,6 +665,9 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
             ),
             ElevatedButton(
               onPressed: () {
+                // Navigator.of(context).pop(true);
+                latitude = position.latitude;
+                longitude = position.longitude;
                 Navigator.of(context).pop(true);
               },
               style: ElevatedButton.styleFrom(
@@ -959,32 +964,32 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
                     ),
                   ),
                 ),
-                if (_currentPosition != null) ...[
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.green.withOpacity(0.3)),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.green, size: 16),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Position enregistrée (précision: ${_currentPosition!.accuracy.toStringAsFixed(1)}m): ${_currentPosition!.latitude.toStringAsFixed(6)}, ${_currentPosition!.longitude.toStringAsFixed(6)}',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: Colors.green[700],
-                              fontSize: 12,
+                  if (latitude != 0.0 && longitude != 0.0) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.green.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.green, size: 16),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Position enregistrée: ${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: Colors.green[700],
+                                fontSize: 12,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
               ],
             ),
           ),
@@ -1600,6 +1605,18 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
       }
 
       // Créer la demande via l'API
+      print('=== CREATING SERVICE REQUEST ===');
+      print('Title: ${_titleController.text.trim()}');
+      print('Description: ${_descriptionController.text.trim()}');
+      print('Category: $_selectedCategory');
+      print('Location: ${_locationController.text.trim()}');
+      print('Current Position: $_currentPosition');
+      print('Latitude: $latitude');
+      print('Longitude: $longitude');
+      print('Budget: ${_budgetController.text.trim()}');
+      print('Deadline: ${_selectedDate ?? DateTime.now().add(const Duration(days: 7))}');
+      print('===============================');
+      
       final newRequest = await ref.read(serviceRequestProvider.notifier).createRequest(
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
@@ -1607,8 +1624,8 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
         clientName: '${user.firstName} ${user.lastName}',
         clientPhone: user.phone,
         location: _locationController.text.trim(),
-        latitude: _currentPosition?.latitude,
-        longitude: _currentPosition?.longitude,
+        latitude: latitude,
+        longitude: longitude,
         budget: double.parse(_budgetController.text.trim()),
         deadline: _selectedDate ?? DateTime.now().add(const Duration(days: 7)),
         notes: _selectedUrgency != null ? 'Urgence: $_selectedUrgency' : null,

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../core/errors/exceptions.dart';
 import '../../../core/network/network_info.dart';
+import '../../../core/config/app_config.dart';
 import '../../../domain/entities/message.dart';
 import '../../../domain/entities/conversation.dart';
 import '../../../data/models/message_model.dart';
@@ -21,7 +22,6 @@ abstract class MessageRemoteDataSource {
 class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
   final http.Client client;
   final NetworkInfo networkInfo;
-  static const String baseUrl = 'http://localhost:3000';
 
   MessageRemoteDataSourceImpl({
     required this.client,
@@ -35,7 +35,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/messages/conversations'),
+      Uri.parse('${AppConfig.apiBaseUrl}/messages/conversations'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -58,7 +58,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/messages/conversations/$id'),
+      Uri.parse('${AppConfig.apiBaseUrl}/messages/conversations/$id'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -80,7 +80,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/messages/conversations/$conversationId/messages'),
+      Uri.parse('${AppConfig.apiBaseUrl}/messages/conversations/$conversationId/messages'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -102,7 +102,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
     }
 
     final response = await client.post(
-      Uri.parse('$baseUrl/messages/conversations/$conversationId/messages'),
+      Uri.parse('${AppConfig.apiBaseUrl}/messages/conversations/$conversationId/messages'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -128,7 +128,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
     }
 
     final response = await client.post(
-      Uri.parse('$baseUrl/messages/conversations'),
+      Uri.parse('${AppConfig.apiBaseUrl}/messages/conversations'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -159,7 +159,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
     }
 
     final response = await client.post(
-      Uri.parse('$baseUrl/messages/conversations/$conversationId/read'),
+      Uri.parse('${AppConfig.apiBaseUrl}/messages/conversations/$conversationId/read'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -178,7 +178,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/messages/unread-count'),
+      Uri.parse('${AppConfig.apiBaseUrl}/messages/unread-count'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../core/errors/exceptions.dart';
 import '../../../core/network/network_info.dart';
+import '../../../core/config/app_config.dart';
 import '../../../domain/entities/prestataire.dart';
 
 abstract class PrestataireRemoteDataSource {
@@ -14,7 +15,6 @@ abstract class PrestataireRemoteDataSource {
 class PrestataireRemoteDataSourceImpl implements PrestataireRemoteDataSource {
   final http.Client client;
   final NetworkInfo networkInfo;
-  static const String baseUrl = 'http://localhost:3000';
 
   PrestataireRemoteDataSourceImpl({
     required this.client,
@@ -28,7 +28,7 @@ class PrestataireRemoteDataSourceImpl implements PrestataireRemoteDataSource {
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/prestataires'),
+      Uri.parse('${AppConfig.apiBaseUrl}/prestataires'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -68,7 +68,7 @@ class PrestataireRemoteDataSourceImpl implements PrestataireRemoteDataSource {
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/prestataires/category/$category'),
+      Uri.parse('${AppConfig.apiBaseUrl}/prestataires/category/$category'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -87,7 +87,7 @@ class PrestataireRemoteDataSourceImpl implements PrestataireRemoteDataSource {
     }
 
     final response = await client.get(
-      Uri.parse('$baseUrl/prestataires/$id'),
+      Uri.parse('${AppConfig.apiBaseUrl}/prestataires/$id'),
       headers: {'Content-Type': 'application/json'},
     );
 

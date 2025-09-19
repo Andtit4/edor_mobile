@@ -1,7 +1,12 @@
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/upload_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../domain/entities/user.dart';
@@ -28,6 +33,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   
   bool _isLoading = false;
   UserRole _selectedRole = UserRole.client;
+  XFile? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -39,15 +46,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final authState = ref.read(authProvider);
     final currentUser = authState.user;
     if (currentUser != null) {
-      _firstNameController.text = currentUser.firstName;
-      _lastNameController.text = currentUser.lastName;
-      _lastNameController.text = currentUser.phone;
-      _emailController.text = currentUser.email;
-      _phoneController.text =   '';
-      _bioController.text =  '';
-      _addressController.text =   '';
-      _cityController.text =   '';
-      _postalCodeController.text =   '';
+      _firstNameController.text = currentUser.firstName ?? '';
+      _lastNameController.text = currentUser.lastName ?? '';
+      _emailController.text = currentUser.email ?? '';
+      _phoneController.text = currentUser.phone ?? '';
+      _bioController.text = currentUser.bio ?? '';
+      _addressController.text = currentUser.address ?? '';
+      _cityController.text = currentUser.city ?? '';
+      _postalCodeController.text = currentUser.postalCode ?? '';
       _selectedRole = currentUser.role;
     }
   }
@@ -65,6 +71,79 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+      
+      if (image != null) {
+        print('Image sélectionnée: ${image.name}, path: ${image.path}');
+        setState(() {
+          _selectedImage = image;
+        });
+      }
+    } catch (e) {
+      print('Erreur lors de la sélection de l\'image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de la sélection de l\'image: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _uploadProfileImage() async {
+    if (_selectedImage == null) return;
+
+    final authState = ref.read(authProvider);
+    final token = authState.token;
+    
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vous devez être connecté pour uploader une image'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    final uploadNotifier = ref.read(uploadProvider.notifier);
+    final imageUrl = await uploadNotifier.uploadProfileImage(_selectedImage!, token);
+    
+    print('=== UPLOAD RESULT ===');
+    print('Image URL returned: $imageUrl');
+    print('==================');
+    
+    if (imageUrl != null && mounted) {
+      // Mettre à jour l'utilisateur dans le provider auth
+      final authNotifier = ref.read(authProvider.notifier);
+      await authNotifier.updateProfileImage(imageUrl);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Photo de profil mise à jour avec succès'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } else if (mounted) {
+      final uploadState = ref.read(uploadProvider);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(uploadState.error ?? 'Erreur lors de l\'upload'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -73,8 +152,24 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     });
 
     try {
-      // Ici vous pouvez ajouter la logique pour sauvegarder le profil
-      await Future.delayed(const Duration(seconds: 2));
+      // Upload de l'image si une nouvelle image est sélectionnée
+      if (_selectedImage != null) {
+        await _uploadProfileImage();
+      }
+      
+      // Mettre à jour le profil utilisateur
+      final authNotifier = ref.read(authProvider.notifier);
+      await authNotifier.updateProfile(
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim(),
+        bio: _bioController.text.trim(),
+        address: _addressController.text.trim(),
+        city: _cityController.text.trim(),
+        postalCode: _postalCodeController.text.trim(),
+        role: _selectedRole,
+      );
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -144,42 +239,67 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               Center(
                 child: Stack(
                   children: [
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.gray200,
-                        border: Border.all(
-                          color: AppColors.primaryBlue,
-                          width: 3,
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.gray200,
+                          border: Border.all(
+                            color: AppColors.primaryBlue,
+                            width: 3,
+                          ),
                         ),
-                      ),
-                      child: const Icon(
-                        Icons.person,
-                        size: 60,
-                        color: AppColors.gray400,
+                        child: ClipOval(
+                          child: _buildProfileImage(),
+                        ),
                       ),
                     ),
                     Positioned(
                       bottom: 0,
                       right: 0,
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primaryBlue,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.camera_alt,
-                          color: Colors.white,
-                          size: 20,
+                      child: GestureDetector(
+                        onTap: _pickImage,
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: const BoxDecoration(
+                            color: AppColors.primaryBlue,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Indicateur d'upload
+              Consumer(
+                builder: (context, ref, child) {
+                  final uploadState = ref.watch(uploadProvider);
+                  if (uploadState.isUploading) {
+                    return const Center(
+                      child: Column(
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 8),
+                          Text('Upload en cours...'),
+                        ],
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
               
               const SizedBox(height: 30),
@@ -355,6 +475,76 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildProfileImage() {
+    final authState = ref.read(authProvider);
+    final currentUser = authState.user;
+    
+    // Si une nouvelle image est sélectionnée, l'afficher
+    if (_selectedImage != null) {
+      // Pour Flutter Web, nous utilisons une approche différente
+      return FutureBuilder<Uint8List?>(
+        future: _getImageBytes(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data != null) {
+            return Image.memory(
+              snapshot.data!,
+              width: 120,
+              height: 120,
+              fit: BoxFit.cover,
+            );
+          } else if (snapshot.hasError) {
+            return const Icon(
+              Icons.error,
+              size: 60,
+              color: AppColors.error,
+            );
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
+      );
+    }
+    
+    // Sinon, afficher l'image actuelle de l'utilisateur
+    if (currentUser?.profileImage != null && currentUser!.profileImage!.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: currentUser.profileImage!,
+        width: 120,
+        height: 120,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+        errorWidget: (context, url, error) => const Icon(
+          Icons.person,
+          size: 60,
+          color: AppColors.gray400,
+        ),
+      );
+    }
+    
+    // Image par défaut
+    return const Icon(
+      Icons.person,
+      size: 60,
+      color: AppColors.gray400,
+    );
+  }
+
+  Future<Uint8List?> _getImageBytes() async {
+    if (_selectedImage == null) return null;
+    
+    try {
+      // XFile.readAsBytes() fonctionne sur toutes les plateformes
+      return await _selectedImage!.readAsBytes();
+    } catch (e) {
+      print('Erreur lors de la lecture de l\'image: $e');
+      return null;
+    }
   }
 
   Widget _buildRoleCard(UserRole role, String title, String subtitle, IconData icon) {
