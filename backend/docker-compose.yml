@@ -10,9 +10,11 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8090
+      - BASE_URL=http://185.97.146.99:8090
     volumes:
       - ./uploads:/app/uploads
       - ./.env:/app/.env
+    user: "1000:1000"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
