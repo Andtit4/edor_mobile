@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.simple
-    container_name: edor-api
+    container_name: edor-api-prod
     ports:
       - "8090:8090"
     environment:
@@ -13,28 +13,32 @@ services:
       - PORT=8090
       - BASE_URL=http://localhost:8090
     volumes:
-      # Persister les fichiers uploadés
       - ./uploads:/app/uploads
-      # Optionnel: persister les logs
       - ./logs:/app/logs
-    restart: unless-stopped
+    restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 40s
+      retries: 5
+      start_period: 60s
     networks:
       - edor-network
-    # Limites de ressources
+    # Limites de ressources pour la production
     deploy:
       resources:
         limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
           memory: 512M
           cpus: '0.5'
-        reservations:
-          memory: 256M
-          cpus: '0.25'
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
   edor-network:
