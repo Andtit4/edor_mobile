@@ -40,7 +40,7 @@ export class UploadController {
       return { 
         message: 'Image trouvée',
         filePath,
-        url: `http://192.168.1.73:3000/uploads/profiles/${filename}`
+        url: `${this.uploadService.getProfileImageUrl(filename)}`
       };
     } else {
       return { 

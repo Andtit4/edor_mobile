@@ -2,7 +2,7 @@
 import 'dart:io';
 
 class AppConfig {
-  static String _apiBaseUrl = 'http://192.168.100.34:3000';
+  static String _apiBaseUrl = 'http://185.97.146.99:8090';
   static String _appName = 'Edor';
   static String _appVersion = '1.0.0';
   static String _environment = 'development';

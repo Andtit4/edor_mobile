@@ -6,7 +6,7 @@ Le fichier `.env` à la racine du projet contient la configuration de l'applicat
 
 ```env
 # Configuration de l'API
-API_BASE_URL=http://localhost:3000
+API_BASE_URL=http://185.97.146.99:8090
 
 # Configuration de l'application
 APP_NAME=Edor
@@ -27,7 +27,7 @@ Pour changer l'URL de l'API, modifiez simplement le fichier `.env` :
 API_BASE_URL=https://api.edor.com
 
 # Pour un serveur local différent
-API_BASE_URL=http://192.168.1.100:3000
+API_BASE_URL=http://185.97.146.99:8090
 ```
 
 ### 2. Utiliser la configuration dans le code
@@ -50,7 +50,7 @@ String loginUrl = AppConfig.getEndpointUrl('/auth/login');
 
 Si le fichier `.env` n'existe pas ou ne peut pas être lu, l'application utilise les valeurs par défaut :
 
-- `API_BASE_URL`: `http://localhost:3000`
+- `API_BASE_URL`: `http://185.97.146.99:8090`
 - `APP_NAME`: `Edor`
 - `APP_VERSION`: `1.0.0`
 - `ENVIRONMENT`: `development`

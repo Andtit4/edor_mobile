@@ -1,7 +1,7 @@
 // lib/core/config/env.dart
 class Env {
   // Configuration de l'API
-  static const String apiBaseUrl = 'http://192.168.100.34:3000';
+  static const String apiBaseUrl = 'http://185.97.146.99:8090';
   
   // Configuration de l'application
   static const String appName = 'Edor';
