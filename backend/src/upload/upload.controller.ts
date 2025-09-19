@@ -210,6 +210,8 @@ export class UploadController {
     @UploadedFiles() files: any[],
     @Request() req: any,
   ) {
+    console.log('=== UPLOAD SERVICE REQUEST IMAGES ENDPOINT HIT ===');
+    console.log('Files received:', files?.length || 0);
     console.log('Upload multiple images request received:', {
       filesCount: files?.length || 0,
       files: files?.map(f => ({
@@ -267,6 +269,11 @@ export class UploadController {
         console.log('Image sauvegardée:', filename, 'URL:', imageUrl);
       }
 
+      console.log('=== UPLOAD SUCCESS ===');
+      console.log('Image URLs generated:', imageUrls);
+      console.log('Count:', imageUrls.length);
+      console.log('========================');
+      
       return {
         message: 'Images uploadées avec succès',
         imageUrls,

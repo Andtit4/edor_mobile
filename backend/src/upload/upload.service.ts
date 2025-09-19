@@ -46,14 +46,14 @@ export class UploadService {
   }
 
   getProfileImageUrl(filename: string): string {
-    const baseUrl = this.configService.get('BASE_URL', 'http://localhost:3000');
+    const baseUrl = this.configService.get('BASE_URL', 'http://192.168.100.34:3000');
     const imageUrl = `${baseUrl}/uploads/profiles/${filename}`;
     console.log('URL de l\'image générée:', imageUrl);
     return imageUrl;
   }
 
   getServiceRequestImageUrl(filename: string): string {
-    const baseUrl = this.configService.get('BASE_URL', 'http://localhost:3000');
+    const baseUrl = this.configService.get('BASE_URL', 'http://192.168.100.34:3000');
     const imageUrl = `${baseUrl}/uploads/service-requests/${filename}`;
     console.log('URL de l\'image de demande générée:', imageUrl);
     return imageUrl;

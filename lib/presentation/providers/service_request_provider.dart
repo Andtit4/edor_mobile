@@ -61,12 +61,22 @@ class ServiceRequestNotifier extends StateNotifier<ServiceRequestState> {
     state = state.copyWith(isLoading: true, error: null);
     
     try {
+      print('=== LOADING ALL REQUESTS ===');
       final serviceRequests = await _remoteDataSource.getAllServiceRequests();
+      print('Loaded ${serviceRequests.length} requests');
+      
+      // Debug: Vérifier les photos de chaque demande
+      for (int i = 0; i < serviceRequests.length; i++) {
+        final request = serviceRequests[i];
+        print('Request $i: ${request.title} - Photos: ${request.photos.length} - ${request.photos}');
+      }
+      
       state = state.copyWith(
         allRequests: serviceRequests,
         isLoading: false,
       );
     } catch (e) {
+      print('Error loading all requests: $e');
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),

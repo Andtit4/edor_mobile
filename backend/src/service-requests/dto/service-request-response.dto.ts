@@ -19,6 +19,8 @@ export class ServiceRequestResponseDto {
   notes?: string;
   completionDate?: Date;
   completionNotes?: string;
+  photos?: string[];
+  clientImage?: string;
   createdAt: Date;
   updatedAt: Date;
 

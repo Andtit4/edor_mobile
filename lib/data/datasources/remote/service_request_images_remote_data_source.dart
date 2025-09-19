@@ -46,20 +46,40 @@ class ServiceRequestImagesRemoteDataSourceImpl
         
         // Détecter le type MIME
         String mimeType = 'image/jpeg'; // Par défaut
-        if (imageFile.name.toLowerCase().endsWith('.png')) {
+        final fileName = imageFile.name.toLowerCase();
+        
+        if (fileName.endsWith('.png')) {
           mimeType = 'image/png';
-        } else if (imageFile.name.toLowerCase().endsWith('.gif')) {
+        } else if (fileName.endsWith('.gif')) {
           mimeType = 'image/gif';
-        } else if (imageFile.name.toLowerCase().endsWith('.jpg') || 
-                   imageFile.name.toLowerCase().endsWith('.jpeg')) {
+        } else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
           mimeType = 'image/jpeg';
+        } else if (fileName.isEmpty || fileName == 'image_$i.jpg') {
+          // Pour Flutter Web avec blob URLs, détecter le type à partir des bytes
+          if (bytes.length >= 4) {
+            // Vérifier les signatures de fichiers
+            if (bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47) {
+              mimeType = 'image/png';
+            } else if (bytes[0] == 0x47 && bytes[1] == 0x49 && bytes[2] == 0x46) {
+              mimeType = 'image/gif';
+            } else if (bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF) {
+              mimeType = 'image/jpeg';
+            }
+          }
         }
 
         print('Upload image $i - Nom: ${imageFile.name}, Taille: ${bytes.length} bytes, MimeType: $mimeType');
 
+        // Générer un nom de fichier approprié
+        String filename = imageFile.name;
+        if (filename.isEmpty || filename.startsWith('image_')) {
+          final ext = mimeType.split('/')[1];
+          filename = 'service-request-${DateTime.now().millisecondsSinceEpoch}-$i.$ext';
+        }
+
         final multipartFile = MultipartFile.fromBytes(
           bytes,
-          filename: imageFile.name,
+          filename: filename,
           contentType: MediaType.parse(mimeType),
         );
         
@@ -70,6 +90,9 @@ class ServiceRequestImagesRemoteDataSourceImpl
       final formData = FormData.fromMap({
         'images': multipartFiles,
       });
+
+      print('FormData créé avec ${multipartFiles.length} fichiers');
+      print('URL de l\'endpoint: $baseUrl/service-request-images');
 
       // Faire la requête
       final response = await dio.post(
@@ -83,7 +106,7 @@ class ServiceRequestImagesRemoteDataSourceImpl
         ),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         final imageUrls = List<String>.from(data['imageUrls'] ?? []);
         print('Upload réussi - URLs: $imageUrls');

@@ -11,6 +11,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../domain/entities/user.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../widgets/phone_field.dart';
 import '../../widgets/custom_button.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
@@ -26,6 +27,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
+  String _fullPhoneNumber = '';
   final _bioController = TextEditingController();
   final _addressController = TextEditingController();
   final _cityController = TextEditingController();
@@ -171,7 +173,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         email: _emailController.text.trim(),
-        phone: _phoneController.text.trim(),
+        phone: _fullPhoneNumber.isNotEmpty ? _fullPhoneNumber : _phoneController.text.trim(),
         bio: _bioController.text.trim(),
         address: _addressController.text.trim(),
         city: _cityController.text.trim(),
@@ -371,15 +373,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               
               const SizedBox(height: 16),
               
-              CustomTextField(
-                label: 'Téléphone',
+              PhoneField(
                 controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
+                label: 'Téléphone',
+                hint: 'Entrez votre numéro de téléphone',
+                validator: (phone) {
+                  if (phone == null || phone.number.isEmpty) {
                     return 'Le téléphone est requis';
                   }
                   return null;
+                },
+                onChanged: (phone) {
+                  _fullPhoneNumber = phone.completeNumber;
                 },
               ),
               

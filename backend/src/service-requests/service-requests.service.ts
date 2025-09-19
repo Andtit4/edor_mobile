@@ -28,38 +28,55 @@ export class ServiceRequestsService {
     console.log('Location:', createServiceRequestDto.location);
     console.log('Latitude:', createServiceRequestDto.latitude);
     console.log('Longitude:', createServiceRequestDto.longitude);
+    console.log('Client Image:', createServiceRequestDto.clientImage);
+    console.log('Photos:', createServiceRequestDto.photos);
+    console.log('Photos type:', typeof createServiceRequestDto.photos);
+    console.log('Photos length:', createServiceRequestDto.photos?.length);
     console.log('===============================');
     
     const serviceRequest = this.serviceRequestRepository.create({
       ...createServiceRequestDto,
       clientId,
+      photos: createServiceRequestDto.photos || [],
+      clientImage: createServiceRequestDto.clientImage,
     });
     
     const savedServiceRequest = await this.serviceRequestRepository.save(serviceRequest);
     
+    // Logs de débogage après sauvegarde
+    const finalServiceRequest = Array.isArray(savedServiceRequest) ? savedServiceRequest[0] : savedServiceRequest;
+    console.log('=== APRÈS SAUVEGARDE ===');
+    console.log('Service Request ID:', finalServiceRequest.id);
+    console.log('Photos sauvegardées:', finalServiceRequest.photos);
+    console.log('Photos type:', typeof finalServiceRequest.photos);
+    console.log('Photos length:', finalServiceRequest.photos?.length);
+    console.log('========================');
+    
     // Envoyer l'email de confirmation au client si l'email est fourni
-    if (clientEmail) {
+    if (clientEmail && Array.isArray(savedServiceRequest) ? savedServiceRequest[0] : savedServiceRequest) {
+      const serviceRequest = Array.isArray(savedServiceRequest) ? savedServiceRequest[0] : savedServiceRequest;
+      
       // Convertir la deadline en Date si c'est une chaîne
-      const deadlineDate = typeof savedServiceRequest.deadline === 'string' 
-        ? new Date(savedServiceRequest.deadline)
-        : savedServiceRequest.deadline;
+      const deadlineDate = typeof serviceRequest.deadline === 'string' 
+        ? new Date(serviceRequest.deadline)
+        : serviceRequest.deadline;
       
       await this.emailService.sendServiceRequestConfirmation(
-        clientEmail,
+        clientEmail!,
         createServiceRequestDto.clientName,
         {
-          id: savedServiceRequest.id,
-          title: savedServiceRequest.title,
-          description: savedServiceRequest.description,
-          category: savedServiceRequest.category,
-          location: savedServiceRequest.location,
-          budget: savedServiceRequest.budget,
+          id: serviceRequest.id,
+          title: serviceRequest.title,
+          description: serviceRequest.description,
+          category: serviceRequest.category,
+          location: serviceRequest.location,
+          budget: serviceRequest.budget,
           deadline: deadlineDate.toLocaleDateString('fr-FR'),
         }
       );
     }
     
-    return savedServiceRequest;
+    return Array.isArray(savedServiceRequest) ? savedServiceRequest[0] : savedServiceRequest;
   }
 
   async findAll(): Promise<ServiceRequestResponseDto[]> {
@@ -210,3 +227,4 @@ export class ServiceRequestsService {
     return this.findOne(id);
   }
 }
+

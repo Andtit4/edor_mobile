@@ -13,6 +13,7 @@ import '../../widgets/custom_text_field.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/image_gallery.dart';
 import '../../widgets/photo_viewer.dart';
+import '../../widgets/phone_field.dart';
 
 class CreateRequestScreen extends ConsumerStatefulWidget {
   const CreateRequestScreen({super.key});
@@ -29,9 +30,10 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
   final _locationController = TextEditingController();
   final _budgetController = TextEditingController();
   final _phoneController = TextEditingController();
+  String _fullPhoneNumber = '';
   final _notesController = TextEditingController();
-  double latitude = 0.0;
-  double longitude = 0.0;
+  double? latitude;
+  double? longitude;
   String _selectedCategory = 'Plomberie';
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 7));
   String _selectedUrgency = 'Normal';
@@ -83,6 +85,12 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
     
     _fabAnimationController.forward();
     _progressAnimationController.forward();
+    
+    // Initialiser les coordonnées si _currentPosition existe
+    if (_currentPosition != null) {
+      latitude = _currentPosition!.latitude;
+      longitude = _currentPosition!.longitude;
+    }
   }
 
   @override
@@ -235,20 +243,36 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
 
       // Obtenir l'adresse à partir des coordonnées
       String? quartier;
+      
+      // Toujours essayer le géocodage, même avec une précision faible
+      print('[DEBUG] Précision: ${position.accuracy}m, tentative de géocodage');
       try {
+        print('[DEBUG] Tentative de géocodage pour: ${position.latitude}, ${position.longitude}');
         List<Placemark> placemarks = await placemarkFromCoordinates(
           position.latitude,
           position.longitude,
         );
 
+        print('[DEBUG] Placemarks trouvés: ${placemarks.length}');
+        
         if (placemarks.isNotEmpty) {
           Placemark place = placemarks[0];
-          // Extraire le quartier (sublocality ou locality)
-          quartier = place.subLocality ?? place.locality;
+          print('[DEBUG] Placemark: subLocality=${place.subLocality}, locality=${place.locality}, administrativeArea=${place.administrativeArea}');
+          
+          // Extraire le quartier (sublocality ou locality ou administrativeArea)
+          quartier = place.subLocality ?? 
+                    place.locality ?? 
+                    place.administrativeArea ??
+                    'Position détectée';
+          
+          print('[DEBUG] Quartier extrait: $quartier');
+        } else {
+          print('[DEBUG] Aucun placemark trouvé');
+          quartier = 'Position détectée';
         }
       } catch (geocodingError) {
         print('[DEBUG] Erreur géocodage: $geocodingError');
-        quartier = null;
+        quartier = 'Position détectée';
       }
 
       // Afficher la boîte de dialogue de confirmation
@@ -258,13 +282,25 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
       if (mounted) {
         bool confirmed = await _showLocationConfirmationDialog(position, quartier);
         
-        if (confirmed) {
+        if (confirmed && position != null) {
           print('[DEBUG] Position confirmée - Latitude: ${position.latitude}, Longitude: ${position.longitude}');
           setState(() {
             _currentPosition = position;
+            latitude = position!.latitude;
+            longitude = position!.longitude;
             _locationController.text = quartier ?? '';
           });
-          print('[DEBUG] _currentPosition mis à jour: $_currentPosition');
+          print('[DEBUG] Coordonnées mises à jour - Latitude: $latitude, Longitude: $longitude');
+        } else if (position != null) {
+          // Même si l'utilisateur ne confirme pas, utiliser les coordonnées détectées
+          print('[DEBUG] Position non confirmée mais coordonnées disponibles - Latitude: ${position.latitude}, Longitude: ${position.longitude}');
+          setState(() {
+            _currentPosition = position;
+            latitude = position!.latitude;
+            longitude = position!.longitude;
+            _locationController.text = quartier ?? '';
+          });
+          print('[DEBUG] Coordonnées mises à jour sans confirmation - Latitude: $latitude, Longitude: $longitude');
         } else {
           print('[DEBUG] Position non confirmée, relancer la détection');
           // Relancer la détection si l'utilisateur a choisi de refaire
@@ -301,6 +337,8 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         if (mounted) {
+          LocationPermission permission = await Geolocator.checkPermission();
+           permission = await Geolocator.requestPermission();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Le service de localisation est désactivé. Veuillez l\'activer dans les paramètres.'),
@@ -427,20 +465,36 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
 
       // Obtenir l'adresse à partir des coordonnées
       String? quartier;
+      
+      // Toujours essayer le géocodage, même avec une précision faible
+      print('[DEBUG] Précision: ${position.accuracy}m, tentative de géocodage');
       try {
+        print('[DEBUG] Tentative de géocodage pour: ${position.latitude}, ${position.longitude}');
         List<Placemark> placemarks = await placemarkFromCoordinates(
           position.latitude,
           position.longitude,
         );
 
+        print('[DEBUG] Placemarks trouvés: ${placemarks.length}');
+        
         if (placemarks.isNotEmpty) {
           Placemark place = placemarks[0];
-          // Extraire le quartier (sublocality ou locality)
-          quartier = place.subLocality ?? place.locality;
+          print('[DEBUG] Placemark: subLocality=${place.subLocality}, locality=${place.locality}, administrativeArea=${place.administrativeArea}');
+          
+          // Extraire le quartier (sublocality ou locality ou administrativeArea)
+          quartier = place.subLocality ?? 
+                    place.locality ?? 
+                    place.administrativeArea ??
+                    'Position détectée';
+          
+          print('[DEBUG] Quartier extrait: $quartier');
+        } else {
+          print('[DEBUG] Aucun placemark trouvé');
+          quartier = 'Position détectée';
         }
       } catch (geocodingError) {
         print('[DEBUG] Erreur géocodage: $geocodingError');
-        quartier = null;
+        quartier = 'Position détectée';
       }
 
       // Afficher la boîte de dialogue de confirmation
@@ -472,7 +526,12 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
     }
   }
 
-  Future<bool> _showLocationConfirmationDialog(Position position, String? quartier) async {
+  Future<bool> _showLocationConfirmationDialog(Position? position, String? quartier) async {
+    if (position == null) {
+      print('[DEBUG] Position nulle, impossible de confirmer');
+      return false;
+    }
+    
     final accuracy = position.accuracy;
     
     // Déterminer la couleur et le message selon la précision
@@ -668,9 +727,12 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
             ),
             ElevatedButton(
               onPressed: () {
-                // Navigator.of(context).pop(true);
-                latitude = position.latitude;
-                longitude = position.longitude;
+                print('[DEBUG] Confirmation de position - Latitude: ${position.latitude}, Longitude: ${position.longitude}');
+                setState(() {
+                  latitude = position.latitude;
+                  longitude = position.longitude;
+                  _locationController.text = quartier ?? '';
+                });
                 Navigator.of(context).pop(true);
               },
               style: ElevatedButton.styleFrom(
@@ -981,12 +1043,17 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
                           Icon(Icons.check_circle, color: Colors.green, size: 16),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(
-                              'Position enregistrée: ${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}',
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: Colors.green[700],
-                                fontSize: 12,
-                              ),
+                            child: Builder(
+                              builder: (context) {
+                                print('[DEBUG] Affichage - Latitude: $latitude, Longitude: $longitude');
+                                return Text(
+                                  'Position enregistrée: ${latitude?.toStringAsFixed(6) ?? 'N/A'}, ${longitude?.toStringAsFixed(6) ?? 'N/A'}',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: Colors.green[700],
+                                    fontSize: 12,
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ],
@@ -1031,20 +1098,19 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
                 child: _buildSectionCard(
                   title: 'Téléphone',
                   icon: Icons.phone,
-                  child: CustomTextField(
+                  child: PhoneField(
                     controller: _phoneController,
-                    hint: '+228 90 12 34 56',
-                    keyboardType: TextInputType.phone,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
+                    label: 'Téléphone',
+                    hint: 'Entrez votre numéro de téléphone',
+                    validator: (phone) {
+                      if (phone == null || phone.number.isEmpty) {
                         return 'Téléphone requis';
-                      }
-                      if (!RegExp(r'^\+228\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}$').hasMatch(value)) {
-                        return 'Format: +228 XX XX XX XX';
                       }
                       return null;
                     },
-                    label: 'Téléphone',
+                    onChanged: (phone) {
+                      _fullPhoneNumber = phone.completeNumber;
+                    },
                   ),
                 ),
               ),
@@ -1597,6 +1663,13 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
       return;
     }
     
+    if (latitude == null || longitude == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez détecter votre position GPS avant de créer la demande')),
+      );
+      return;
+    }
+    
     setState(() => _isSubmitting = true);
     
     try {
@@ -1632,13 +1705,35 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
       // Upload des photos si il y en a
       List<String> photoUrls = [];
       final imagesState = ref.read(serviceRequestImagesProvider);
+      print('=== DEBUG PHOTOS ===');
+      print('Images sélectionnées: ${imagesState.selectedImages}');
+      print('Images déjà uploadées: ${imagesState.uploadedImageUrls}');
+      print('Is uploading: ${imagesState.isUploading}');
+      print('Error: ${imagesState.error}');
+      
       if (imagesState.selectedImages.isNotEmpty) {
         print('Upload des photos...');
-        await ref.read(serviceRequestImagesProvider.notifier).uploadImages(token);
-        final updatedState = ref.read(serviceRequestImagesProvider);
-        photoUrls = updatedState.uploadedImageUrls;
-        print('Photos uploadées: $photoUrls');
+        try {
+          await ref.read(serviceRequestImagesProvider.notifier).uploadImages(token);
+          final updatedState = ref.read(serviceRequestImagesProvider);
+          photoUrls = updatedState.uploadedImageUrls;
+          print('Photos uploadées: $photoUrls');
+          print('État après upload - Error: ${updatedState.error}');
+          
+          if (updatedState.error != null) {
+            print('ERREUR D\'UPLOAD: ${updatedState.error}');
+            // Continuer sans les photos plutôt que d'échouer complètement
+            photoUrls = [];
+          }
+        } catch (e) {
+          print('EXCEPTION D\'UPLOAD: $e');
+          // Continuer sans les photos
+          photoUrls = [];
+        }
+      } else {
+        print('Aucune image sélectionnée pour l\'upload');
       }
+      print('=== FIN DEBUG PHOTOS ===');
       
       print('=== CREATING SERVICE REQUEST ===');
       print('User profileImage: ${user.profileImage}');
@@ -1651,11 +1746,11 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
         description: _descriptionController.text.trim(),
         category: _selectedCategory!,
         clientName: '${user.firstName} ${user.lastName}',
-        clientPhone: user.phone,
+        clientPhone: _fullPhoneNumber.isNotEmpty ? _fullPhoneNumber : user.phone,
         clientImage: user.profileImage,
         location: _locationController.text.trim(),
-        latitude: latitude,
-        longitude: longitude,
+        latitude: latitude ?? 0.0,
+        longitude: longitude ?? 0.0,
         budget: double.parse(_budgetController.text.trim()),
         deadline: _selectedDate ?? DateTime.now().add(const Duration(days: 7)),
         notes: _selectedUrgency != null ? 'Urgence: $_selectedUrgency' : null,

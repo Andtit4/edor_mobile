@@ -16,6 +16,7 @@ _$ServiceRequestModelImpl _$$ServiceRequestModelImplFromJson(
   clientId: json['clientId'] as String,
   clientName: json['clientName'] as String,
   clientPhone: json['clientPhone'] as String,
+  clientImage: json['clientImage'] as String?,
   location: json['location'] as String,
   latitude: _latitudeFromJson(json['latitude']),
   longitude: _longitudeFromJson(json['longitude']),
@@ -29,6 +30,9 @@ _$ServiceRequestModelImpl _$$ServiceRequestModelImplFromJson(
   notes: json['notes'] as String?,
   completionDate: _dateTimeFromJsonNullable(json['completionDate']),
   completionNotes: json['completionNotes'] as String?,
+  photos:
+      (json['photos'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$$ServiceRequestModelImplToJson(
@@ -41,6 +45,7 @@ Map<String, dynamic> _$$ServiceRequestModelImplToJson(
   'clientId': instance.clientId,
   'clientName': instance.clientName,
   'clientPhone': instance.clientPhone,
+  'clientImage': instance.clientImage,
   'location': instance.location,
   'latitude': instance.latitude,
   'longitude': instance.longitude,
@@ -54,4 +59,5 @@ Map<String, dynamic> _$$ServiceRequestModelImplToJson(
   'notes': instance.notes,
   'completionDate': instance.completionDate?.toIso8601String(),
   'completionNotes': instance.completionNotes,
+  'photos': instance.photos,
 };

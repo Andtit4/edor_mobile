@@ -820,41 +820,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              
-              // Photos de la demande
-              if (request.photos.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.photo_camera,
-                      size: 16,
-                      color: Colors.grey[600],
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Photos (${request.photos.length})',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                CompactImageGallery(
-                  imageUrls: request.photos,
-                  onTap: () {
-                    showPhotoViewer(
-                      context,
-                      imageUrls: request.photos,
-                      title: request.title,
-                    );
-                  },
-                ),
-              ],
             ],
           ),
+          
+          // Photos de la demande
+          if (request.photos.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  Icons.photo_camera,
+                  size: 16,
+                  color: Colors.grey[600],
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Photos (${request.photos.length})',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ImageGallery(
+              imageUrls: request.photos,
+              height: 100,
+              maxImagesToShow: 3,
+              onTap: () {
+                showPhotoViewer(
+                  context,
+                  imageUrls: request.photos,
+                  title: request.title,
+                );
+              },
+            ),
+          ],
         ],
       ),
     );

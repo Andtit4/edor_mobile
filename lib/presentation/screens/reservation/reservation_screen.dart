@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../providers/prestataire_provider.dart';
 import '../../../core/utils/price_converter.dart';
+import '../../widgets/phone_field.dart';
 
 class ReservationScreen extends ConsumerStatefulWidget {
   final String prestataireId;
@@ -23,6 +24,7 @@ class _ReservationScreenState extends ConsumerState<ReservationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
+  String _fullPhoneNumber = '';
   final _addressController = TextEditingController();
   final _descriptionController = TextEditingController();
   
@@ -191,18 +193,18 @@ class _ReservationScreenState extends ConsumerState<ReservationScreen> {
               },
             ),
             const SizedBox(height: 16),
-            TextFormField(
+            PhoneField(
               controller: _phoneController,
-              decoration: const InputDecoration(
-                labelText: 'Téléphone',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.phone,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
+              label: 'Téléphone',
+              hint: 'Entrez votre numéro de téléphone',
+              validator: (phone) {
+                if (phone == null || phone.number.isEmpty) {
                   return 'Veuillez entrer votre téléphone';
                 }
                 return null;
+              },
+              onChanged: (phone) {
+                _fullPhoneNumber = phone.completeNumber;
               },
             ),
             const SizedBox(height: 16),

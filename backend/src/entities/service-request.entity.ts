@@ -43,7 +43,7 @@ import {
 	clientPhone: string;
 
 	@Column({ nullable: true })
-	clientImage: string;
+	clientImage?: string;
   
 	@Column()
 	location: string;

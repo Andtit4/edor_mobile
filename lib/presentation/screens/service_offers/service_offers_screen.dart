@@ -1165,6 +1165,24 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 12),
+              
+              // Affichage des photos si disponibles
+              if (request.photos.isNotEmpty) ...[
+                ImageGallery(
+                  imageUrls: request.photos,
+                  height: 120,
+                  maxImagesToShow: 3,
+                  onTap: () {
+                    showPhotoViewer(
+                      context,
+                      imageUrls: request.photos,
+                      initialIndex: 0,
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+              ],
+              
               Row(
                 children: [
                   Icon(

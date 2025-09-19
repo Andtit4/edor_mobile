@@ -86,8 +86,23 @@ class ServiceRequestImagesNotifier extends StateNotifier<ServiceRequestImagesSta
     state = state.copyWith(isUploading: true, error: null);
 
     try {
-      // Convertir les chemins en XFile
-      final imageFiles = state.selectedImages.map((path) => XFile(path)).toList();
+      // Convertir les chemins en XFile avec gestion spéciale pour Flutter Web
+      final imageFiles = <XFile>[];
+      
+      for (int i = 0; i < state.selectedImages.length; i++) {
+        final path = state.selectedImages[i];
+        XFile imageFile;
+        
+        if (path.startsWith('blob:')) {
+          // Pour Flutter Web, créer un XFile avec un nom de fichier
+          imageFile = XFile(path, name: 'image_$i.jpg');
+        } else {
+          // Pour les autres plateformes, utiliser le chemin normal
+          imageFile = XFile(path);
+        }
+        
+        imageFiles.add(imageFile);
+      }
       
       final uploadedUrls = await _repository.uploadServiceRequestImages(
         imageFiles,

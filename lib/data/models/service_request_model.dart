@@ -15,6 +15,7 @@ class ServiceRequestModel with _$ServiceRequestModel {
     required String clientId,
     required String clientName,
     required String clientPhone,
+    String? clientImage,
     required String location,
     @JsonKey(fromJson: _latitudeFromJson) double? latitude,
     @JsonKey(fromJson: _longitudeFromJson) double? longitude,
@@ -28,6 +29,7 @@ class ServiceRequestModel with _$ServiceRequestModel {
     String? notes,
     @JsonKey(fromJson: _dateTimeFromJsonNullable) DateTime? completionDate,
     String? completionNotes,
+    @Default([]) List<String> photos,
   }) = _ServiceRequestModel;
 
   factory ServiceRequestModel.fromJson(Map<String, dynamic> json) => 
@@ -45,6 +47,7 @@ extension ServiceRequestModelExtension on ServiceRequestModel {
       clientId: clientId,
       clientName: clientName,
       clientPhone: clientPhone,
+      clientImage: clientImage,
       location: location,
       latitude: latitude,
       longitude: longitude,
@@ -58,6 +61,7 @@ extension ServiceRequestModelExtension on ServiceRequestModel {
       notes: notes,
       completionDate: completionDate,
       completionNotes: completionNotes,
+      photos: photos,
     );
   }
 }
