@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_colors.dart';
@@ -31,7 +32,7 @@ class ImageGallery extends StatelessWidget {
         ? imageUrls.take(maxImagesToShow!).toList()
         : imageUrls;
     
-    final remainingCount = imageUrls.length - imagesToShow.length;
+    // final remainingCount = imageUrls.length - imagesToShow.length;
 
     return GestureDetector(
       onTap: onTap,
@@ -104,26 +105,7 @@ class ImageGallery extends StatelessWidget {
   Widget _buildSingleImage(String imageUrl) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
-      child: CachedNetworkImage(
-        imageUrl: imageUrl,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        height: double.infinity,
-        placeholder: (context, url) => Container(
-          color: AppColors.lightGray,
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
-        ),
-        errorWidget: (context, url, error) => Container(
-          color: AppColors.lightGray,
-          child: const Icon(
-            Icons.image_not_supported,
-            color: Colors.grey,
-            size: 32,
-          ),
-        ),
-      ),
+      child: _buildImageWidget(imageUrl),
     );
   }
 
@@ -268,26 +250,49 @@ class ImageGallery extends StatelessWidget {
   }
 
   Widget _buildImageWidget(String imageUrl) {
-    return CachedNetworkImage(
-      imageUrl: imageUrl,
-      fit: BoxFit.cover,
-      width: double.infinity,
-      height: double.infinity,
-      placeholder: (context, url) => Container(
-        color: AppColors.lightGray,
-        child: const Center(
-          child: CircularProgressIndicator(strokeWidth: 2),
+    // Vérifier si c'est un fichier local ou une URL
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      // URL d'image en ligne
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        placeholder: (context, url) => Container(
+          color: AppColors.lightGray,
+          child: const Center(
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
         ),
-      ),
-      errorWidget: (context, url, error) => Container(
-        color: AppColors.lightGray,
-        child: const Icon(
-          Icons.image_not_supported,
-          color: Colors.grey,
-          size: 24,
+        errorWidget: (context, url, error) => Container(
+          color: AppColors.lightGray,
+          child: const Icon(
+            Icons.image_not_supported,
+            color: Colors.grey,
+            size: 24,
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      // Fichier local
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.file(
+          File(imageUrl),
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+          errorBuilder: (context, error, stackTrace) => Container(
+            color: AppColors.lightGray,
+            child: const Icon(
+              Icons.image_not_supported,
+              color: Colors.grey,
+              size: 24,
+            ),
+          ),
+        ),
+      );
+    }
   }
 }
 
@@ -324,26 +329,7 @@ class CompactImageGallery extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(7),
-              child: CachedNetworkImage(
-                imageUrl: imageUrls.first,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-                placeholder: (context, url) => Container(
-                  color: AppColors.lightGray,
-                  child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  color: AppColors.lightGray,
-                  child: const Icon(
-                    Icons.image,
-                    color: Colors.grey,
-                    size: 20,
-                  ),
-                ),
-              ),
+              child: _buildImageWidget(imageUrls.first),
             ),
             if (imageUrls.length > 1)
               Positioned(
@@ -369,6 +355,49 @@ class CompactImageGallery extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildImageWidget(String imageUrl) {
+    // Vérifier si c'est un fichier local ou une URL
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      // URL d'image en ligne
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        placeholder: (context, url) => Container(
+          color: AppColors.lightGray,
+          child: const Center(
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: AppColors.lightGray,
+          child: const Icon(
+            Icons.image_not_supported,
+            color: Colors.grey,
+            size: 24,
+          ),
+        ),
+      );
+    } else {
+      // Fichier local
+      return Image.file(
+        File(imageUrl),
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: AppColors.lightGray,
+          child: const Icon(
+            Icons.image_not_supported,
+            color: Colors.grey,
+            size: 24,
+          ),
+        ),
+      );
+    }
   }
 }
 
