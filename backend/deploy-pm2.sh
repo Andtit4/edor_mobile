@@ -58,3 +58,5 @@ echo "  - Arrêter: pm2 stop edor-api"
 echo "  - Statut: pm2 status"
 echo "  - Monitoring: pm2 monit"
 
+
+

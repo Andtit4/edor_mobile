@@ -12,6 +12,7 @@ import { PriceNegotiationsModule } from './price-negotiations/price-negotiations
 import { ReviewsModule } from './reviews/reviews.module';
 import { EmailModule } from './email/email.module';
 import { UploadModule } from './upload/upload.module';
+import { AIMatchingModule } from './ai-matching/ai-matching.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { UploadModule } from './upload/upload.module';
     ReviewsModule,
     EmailModule,
     UploadModule,
+    AIMatchingModule,
   ],
 })
 export class AppModule {}

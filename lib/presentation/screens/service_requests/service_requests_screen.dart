@@ -814,7 +814,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
 
       // Recharger les demandes pour voir le statut mis à jour
       ref.read(serviceRequestProvider.notifier).loadAllRequests();
-
+      
       // Afficher un message de succès
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -825,6 +825,8 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
         );
       }
     } catch (e) {
+      print('ERROR in createNegotiation: $e');
+      
       // Fermer l'indicateur de chargement
       if (context.mounted) {
         Navigator.of(context, rootNavigator: true).pop();
@@ -837,6 +839,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
       }
     }
   }
+
 
   void _completeRequest(ServiceRequest request) {
     final authState = ref.read(authProvider);

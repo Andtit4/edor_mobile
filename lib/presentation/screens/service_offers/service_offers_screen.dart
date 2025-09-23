@@ -18,6 +18,7 @@ import '../../widgets/profile_avatar.dart';
 import '../../widgets/image_gallery.dart';
 import '../../widgets/photo_viewer.dart';
 import '../../../core/utils/price_converter.dart';
+import '../ai_matching/ai_matching_screen.dart';
 // import '../../../router/app_routes.dart';
 
 class ServiceOffersScreen extends ConsumerStatefulWidget {
@@ -1274,6 +1275,27 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                 ),
               ],
               
+              // Bouton IA pour les demandes en attente
+              if (request.status == 'pending') ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showAIRecommendations(request.id),
+                    icon: const Icon(Icons.psychology, size: 18),
+                    label: const Text('Recommandations IA'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.blue,
+                      side: const BorderSide(color: Colors.blue),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              
               // Les négociations sont maintenant gérées dans l'onglet "Offres"
               // Plus besoin d'afficher NegotiationListWidget ici
             ],
@@ -2200,5 +2222,23 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
 
   String _formatDateTime(DateTime dateTime) {
     return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+  }
+
+  void _showAIRecommendations(String serviceRequestId) {
+    print('🔍 AI Button clicked for serviceRequestId: $serviceRequestId');
+    try {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AIMatchingScreen(
+            serviceRequestId: serviceRequestId,
+            title: 'Recommandations IA',
+          ),
+        ),
+      );
+      print('✅ Navigation successful');
+    } catch (e) {
+      print('❌ Navigation error: $e');
+    }
   }
 }

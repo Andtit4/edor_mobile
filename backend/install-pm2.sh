@@ -62,3 +62,5 @@ echo "  - Gérer l'API: ./pm2-manage.sh {start|stop|restart|status|logs}"
 echo "  - Monitoring: pm2 monit"
 echo "  - Logs en temps réel: pm2 logs edor-api"
 
+
+
