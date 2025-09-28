@@ -14,4 +14,22 @@ export const databaseConfig: TypeOrmModuleOptions = {
   synchronize: true, // Force la synchronisation pour recréer les tables
   logging: true, // Active les logs pour voir les requêtes SQL
   dropSchema: false, // Ne pas supprimer toutes les tables
+  // Options de connexion robustes
+  extra: {
+    connectionLimit: 10,
+    acquireTimeout: 60000,
+    timeout: 60000,
+    reconnect: true,
+    keepAlive: true,
+    keepAliveInitialDelay: 0,
+    // Gestion des déconnexions
+    idleTimeout: 300000, // 5 minutes
+    maxReconnects: 5,
+    reconnectInterval: 2000, // 2 secondes
+  },
+  // Pool de connexions
+  poolSize: 10,
+  // Retry en cas d'échec
+  retryAttempts: 3,
+  retryDelay: 3000,
 };

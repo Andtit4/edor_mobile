@@ -11,12 +11,10 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../domain/entities/user.dart';
 import '../../../domain/entities/prestataire.dart';
 import '../../../domain/entities/service_request.dart';
-import '../../../domain/entities/service_offer.dart';
 import '../../router/app_routes.dart';
 import '../../widgets/profile_avatar.dart';
 import '../../widgets/image_gallery.dart';
 import '../../widgets/photo_viewer.dart';
-import '../../../core/utils/price_converter.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -59,8 +57,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppColors.lightGray,
       body: SafeArea(
         child: Consumer(
           builder: (context, ref, child) {
@@ -68,27 +69,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             final user = authState.user;
             
             if (user == null) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.purple),
+                ),
+              );
             }
 
-            return Column(
-              children: [
-                // Header
-                _buildHeader(user),
-                
-                // Search Bar
-                _buildSearchBar(),
-                
-                // Quick Actions based on role
-                _buildQuickActions(user.role),
-                
-                // Content based on role
-                Expanded(
-                  child: user.role == UserRole.prestataire 
-                      ? _buildPrestataireContent()
-                      : _buildClientContent(),
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.06, // 6% de la largeur
+                  vertical: 20,
                 ),
-              ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Espace flexible pour centrer le contenu
+                    SizedBox(height: screenHeight * 0.02),
+                    
+                    // Header amélioré
+                    _buildEnhancedHeader(user),
+                    
+                    SizedBox(height: screenHeight * 0.025),
+                    
+                    // Search Bar amélioré
+                    _buildEnhancedSearchBar(),
+                    
+                    SizedBox(height: screenHeight * 0.025),
+                    
+                    // Quick Actions based on role
+                    _buildQuickActions(user.role),
+                    
+                    SizedBox(height: screenHeight * 0.02),
+                    
+                    // Content based on role
+                    SizedBox(
+                      height: screenHeight * 0.5, // Hauteur fixe pour éviter les conflits
+                      child: user.role == UserRole.prestataire 
+                          ? _buildPrestataireContent()
+                          : _buildClientContent(),
+                    ),
+                    
+                    // Espace en bas
+                    SizedBox(height: screenHeight * 0.1),
+                  ],
+                ),
+              ),
             );
           },
         ),
@@ -96,18 +124,59 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildHeader(User user) {
+  Widget _buildEnhancedHeader(User user) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.purple.withOpacity(0.1),
+            AppColors.purple.withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppColors.purple.withOpacity(0.1),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.purple.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: Row(
         children: [
-          ProfileAvatar(
-            imageUrl: user.profileImage,
-            name: user.firstName,
-            size: 50.0,
-            showBorder: true,
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.purple.withOpacity(0.2),
+                  AppColors.purple.withOpacity(0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppColors.purple.withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            child: ProfileAvatar(
+              imageUrl: user.profileImage,
+              name: user.firstName,
+              size: 50.0,
+              showBorder: false,
+            ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,26 +184,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 Text(
                   'Bonjour, ${user.firstName}!',
                   style: AppTextStyles.h3.copyWith(
-                    color: const Color(0xFF1F2937),
-                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 22,
                   ),
                 ),
+                const SizedBox(height: 4),
                 Text(
                   'Que souhaitez-vous faire aujourd\'hui?',
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: Colors.grey[600],
+                    color: AppColors.textSecondary,
+                    fontSize: 15,
                   ),
                 ),
               ],
             ),
           ),
-          IconButton(
-            onPressed: () {
-              // Navigation vers les notifications
-            },
-            icon: const Icon(
-              Icons.notifications_outlined,
-              color: Color(0xFF1F2937),
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.borderColor.withOpacity(0.3),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: IconButton(
+              onPressed: () {
+                // Navigation vers les notifications
+              },
+              icon: const Icon(
+                Icons.notifications_outlined,
+                color: AppColors.purple,
+                size: 24,
+              ),
             ),
           ),
         ],
@@ -142,18 +234,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildEnhancedSearchBar() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.borderColor.withOpacity(0.3),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: AppColors.purple.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -161,13 +261,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         decoration: InputDecoration(
           hintText: 'Rechercher un service...',
           hintStyle: AppTextStyles.bodyMedium.copyWith(
-            color: Colors.grey[500],
+            color: AppColors.textSecondary.withOpacity(0.7),
+            fontSize: 16,
           ),
           border: InputBorder.none,
-          prefixIcon: Icon(
-            Icons.search,
-            color: Colors.grey[500],
+          prefixIcon: Container(
+            margin: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.purple.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.search,
+              color: AppColors.purple,
+              size: 20,
+            ),
           ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 18,
+          ),
+        ),
+        style: AppTextStyles.bodyMedium.copyWith(
+          fontSize: 16,
+          color: Colors.black,
         ),
       ),
     );
@@ -185,32 +303,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   Widget _buildClientQuickActions() {
     return Container(
-      margin: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: AppColors.purple.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 5),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.white.withOpacity(0.8),
+          width: 1,
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Actions rapides',
-            style: AppTextStyles.h4.copyWith(
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF1F2937),
+            style: AppTextStyles.labelLarge.copyWith(
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
+              fontSize: 20,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
-                child: _buildQuickActionCard(
+                child: _buildEnhancedQuickActionCard(
                   'Demander un service',
                   'Créer une demande',
                   Icons.add_circle_outline,
-                  const Color(0xFF8B5CF6),
+                  AppColors.purple,
                   () => context.push(AppRoutes.createRequest),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _buildQuickActionCard(
+                child: _buildEnhancedQuickActionCard(
                   'Prestataires',
                   'Voir les services',
                   Icons.people_outline,
@@ -225,7 +364,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildQuickActionCard(
+  Widget _buildEnhancedQuickActionCard(
     String title,
     String subtitle,
     IconData icon,
@@ -235,15 +374,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            colors: [
+              color.withOpacity(0.05),
+              color.withOpacity(0.02),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: color.withOpacity(0.2),
+            width: 1,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
+              color: color.withOpacity(0.1),
+              blurRadius: 15,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -251,30 +401,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              width: 50,
+              height: 50,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                gradient: LinearGradient(
+                  colors: [
+                    color.withOpacity(0.2),
+                    color.withOpacity(0.1),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: color.withOpacity(0.3),
+                  width: 1,
+                ),
               ),
               child: Icon(
                 icon,
                 color: color,
-                size: 24,
+                size: 26,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Text(
               title,
-              style: AppTextStyles.bodyLarge.copyWith(
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF1F2937),
+              style: AppTextStyles.labelLarge.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+                fontSize: 16,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               subtitle,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: Colors.grey[600],
+                color: AppColors.textSecondary,
+                fontSize: 14,
               ),
             ),
           ],
@@ -287,7 +451,88 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     return Column(
       children: [
         // Recent Requests
-        _buildSectionHeader('Demandes récentes', () => context.push(AppRoutes.serviceRequests)),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppColors.purple.withOpacity(0.05),
+                AppColors.purple.withOpacity(0.02),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: AppColors.purple.withOpacity(0.1),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.purple.withOpacity(0.2),
+                      AppColors.purple.withOpacity(0.1),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppColors.purple.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.work_outline,
+                  color: AppColors.purple,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Demandes récentes',
+                      style: AppTextStyles.labelLarge.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                        fontSize: 20,
+                      ),
+                    ),
+                    
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: () => context.push(AppRoutes.serviceRequests),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  backgroundColor: AppColors.purple.withOpacity(0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Voir tout',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.purple,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         Expanded(
           child: _buildRecentRequestsList(),
         ),
@@ -299,25 +544,89 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     return Column(
       children: [
         // Titre de la section
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppColors.purple.withOpacity(0.05),
+                AppColors.purple.withOpacity(0.02),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: AppColors.purple.withOpacity(0.1),
+              width: 1,
+            ),
+          ),
           child: Row(
             children: [
-              Text(
-                'Prestataires populaires',
-                style: AppTextStyles.h4.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1F2937),
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.purple.withOpacity(0.2),
+                      AppColors.purple.withOpacity(0.1),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppColors.purple.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.people_outline,
+                  color: AppColors.purple,
+                  size: 26,
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Prestataires populaires',
+                      style: AppTextStyles.labelLarge.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                        fontSize: 20,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Découvrez nos meilleurs professionnels',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               TextButton(
                 onPressed: () => context.push(AppRoutes.serviceOffers),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  backgroundColor: AppColors.purple.withOpacity(0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
                 child: Text(
                   'Voir tout',
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: const Color(0xFF8B5CF6),
-                    fontWeight: FontWeight.w600,
+                    color: AppColors.purple,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
                   ),
                 ),
               ),
@@ -333,33 +642,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildSectionHeader(String title, VoidCallback onSeeAll) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: AppTextStyles.h4.copyWith(
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF1F2937),
-            ),
-          ),
-          const Spacer(),
-          TextButton(
-            onPressed: onSeeAll,
-            child: Text(
-              'Voir tout',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: const Color(0xFF8B5CF6),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildRecentRequestsList() {
     final serviceRequestState = ref.watch(serviceRequestProvider);
@@ -456,18 +738,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final color = colors[prestataire.category] ?? const Color(0xFF8B5CF6);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: AppColors.purple.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 5),
           ),
         ],
+        border: Border.all(
+          color: Colors.white.withOpacity(0.8),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -619,16 +910,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           children: [
               if (prestataire.pricePerHour > 0) ...[
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                    color: const Color(0xFF10B981).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF10B981).withOpacity(0.1),
+                    const Color(0xFF10B981).withOpacity(0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color(0xFF10B981).withOpacity(0.2),
+                  width: 1,
+                ),
               ),
               child: Text(
-                    PriceConverter.formatEuroToFcfaPerHour(prestataire.pricePerHour),
+                '${prestataire.pricePerHour.toStringAsFixed(0)} FCFA/h',
                 style: AppTextStyles.bodySmall.copyWith(
-                      color: const Color(0xFF10B981),
-                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF10B981),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
                 ),
               ),
             ),
@@ -704,18 +1007,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final color = colors[request.category] ?? const Color(0xFF8B5CF6);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: AppColors.purple.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 5),
           ),
         ],
+        border: Border.all(
+          color: Colors.white.withOpacity(0.8),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -813,11 +1125,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Text(
-                PriceConverter.formatEuroToFcfa(request.budget),
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w600,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      color.withOpacity(0.1),
+                      color.withOpacity(0.05),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: color.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  '${request.budget.toStringAsFixed(0)} FCFA',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],

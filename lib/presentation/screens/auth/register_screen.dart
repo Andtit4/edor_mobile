@@ -5,8 +5,6 @@ import '../../providers/auth_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../domain/entities/user.dart';
-import '../../widgets/custom_text_field.dart';
-import '../../widgets/custom_button.dart';
 import '../../router/app_routes.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -28,7 +26,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  bool _isLoading = false;
   UserRole _selectedRole = UserRole.client;
 
   // Nouvelles variables pour les prestataires
@@ -54,10 +51,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
-
     try {
       await ref.read(authProvider.notifier).register(
         email: _emailController.text.trim(),
@@ -72,41 +65,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
         pricePerHour: _pricePerHour,
         skills: _skills,
       );
-
-      // Vérifier le résultat via le provider
-      final authState = ref.read(authProvider);
-      if (mounted) {
-        if (authState.isAuthenticated) {
-          context.go(AppRoutes.home);
-        } else if (authState.error != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(authState.error!),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     ref.listen<AuthState>(authProvider, (previous, next) {
       print('🔵 RegisterScreen - AuthState changed:');
       print('   Previous: isAuthenticated=${previous?.isAuthenticated}, isLoading=${previous?.isLoading}');
@@ -121,337 +101,668 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.error!),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 4),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
     });
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.lightGray,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                
-                // Header
-                Center(
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryBlue,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primaryBlue.withOpacity(0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.person_add,
-                          color: Colors.white,
-                          size: 40,
-                        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: IntrinsicHeight(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.06, // 6% de la largeur
+                      vertical: 20,
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Espace flexible pour centrer le contenu
+                          SizedBox(height: screenHeight * 0.03),
+                          
+                          // Logo animé
+                          _buildAnimatedLogo(),
+                          
+                          SizedBox(height: screenHeight * 0.025),
+                          
+                          // Titre avec gradient
+                          _buildGradientTitle(),
+                          
+                          SizedBox(height: screenHeight * 0.01),
+                          
+                          // Sous-titre
+                          _buildSubtitle(),
+                          
+                          SizedBox(height: screenHeight * 0.035),
+                          
+                          // Container principal avec glassmorphism
+                          _buildMainContainer(authState),
+                          
+                          SizedBox(height: screenHeight * 0.02),
+                          
+                          // Lien vers la connexion
+                          _buildLoginLink(),
+                          
+                          // Espace flexible pour pousser le contenu vers le haut
+                          const Spacer(),
+                        ],
                       ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Créer un compte',
-                        style: AppTextStyles.h2.copyWith(
-                          color: AppColors.activityText,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Rejoignez notre communauté de services',
-                        style: AppTextStyles.bodyLarge.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
 
-                const SizedBox(height: 40),
-
-                // Connexion sociale
-                Text(
-                  'Inscription rapide',
-                  style: AppTextStyles.h5.copyWith(
-                    color: AppColors.activityText,
-                    fontWeight: FontWeight.w600,
-                  ),
+  // Nouveaux widgets améliorés
+  Widget _buildAnimatedLogo() {
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(milliseconds: 800),
+      tween: Tween(begin: 0.0, end: 1.0),
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: value,
+          child: Container(
+            width: 90,
+            height: 90,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.purple.withOpacity(0.1),
+                  AppColors.purple.withOpacity(0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                color: AppColors.purple.withOpacity(0.2),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.purple.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
                 ),
-                const SizedBox(height: 16),
-                
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildSocialButton(
-                      icon: Icons.g_mobiledata,
-                      color: Colors.red,
-                      onTap: () {
-                        ref.read(authProvider.notifier).signInWithGoogle(role: _selectedRole, context: context);
-                      },
-                    ),
-                    _buildSocialButton(
-                      icon: Icons.facebook,
-                      color: Colors.blue,
-                      onTap: () {
-                        ref.read(authProvider.notifier).signInWithFacebook(role: _selectedRole);
-                      },
-                    ),
-                    _buildSocialButton(
-                      icon: Icons.apple,
-                      color: Colors.black,
-                      onTap: () {
-                        ref.read(authProvider.notifier).signInWithApple(role: _selectedRole);
-                      },
-                    ),
-                  ],
+                BoxShadow(
+                  color: Colors.white,
+                  blurRadius: 20,
+                  offset: const Offset(0, -8),
                 ),
-
-                const SizedBox(height: 32),
-
-                // Divider
-                Row(
-                  children: [
-                    const Expanded(child: Divider()),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'OU',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    const Expanded(child: Divider()),
-                  ],
-                ),
-
-                const SizedBox(height: 32),
-
-                // Type de compte
-                Text(
-                  'Type de compte',
-                  style: AppTextStyles.h5.copyWith(
-                    color: AppColors.activityText,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildRoleCard(
-                        UserRole.client,
-                        'Client',
-                        'Je cherche des services',
-                        Icons.person,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildRoleCard(
-                        UserRole.prestataire,
-                        'Prestataire',
-                        'Je propose mes services',
-                        Icons.build,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 32),
-
-                // Informations personnelles
-                Text(
-                  'Informations personnelles',
-                  style: AppTextStyles.h5.copyWith(
-                    color: AppColors.activityText,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        label: 'Prénom',
-                        controller: _firstNameController,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Le prénom est requis';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: CustomTextField(
-                        label: 'Nom',
-                        controller: _lastNameController,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Le nom est requis';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                CustomTextField(
-                  label: 'Email',
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'L\'email est requis';
-                    }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                      return 'Format d\'email invalide';
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 16),
-
-                CustomTextField(
-                  label: 'Téléphone',
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Le téléphone est requis';
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 16),
-
-                CustomTextField(
-                  label: 'Mot de passe',
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Le mot de passe est requis';
-                    }
-                    if (value.length < 6) {
-                      return 'Le mot de passe doit contenir au moins 6 caractères';
-                    }
-                    return null;
-                  },
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                      color: AppColors.textSecondary,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                CustomTextField(
-                  label: 'Confirmer le mot de passe',
-                  controller: _confirmPasswordController,
-                  obscureText: _obscureConfirmPassword,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'La confirmation est requise';
-                    }
-                    if (value != _passwordController.text) {
-                      return 'Les mots de passe ne correspondent pas';
-                    }
-                    return null;
-                  },
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
-                      color: AppColors.textSecondary,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscureConfirmPassword = !_obscureConfirmPassword;
-                      });
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // Bouton d'inscription
-                CustomButton(
-                  text: 'Créer mon compte',
-                  onPressed: _isLoading ? null : _register,
-                  isLoading: _isLoading,
-                  size: ButtonSize.large,
-                ),
-
-                const SizedBox(height: 24),
-
-                // Lien vers la connexion
-                Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Vous avez déjà un compte ? ',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => context.go(AppRoutes.login),
-                        child: Text(
-                          'Se connecter',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.primaryBlue,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
               ],
             ),
+            child: const Icon(
+              Icons.person_add_alt_1_outlined,
+              size: 45,
+              color: AppColors.purple,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildGradientTitle() {
+    return ShaderMask(
+      shaderCallback: (bounds) => LinearGradient(
+        colors: [
+          AppColors.purple,
+          AppColors.purple.withOpacity(0.8),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(bounds),
+      child: Text(
+        'Créer un compte',
+        style: AppTextStyles.h2.copyWith(
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          fontSize: 28,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildSubtitle() {
+    return Text(
+      'Rejoignez notre communauté de services',
+      style: AppTextStyles.bodyMedium.copyWith(
+        color: AppColors.textSecondary,
+        fontSize: 16,
+        height: 1.4,
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  Widget _buildMainContainer(AuthState authState) {
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: AppColors.purple.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 5),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.white.withOpacity(0.8),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Section inscription rapide
+          _buildQuickSignupSection(),
+          
+          const SizedBox(height: 28),
+          
+          // Divider stylisé
+          _buildEnhancedDivider(),
+          
+          const SizedBox(height: 28),
+          
+          // Sélection de rôle
+          _buildRoleSelection(),
+          
+          const SizedBox(height: 28),
+          
+          // Informations personnelles
+          _buildPersonalInfoSection(),
+          
+          const SizedBox(height: 28),
+          
+          // Bouton d'inscription
+          _buildEnhancedRegisterButton(authState),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickSignupSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Inscription rapide',
+          style: AppTextStyles.labelLarge.copyWith(
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildEnhancedSocialButton(
+              icon: Icons.g_mobiledata,
+              color: const Color(0xFFDB4437),
+              onTap: () {
+                ref.read(authProvider.notifier).signInWithGoogle(role: _selectedRole, context: context);
+              },
+            ),
+            _buildEnhancedSocialButton(
+              icon: Icons.facebook,
+              color: const Color(0xFF1877F2),
+              onTap: () {
+                ref.read(authProvider.notifier).signInWithFacebook(role: _selectedRole);
+              },
+            ),
+            _buildEnhancedSocialButton(
+              icon: Icons.apple,
+              color: Colors.black,
+              onTap: () {
+                ref.read(authProvider.notifier).signInWithApple(role: _selectedRole);
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEnhancedDivider() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  AppColors.borderColor,
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.lightGray,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            'OU',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  AppColors.borderColor,
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRoleSelection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Type de compte',
+          style: AppTextStyles.labelLarge.copyWith(
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _buildEnhancedRoleCard(
+                UserRole.client,
+                'Client',
+                'Je cherche des services',
+                Icons.person_outline,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildEnhancedRoleCard(
+                UserRole.prestataire,
+                'Prestataire',
+                'Je propose mes services',
+                Icons.build_outlined,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPersonalInfoSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Informations personnelles',
+          style: AppTextStyles.labelLarge.copyWith(
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 20),
+        
+        // Prénom et Nom
+        Row(
+          children: [
+            Expanded(
+              child: _buildEnhancedTextField(
+                controller: _firstNameController,
+                label: 'Prénom',
+                hint: 'Votre prénom',
+                prefixIcon: Icons.person_outline,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Le prénom est requis';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildEnhancedTextField(
+                controller: _lastNameController,
+                label: 'Nom',
+                hint: 'Votre nom',
+                prefixIcon: Icons.person_outline,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Le nom est requis';
+                  }
+                  return null;
+                },
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 20),
+
+        // Email
+        _buildEnhancedTextField(
+          controller: _emailController,
+          label: 'Email',
+          hint: 'votre@email.com',
+          keyboardType: TextInputType.emailAddress,
+          prefixIcon: Icons.email_outlined,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'L\'email est requis';
+            }
+            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+              return 'Format d\'email invalide';
+            }
+            return null;
+          },
+        ),
+
+        const SizedBox(height: 20),
+
+        // Téléphone
+        _buildEnhancedTextField(
+          controller: _phoneController,
+          label: 'Téléphone',
+          hint: 'Votre numéro',
+          keyboardType: TextInputType.phone,
+          prefixIcon: Icons.phone_outlined,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Le téléphone est requis';
+            }
+            return null;
+          },
+        ),
+
+        const SizedBox(height: 20),
+
+        // Mot de passe
+        _buildEnhancedTextField(
+          controller: _passwordController,
+          label: 'Mot de passe',
+          hint: 'Minimum 6 caractères',
+          obscureText: _obscurePassword,
+          prefixIcon: Icons.lock_outline,
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+              color: AppColors.textSecondary,
+            ),
+            onPressed: () {
+              setState(() {
+                _obscurePassword = !_obscurePassword;
+              });
+            },
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Le mot de passe est requis';
+            }
+            if (value.length < 6) {
+              return 'Le mot de passe doit contenir au moins 6 caractères';
+            }
+            return null;
+          },
+        ),
+
+        const SizedBox(height: 20),
+
+        // Confirmation mot de passe
+        _buildEnhancedTextField(
+          controller: _confirmPasswordController,
+          label: 'Confirmer le mot de passe',
+          hint: 'Répétez votre mot de passe',
+          obscureText: _obscureConfirmPassword,
+          prefixIcon: Icons.lock_outline,
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+              color: AppColors.textSecondary,
+            ),
+            onPressed: () {
+              setState(() {
+                _obscureConfirmPassword = !_obscureConfirmPassword;
+              });
+            },
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'La confirmation est requise';
+            }
+            if (value != _passwordController.text) {
+              return 'Les mots de passe ne correspondent pas';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEnhancedRegisterButton(AuthState authState) {
+    return Container(
+      height: 58,
+      decoration: BoxDecoration(
+        gradient: AppColors.purpleGradient,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.purple.withOpacity(0.4),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: authState.isLoading ? null : _register,
+          child: Container(
+            alignment: Alignment.center,
+            child: authState.isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text(
+                    'Créer mon compte',
+                    style: AppTextStyles.buttonLarge.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildRoleCard(UserRole role, String title, String subtitle, IconData icon) {
+  Widget _buildLoginLink() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Vous avez déjà un compte ? ',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+              fontSize: 15,
+            ),
+          ),
+          TextButton(
+            onPressed: () => context.go(AppRoutes.login),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            ),
+            child: Text(
+              'Se connecter',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.purple,
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEnhancedTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    bool obscureText = false,
+    TextInputType keyboardType = TextInputType.text,
+    IconData? prefixIcon,
+    Widget? suffixIcon,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.labelMedium.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+            fontSize: 15,
+          ),
+        ),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: controller,
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          validator: validator,
+          style: AppTextStyles.bodyMedium.copyWith(
+            fontSize: 16,
+            color: Colors.black,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary.withOpacity(0.7),
+              fontSize: 15,
+            ),
+            prefixIcon: prefixIcon != null
+                ? Icon(
+                    prefixIcon,
+                    color: AppColors.textSecondary,
+                    size: 22,
+                  )
+                : null,
+            suffixIcon: suffixIcon,
+            filled: true,
+            fillColor: AppColors.lightGray.withOpacity(0.5),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: AppColors.borderColor.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: AppColors.borderColor.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(
+                color: AppColors.purple,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(
+                color: AppColors.error,
+                width: 1,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(
+                color: AppColors.error,
+                width: 2,
+              ),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 18,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEnhancedRoleCard(UserRole role, String title, String subtitle, IconData icon) {
     final isSelected = _selectedRole == role;
     
     return GestureDetector(
@@ -460,36 +771,73 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
           _selectedRole = role;
         });
       },
-      child: Container(
-        padding: const EdgeInsets.all(16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryBlue.withOpacity(0.1) : AppColors.surfaceLight,
+          gradient: isSelected
+              ? LinearGradient(
+                  colors: [
+                    AppColors.purple.withOpacity(0.1),
+                    AppColors.purple.withOpacity(0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: isSelected ? null : Colors.white,
           border: Border.all(
-            color: isSelected ? AppColors.primaryBlue : AppColors.borderColor,
+            color: isSelected ? AppColors.purple : AppColors.borderColor.withOpacity(0.3),
             width: isSelected ? 2 : 1,
           ),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            if (isSelected)
+              BoxShadow(
+                color: AppColors.purple.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              color: isSelected ? AppColors.primaryBlue : AppColors.gray400,
-              size: 32,
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: isSelected 
+                    ? AppColors.purple.withOpacity(0.1)
+                    : AppColors.lightGray,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: isSelected ? AppColors.purple : AppColors.textSecondary,
+                size: 28,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               title,
               style: AppTextStyles.labelLarge.copyWith(
-                color: isSelected ? AppColors.primaryBlue : AppColors.activityText,
-                fontWeight: FontWeight.w600,
+                color: isSelected ? AppColors.purple : Colors.black,
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               subtitle,
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.textSecondary,
+                fontSize: 13,
+                height: 1.3,
               ),
               textAlign: TextAlign.center,
             ),
@@ -499,7 +847,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     );
   }
 
-  Widget _buildSocialButton({
+  Widget _buildEnhancedSocialButton({
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
@@ -510,19 +858,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
         width: 60,
         height: 60,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: color.withOpacity(0.3),
+            color: AppColors.borderColor.withOpacity(0.3),
             width: 1,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Icon(
           icon,
           color: color,
-          size: 28,
+          size: 26,
         ),
       ),
     );
   }
+
 }

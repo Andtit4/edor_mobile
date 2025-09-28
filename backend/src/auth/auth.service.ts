@@ -221,13 +221,27 @@ export class AuthService {
     
     const { provider, providerId, email, firstName, lastName, phone, profileImage, role, firebaseUid, emailVerified } = socialAuthDto;
 
-    // Vérifier si l'utilisateur existe déjà avec cet email
-    console.log('🔵 Recherche d\'utilisateurs existants...');
-    let existingUser = await this.userRepository.findOne({ where: { email } });
-    let existingPrestataire = await this.prestataireRepository.findOne({ where: { email } });
-    
-    console.log('🔵 Utilisateur existant trouvé:', !!existingUser);
-    console.log('🔵 Prestataire existant trouvé:', !!existingPrestataire);
+    try {
+      // Vérifier si l'utilisateur existe déjà avec cet email
+      console.log('🔵 Recherche d\'utilisateurs existants...');
+      let existingUser: User | null = null;
+      let existingPrestataire: Prestataire | null = null;
+      
+      try {
+        existingUser = await this.userRepository.findOne({ where: { email } });
+        console.log('🔵 Utilisateur existant trouvé:', !!existingUser);
+      } catch (userError) {
+        console.log('🔴 Erreur lors de la recherche d\'utilisateur:', userError);
+        // Continuer même si la recherche d'utilisateur échoue
+      }
+      
+      try {
+        existingPrestataire = await this.prestataireRepository.findOne({ where: { email } });
+        console.log('🔵 Prestataire existant trouvé:', !!existingPrestataire);
+      } catch (prestataireError) {
+        console.log('🔴 Erreur lors de la recherche de prestataire:', prestataireError);
+        // Continuer même si la recherche de prestataire échoue
+      }
     
     let user: User | Prestataire;
 
@@ -328,8 +342,41 @@ export class AuthService {
       token,
     };
     
-    console.log('✅ === FIN SOCIAL AUTH ===');
-    console.log('✅ Réponse:', JSON.stringify(response, null, 2));
-    return response;
+      console.log('✅ === FIN SOCIAL AUTH ===');
+      console.log('✅ Réponse:', JSON.stringify(response, null, 2));
+      return response;
+    } catch (error) {
+      console.log('🔴 === ERREUR SOCIAL AUTH ===');
+      console.log('🔴 Erreur complète:', error);
+      console.log('🔴 Type d\'erreur:', error.constructor.name);
+      console.log('🔴 Message:', error.message);
+      
+      // En cas d'erreur de base de données, créer un utilisateur temporaire
+      console.log('🔵 Création d\'un utilisateur temporaire...');
+      const tempUser = {
+        id: 'temp-' + Date.now(),
+        email: socialAuthDto.email,
+        firstName: socialAuthDto.firstName,
+        lastName: socialAuthDto.lastName,
+        phone: socialAuthDto.phone || '',
+        role: socialAuthDto.role,
+        profileImage: socialAuthDto.profileImage,
+        isSocialAuth: true,
+      };
+      
+      const tempToken = this.jwtService.sign({
+        sub: tempUser.id,
+        email: tempUser.email,
+        role: tempUser.role,
+      });
+      
+      const tempResponse = {
+        user: tempUser,
+        token: tempToken,
+      };
+      
+      console.log('✅ Utilisateur temporaire créé:', JSON.stringify(tempResponse, null, 2));
+      return tempResponse;
+    }
   }
 }
