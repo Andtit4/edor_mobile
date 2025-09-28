@@ -2,8 +2,8 @@ import 'package:edor/presentation/router/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../providers/auth_provider.dart';
-import '../../providers/theme_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../widgets/profile_avatar.dart';
@@ -21,239 +21,290 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(currentUserProvider);
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       backgroundColor: AppColors.lightGray,
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Header
-              Container(
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
-                child: Text(
-                  'PROFILE SETTING',
-                  style: AppTextStyles.h3.copyWith(
-                    color: AppColors.activityText,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-
-              // Profile Information Card
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 24),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: AppColors.activityCardShadow,
-                ),
-                child: Row(
-                  children: [
-                    // Profile Picture
-                    ProfileAvatar(
-                      imageUrl: currentUser?.profileImage,
-                      name: currentUser?.firstName,
-                      size: 60.0,
-                      showBorder: true,
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: screenWidth * 0.06,
+              vertical: 20,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(height: screenHeight * 0.02),
+                
+                // Header style Home
+                _buildHomeStyleHeader(currentUser),
+                
+                SizedBox(height: screenHeight * 0.025),
+                
+                // Section Général
+                _buildHomeStyleSection(
+                  title: 'Général',
+                  items: [
+                    _buildHomeStyleSettingsItem(
+                      icon: Icons.visibility_outlined,
+                      title: 'Voir le profil',
+                      subtitle: 'Consulter vos informations publiques',
+                      onTap: () => context.push(AppRoutes.viewProfile),
                     ),
-                    const SizedBox(width: 16),
-                    
-                    
-                    // Debug info temporaire
-                    if (currentUser?.profileImage != null) ...[
-                      /* Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.yellow.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Debug - Image URL:',
-                              style: AppTextStyles.caption.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              currentUser!.profileImage!,
-                              style: AppTextStyles.caption.copyWith(
-                                fontSize: 10,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ), */
-                      const SizedBox(height: 8),
-                    ],
-                    
-                    // User Info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            currentUser?.firstName ?? 'Scarlett Davis',
-                            style: AppTextStyles.h5.copyWith(
-                              color: AppColors.activityText,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            currentUser?.email ?? 'Scarlettdavis@gmail.com',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.activityTextSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
+                    _buildHomeStyleSettingsItem(
+                      icon: Icons.person_outline,
+                      title: 'Modifier le profil',
+                      subtitle: 'Photo, nom, email et informations',
+                      onTap: () => context.push(AppRoutes.editProfile),
+                    ),
+                    _buildHomeStyleSettingsItem(
+                      icon: Icons.lock_outline,
+                      title: 'Changer le mot de passe',
+                      subtitle: 'Sécuriser votre compte',
+                      onTap: () => _showComingSoonSnackBar('Changer le mot de passe'),
+                    ),
+                    _buildHomeStyleSettingsItem(
+                      icon: Icons.shield_outlined,
+                      title: 'Conditions d\'utilisation',
+                      subtitle: 'Protéger votre compte',
+                      onTap: () => _showComingSoonSnackBar('Conditions d\'utilisation'),
+                    ),
+                    _buildHomeStyleSettingsItem(
+                      icon: Icons.credit_card_outlined,
+                      title: 'Ajouter une carte',
+                      subtitle: 'Méthode de paiement sécurisée',
+                      onTap: () => _showComingSoonSnackBar('Ajouter une carte'),
                     ),
                   ],
                 ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // General Settings
-              _buildSettingsSection(
-                title: 'General',
-                items: [
-                  _buildSettingsItem(
-                    icon: Icons.person_outline,
-                    title: 'Edit Profile',
-                    subtitle: 'Change profile picture, number, E-mail',
-                    onTap: () {
-                      context.push(AppRoutes.editProfile);
-                    },
-                  ),
-                  _buildSettingsItem(
-                    icon: Icons.lock_outline,
-                    title: 'Change Password',
-                    subtitle: 'Update and strengthen account security',
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Change Password - Coming soon')),
-                      );
-                    },
-                  ),
-                  _buildSettingsItem(
-                    icon: Icons.shield_outlined,
-                    title: 'Terms of Use',
-                    subtitle: 'Protect your account now',
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Terms of Use - Coming soon')),
-                      );
-                    },
-                  ),
-                  _buildSettingsItem(
-                    icon: Icons.credit_card_outlined,
-                    title: 'Add Card',
-                    subtitle: 'Securely add payment method',
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Add Card - Coming soon')),
-                      );
-                    },
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Preferences Settings
-              _buildSettingsSection(
-                title: 'Preferences',
-                items: [
-                  _buildSettingsItem(
-                    icon: Icons.notifications_outlined,
-                    title: 'Notification',
-                    subtitle: 'Customize your notification preferences',
-                    trailing: Switch(
-                      value: _notificationsEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          _notificationsEnabled = value;
-                        });
-                      },
-                      activeColor: AppColors.activityButton,
+                
+                SizedBox(height: screenHeight * 0.02),
+                
+                // Section Préférences
+                _buildHomeStyleSection(
+                  title: 'Préférences',
+                  items: [
+                    _buildHomeStyleSettingsItem(
+                      icon: Icons.notifications_outlined,
+                      title: 'Notifications',
+                      subtitle: 'Personnaliser vos préférences',
+                      trailing: _buildHomeStyleSwitch(),
                     ),
-                  ),
-                  _buildSettingsItem(
-                    icon: Icons.help_outline,
-                    title: 'FAQ',
-                    subtitle: 'Securely add payment method',
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('FAQ - Coming soon')),
-                      );
-                    },
-                  ),
-                  _buildSettingsItem(
-                    icon: Icons.logout,
-                    title: 'Log Out',
-                    subtitle: 'Securely log out of Account',
-                    titleColor: Colors.pink,
-                    iconColor: Colors.pink,
-                    onTap: () {
-                      _showLogoutDialog(context);
-                    },
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 100), // Space for bottom navigation
-            ],
+                    _buildHomeStyleSettingsItem(
+                      icon: Icons.help_outline,
+                      title: 'FAQ',
+                      subtitle: 'Questions fréquemment posées',
+                      onTap: () => _showComingSoonSnackBar('FAQ'),
+                    ),
+                    _buildHomeStyleSettingsItem(
+                      icon: Icons.logout,
+                      title: 'Déconnexion',
+                      subtitle: 'Se déconnecter en toute sécurité',
+                      isDestructive: true,
+                      onTap: () => _showLogoutDialog(context),
+                    ),
+                  ],
+                ),
+                
+                SizedBox(height: screenHeight * 0.1),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildAvatarFallback(String name) {
-    return Center(
-      child: Text(
-        name.isNotEmpty ? name[0].toUpperCase() : 'U',
-        style: AppTextStyles.h4.copyWith(
-          color: AppColors.purple,
-          fontWeight: FontWeight.bold,
+  /// Construit le header style Home
+  Widget _buildHomeStyleHeader(currentUser) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.purple.withOpacity(0.1),
+            AppColors.purple.withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppColors.purple.withOpacity(0.1),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.purple.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.purple.withOpacity(0.2),
+                  AppColors.purple.withOpacity(0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppColors.purple.withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            child: ProfileAvatar(
+              imageUrl: currentUser?.profileImage,
+              name: currentUser?.firstName,
+              size: 50.0,
+              showBorder: false,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Bonjour, ${currentUser?.firstName ?? 'Utilisateur'} !',
+                  style: AppTextStyles.h4.copyWith(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Gérez vos paramètres et préférences',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.borderColor.withOpacity(0.3),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: IconButton(
+              onPressed: () {
+                // Navigation vers les paramètres avancés
+              },
+              icon: const Icon(
+                Icons.settings_outlined,
+                color: AppColors.purple,
+                size: 24,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildSettingsSection({
+  /// Construit une section style Home
+  Widget _buildHomeStyleSection({
     required String title,
     required List<Widget> items,
   }) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.borderColor.withOpacity(0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: AppColors.purple.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 12),
-            child: Text(
-              title,
-              style: AppTextStyles.h6.copyWith(
-                color: AppColors.activityTextSecondary,
-                fontWeight: FontWeight.w500,
+          // Header de la section
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.purple.withOpacity(0.05),
+                  AppColors.purple.withOpacity(0.02),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
               ),
             ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: AppColors.activityCardShadow,
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.purple.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.settings_outlined,
+                    color: AppColors.purple,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: AppTextStyles.h5.copyWith(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
             ),
+          ),
+          
+          // Items de la section
+          Padding(
+            padding: const EdgeInsets.all(8),
             child: Column(
               children: items,
             ),
@@ -263,129 +314,277 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildSettingsItem({
+  /// Construit un item de paramètres style Home
+  Widget _buildHomeStyleSettingsItem({
     required IconData icon,
     required String title,
     required String subtitle,
-    Color? titleColor,
-    Color? iconColor,
     Widget? trailing,
     VoidCallback? onTap,
+    bool isDestructive = false,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
+    final color = isDestructive ? Colors.red : AppColors.purple;
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Row(
-            children: [
-              // Icon
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: (iconColor ?? AppColors.activityButton).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: AppColors.borderColor.withOpacity(0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // Icône
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 20,
+                  ),
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor ?? AppColors.activityButton,
-                  size: 20,
-                ),
-              ),
-              
-              const SizedBox(width: 16),
-              
-              // Title and Subtitle
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: AppTextStyles.buttonMedium.copyWith(
-                        color: titleColor ?? AppColors.activityText,
-                        fontWeight: FontWeight.w600,
+                
+                const SizedBox(width: 16),
+                
+                // Titre et sous-titre
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: isDestructive ? Colors.red : Colors.black,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.activityTextSecondary,
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              
-              // Trailing widget or arrow
-              if (trailing != null)
-                trailing
-              else if (onTap != null)
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: AppColors.activityTextSecondary,
-                ),
-            ],
+                
+                // Widget trailing ou flèche
+                if (trailing != null)
+                  trailing
+                else if (onTap != null)
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: AppColors.textSecondary,
+                  ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  /// Construit un switch style Home
+  Widget _buildHomeStyleSwitch() {
+    return Switch(
+      value: _notificationsEnabled,
+      onChanged: (value) {
+        setState(() {
+          _notificationsEnabled = value;
+        });
+      },
+      activeColor: AppColors.purple,
+      inactiveThumbColor: Colors.grey[300],
+      inactiveTrackColor: Colors.grey[200],
+    );
+  }
+
+  /// Affiche un message "Bientôt disponible"
+  void _showComingSoonSnackBar(String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$feature - Bientôt disponible'),
+        backgroundColor: AppColors.purple,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+
+  /// Affiche le dialogue de déconnexion amélioré
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: Text(
-          'Log Out',
-          style: AppTextStyles.h5.copyWith(
-            color: AppColors.activityText,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to log out?',
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.activityTextSecondary,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Cancel',
-              style: AppTextStyles.buttonMedium.copyWith(
-                color: AppColors.activityTextSecondary,
+        backgroundColor: Colors.white,
+        contentPadding: const EdgeInsets.all(24),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Icône de déconnexion
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.red.withOpacity(0.2),
+                    Colors.red.withOpacity(0.1),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.red.withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              child: const Icon(
+                Icons.logout,
+                color: Colors.red,
+                size: 32,
               ),
             ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              ref.read(authProvider.notifier).logout();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.pink,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+            
+            const SizedBox(height: 20),
+            
+            // Titre
+            Text(
+              'Déconnexion',
+              style: AppTextStyles.h5.copyWith(
+                color: Colors.black,
+                fontWeight: FontWeight.w800,
+                fontSize: 22,
               ),
             ),
-            child: Text(
-              'Log Out',
-              style: AppTextStyles.buttonMedium.copyWith(
-                color: Colors.white,
+            
+            const SizedBox(height: 12),
+            
+            // Message
+            Text(
+              'Êtes-vous sûr de vouloir vous déconnecter ?',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+                fontSize: 16,
               ),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ],
+            
+            const SizedBox(height: 24),
+            
+            // Boutons
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: AppColors.lightGray,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppColors.borderColor.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: TextButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        'Annuler',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(width: 12),
+                
+                Expanded(
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.red,
+                          Colors.red.withOpacity(0.8),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        ref.read(authProvider.notifier).logout();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        'Déconnexion',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

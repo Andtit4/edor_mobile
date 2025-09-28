@@ -10,7 +10,6 @@ import '../../providers/auth_provider.dart';
 import '../../providers/service_request_provider.dart';
 import '../../providers/service_request_images_provider.dart';
 import '../../widgets/custom_text_field.dart';
-import '../../widgets/custom_button.dart';
 import '../../widgets/image_gallery.dart';
 import '../../widgets/photo_viewer.dart';
 import '../../widgets/phone_field.dart';
@@ -758,92 +757,139 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
-        child: Column(
-          children: [
-            // Header moderne avec progression
-            _buildModernHeader(),
-            
-            // Barre de progression
-            _buildProgressBar(),
-            
-            // Contenu principal
-            Expanded(
-              child: _buildStepContent(),
-            ),
-            
-            // Navigation et actions
-            _buildBottomActions(),
-          ],
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            children: [
+              // Header moderne avec progression
+              _buildEnhancedHeader(),
+              
+              // Barre de progression
+              _buildEnhancedProgressBar(),
+              
+              // Contenu principal
+              _buildStepContent(),
+              
+              // Navigation et actions
+              _buildEnhancedBottomActions(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildModernHeader() {
+  /// Header moderne avec glassmorphism
+  Widget _buildEnhancedHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-      decoration: const BoxDecoration(
+      padding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width * 0.06,
+        vertical: 24,
+      ),
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF8B5CF6), Color(0xFF7C3AED)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
+          colors: [
+            AppColors.purple.withOpacity(0.1),
+            AppColors.purple.withOpacity(0.05),
+          ],
         ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.purple.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         children: [
           Row(
             children: [
+              // Bouton retour avec glassmorphism
               GestureDetector(
                 onTap: () => context.pop(),
                 child: Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppColors.borderColor.withOpacity(0.2),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.arrow_back_ios_new,
-                    color: Colors.white,
-                    size: 16,
+                    color: AppColors.purple,
+                    size: 18,
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Nouvelle demande',
-                      style: AppTextStyles.h2.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Décrivez votre besoin en détail',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: Colors.white.withOpacity(0.9),
-                      ),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            gradient: AppColors.purpleGradient,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.purple.withOpacity(0.3),
+                                blurRadius: 12,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.add_task_outlined,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Nouvelle demande',
+                                style: AppTextStyles.h2.copyWith(
+                                  color: const Color(0xFF1F2937),
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Décrivez votre besoin en détail',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.request_quote,
-                  color: Colors.white,
-                  size: 24,
                 ),
               ),
             ],
@@ -853,39 +899,95 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
     );
   }
 
-  Widget _buildProgressBar() {
+  /// Barre de progression moderne avec glassmorphism
+  Widget _buildEnhancedProgressBar() {
     return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width * 0.06,
+        vertical: 20,
+      ),
       padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.borderColor.withOpacity(0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: Column(
         children: [
           Row(
             children: [
-              Text(
-                'Étape ${_currentStep + 1} sur 3',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w500,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  gradient: AppColors.purpleGradient,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Étape ${_currentStep + 1} sur 3',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               const Spacer(),
-              Text(
-                '${((_currentStep + 1) / 3 * 100).round()}%',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: const Color(0xFF8B5CF6),
-                  fontWeight: FontWeight.w600,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.purple.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.purple.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  '${((_currentStep + 1) / 3 * 100).round()}%',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.purple,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           AnimatedBuilder(
             animation: _progressAnimation,
             builder: (context, child) {
-              return LinearProgressIndicator(
-                value: _progressAnimation.value * ((_currentStep + 1) / 3),
-                backgroundColor: Colors.grey[200],
-                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF8B5CF6)),
-                minHeight: 6,
+              return Container(
+                height: 8,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: _progressAnimation.value * ((_currentStep + 1) / 3),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: AppColors.purpleGradient,
+                      borderRadius: BorderRadius.circular(4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.purple.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               );
             },
           ),
@@ -915,8 +1017,11 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
   }
 
   Widget _buildStep1() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width * 0.06,
+        vertical: 20,
+      ),
       child: Form(
         key: _formKey,
         child: Column(
@@ -989,8 +1094,11 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
   }
 
   Widget _buildStep2() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width * 0.06,
+        vertical: 20,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1066,55 +1174,50 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
           
           const SizedBox(height: 20),
           
-          // Budget et Téléphone
-          Row(
-            children: [
-              Expanded(
-                child: _buildSectionCard(
-                  title: 'Budget (FCFA)',
-                  icon: Icons.attach_money,
-                  child: CustomTextField(
-                    controller: _budgetController,
-                    hint: '50000 FCFA',
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Budget requis';
-                      }
-                      if (double.tryParse(value) == null) {
-                        return 'Montant invalide';
-                      }
-                      if (double.parse(value) < 1000) {
-                        return 'Budget minimum: 1000 FCFA';
-                      }
-                      return null;
-                    },
-                    label: 'Budget (FCFA)',
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildSectionCard(
-                  title: 'Téléphone',
-                  icon: Icons.phone,
-                  child: PhoneField(
-                    controller: _phoneController,
-                    label: 'Téléphone',
-                    hint: 'Entrez votre numéro de téléphone',
-                    validator: (phone) {
-                      if (phone == null || phone.number.isEmpty) {
-                        return 'Téléphone requis';
-                      }
-                      return null;
-                    },
-                    onChanged: (phone) {
-                      _fullPhoneNumber = phone.completeNumber;
-                    },
-                  ),
-                ),
-              ),
-            ],
+          // Budget
+          _buildSectionCard(
+            title: 'Budget (FCFA)',
+            icon: Icons.attach_money,
+            child: CustomTextField(
+              controller: _budgetController,
+              hint: '50000 FCFA',
+              keyboardType: TextInputType.number,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Budget requis';
+                }
+                if (double.tryParse(value) == null) {
+                  return 'Montant invalide';
+                }
+                if (double.parse(value) < 1000) {
+                  return 'Budget minimum: 1000 FCFA';
+                }
+                return null;
+              },
+              label: 'Budget (FCFA)',
+            ),
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // Téléphone
+          _buildSectionCard(
+            title: 'Téléphone',
+            icon: Icons.phone,
+            child: PhoneField(
+              controller: _phoneController,
+              label: 'Téléphone',
+              hint: 'Entrez votre numéro de téléphone',
+              validator: (phone) {
+                if (phone == null || phone.number.isEmpty) {
+                  return 'Téléphone requis';
+                }
+                return null;
+              },
+              onChanged: (phone) {
+                _fullPhoneNumber = phone.completeNumber;
+              },
+            ),
           ),
           
           const SizedBox(height: 20),
@@ -1140,8 +1243,11 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
   }
 
   Widget _buildStep3() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width * 0.06,
+        vertical: 20,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1171,46 +1277,49 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
     );
   }
 
+  /// Carte de section moderne avec glassmorphism
   Widget _buildSectionCard({
     required String title,
     required IconData icon,
     required Widget child,
   }) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppColors.activityCardShadow,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppColors.borderColor.withOpacity(0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF8B5CF6).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  color: const Color(0xFF8B5CF6),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                title,
-                style: AppTextStyles.h4.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1F2937),
+              
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  title,
+                  style: AppTextStyles.h3.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1F2937),
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           child,
         ],
       ),
@@ -1495,51 +1604,145 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
     );
   }
 
-  Widget _buildBottomActions() {
+  /// Actions du bas modernes avec glassmorphism
+  Widget _buildEnhancedBottomActions() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      margin: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width * 0.06,
+        vertical: 20,
+      ),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppColors.borderColor.withOpacity(0.2),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            if (_currentStep > 0)
-              Expanded(
-                child: CustomButton(
-                  text: 'Précédent',
+      child: Row(
+        children: [
+          if (_currentStep > 0)
+            Expanded(
+              child: Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.grey.withOpacity(0.1),
+                      Colors.grey.withOpacity(0.05),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.grey.withOpacity(0.3),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
                   onPressed: _previousStep,
-                  backgroundColor: Colors.grey[100],
-                  textColor: Colors.grey[700],
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.arrow_back_ios,
+                        color: Colors.grey[700],
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      
+                    ],
+                  ),
                 ),
               ),
-            if (_currentStep > 0) const SizedBox(width: 16),
-            Expanded(
-              flex: 2,
-              child: AnimatedBuilder(
-                animation: _fabAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _fabAnimation.value,
-                    child: CustomButton(
-                      text: _currentStep == 2 ? 'Publier la demande' : 'Suivant',
-                      onPressed: _currentStep == 2 ? _submitRequest : _nextStep,
-                      isLoading: _isSubmitting,
-                      backgroundColor: const Color(0xFF8B5CF6),
-                    ),
-                  );
-                },
-              ),
             ),
-          ],
-        ),
+          if (_currentStep > 0) const SizedBox(width: 16),
+          Expanded(
+            flex: 2,
+            child: AnimatedBuilder(
+              animation: _fabAnimation,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: _fabAnimation.value,
+                  child: Container(
+                    height: 56,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.purpleGradient,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.purple.withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: _currentStep == 2 ? _submitRequest : _nextStep,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _currentStep == 2 ? 'Publier ' : 'Suivant',
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  _currentStep == 2 ? Icons.send : Icons.arrow_forward_ios,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

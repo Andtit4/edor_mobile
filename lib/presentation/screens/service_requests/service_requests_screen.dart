@@ -2,14 +2,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../domain/entities/service_request.dart';
 import '../../../domain/entities/user.dart';
 import '../../providers/service_request_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/price_negotiation_provider.dart';
 import '../../widgets/profile_avatar.dart';
-import '../../../core/utils/price_converter.dart';
+import '../../widgets/image_gallery.dart';
+import '../../widgets/photo_viewer.dart';
 
 class ServiceRequestsScreen extends ConsumerStatefulWidget {
   const ServiceRequestsScreen({super.key});
@@ -36,21 +39,16 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     });
   }
 
+  /// Charge les données des demandes de service
   void _loadData() {
     final authState = ref.read(authProvider);
     final token = authState.token;
-    
-    print('=== DEBUG SERVICE REQUESTS ===');
-    print('Auth state: ${authState.isAuthenticated}');
-    print('User: ${authState.user?.email}');
-    print('Token: ${token?.substring(0, 20)}...');
-    print('==============================');
     
     if (token != null) {
       // Charger toutes les demandes (pour le premier onglet)
       ref.read(serviceRequestProvider.notifier).loadAllRequests();
       
-      // ✅ AJOUTER CETTE LIGNE - Charger les demandes de l'utilisateur connecté
+      // Charger les demandes de l'utilisateur connecté
       ref.read(serviceRequestProvider.notifier).loadMyRequests(token);
       
       // Charger les demandes assignées à l'utilisateur (pour les prestataires)
@@ -58,28 +56,26 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
         ref.read(serviceRequestProvider.notifier).loadAssignedRequests(token);
       }
     } else {
-      print('No token available for loading requests');
       _loadDataFromCache();
     }
   }
 
-  void _loadDataFromCache() async {
+  /// Charge les données depuis le cache local
+  Future<void> _loadDataFromCache() async {
     try {
       final localDataSource = ref.read(localDataSourceProvider);
       final tokenData = await localDataSource.getFromCache('auth_token');
       final token = tokenData?['token'] as String?;
       
-      print('Token from cache: ${token?.substring(0, 20)}...');
-      
       if (token != null) {
         // Charger toutes les demandes
         ref.read(serviceRequestProvider.notifier).loadAllRequests();
         
-        // ✅ AJOUTER CETTE LIGNE - Charger les demandes de l'utilisateur
+        // Charger les demandes de l'utilisateur
         ref.read(serviceRequestProvider.notifier).loadMyRequests(token);
       }
     } catch (e) {
-      print('Error loading token from cache: $e');
+      // Gestion silencieuse des erreurs de cache
     }
   }
 
@@ -89,6 +85,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     super.dispose();
   }
 
+  /// Ouvre Google Maps avec les coordonnées de la demande
   Future<void> _openGoogleMaps(double latitude, double longitude) async {
     final url = 'https://www.google.com/maps/dir/?api=1&destination=$latitude,$longitude';
     final uri = Uri.parse(url);
@@ -97,84 +94,179 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Impossible d\'ouvrir Google Maps'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+        _showErrorSnackBar('Impossible d\'ouvrir Google Maps');
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur lors de l\'ouverture de Google Maps: $e'),
-            backgroundColor: Colors.red,
+      _showErrorSnackBar('Erreur lors de l\'ouverture de Google Maps: $e');
+    }
+  }
+
+  /// Affiche un message d'erreur
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-        );
-      }
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final requestState = ref.watch(serviceRequestProvider);
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppColors.lightGray,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            _buildHeader(),
-            
-            // Search Bar
-            _buildSearchBar(),
-            
-            // Filter Chips
-            _buildFilterChips(),
-            
-            // Tab Bar
-            _buildTabBar(),
-            
-            // Content
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildRequestsList(requestState.allRequests),
-                  _buildMyAcceptedRequests(requestState.myRequests),
-                ],
-              ),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: screenWidth * 0.06,
+              vertical: 20,
             ),
-          ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(height: screenHeight * 0.02),
+                _buildEnhancedHeader(),
+                SizedBox(height: screenHeight * 0.025),
+                _buildEnhancedSearchBar(),
+                SizedBox(height: screenHeight * 0.02),
+                _buildEnhancedFilterChips(),
+                SizedBox(height: screenHeight * 0.02),
+                _buildEnhancedTabBar(),
+                SizedBox(height: screenHeight * 0.02),
+                SizedBox(
+                  height: screenHeight * 0.6,
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildRequestsList(requestState.allRequests),
+                      _buildMyAcceptedRequests(requestState.myRequests),
+                    ],
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.1),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  /// Construit le header amélioré de la page
+  Widget _buildEnhancedHeader() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.purple.withOpacity(0.1),
+            AppColors.purple.withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppColors.purple.withOpacity(0.1),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.purple.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: Row(
         children: [
-          Text(
-            'Demandes de service',
-            style: AppTextStyles.h2.copyWith(
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF1F2937),
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.purple.withOpacity(0.2),
+                  AppColors.purple.withOpacity(0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppColors.purple.withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            child: const Icon(
+              Icons.work_outline,
+              color: AppColors.purple,
+              size: 30,
             ),
           ),
-          const Spacer(),
-          IconButton(
-            onPressed: () {
-              // Filtres avancés
-            },
-            icon: const Icon(
-              Icons.filter_list,
-              color: Color(0xFF8B5CF6),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Demandes de service',
+                  style: AppTextStyles.h3.copyWith(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 24,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Découvrez les nouvelles opportunités',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.borderColor.withOpacity(0.3),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: IconButton(
+              onPressed: () {
+                // Filtres avancés
+              },
+              icon: const Icon(
+                Icons.filter_list,
+                color: AppColors.purple,
+                size: 24,
+              ),
             ),
           ),
         ],
@@ -182,18 +274,27 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     );
   }
 
-  Widget _buildSearchBar() {
+  /// Construit la barre de recherche améliorée
+  Widget _buildEnhancedSearchBar() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.borderColor.withOpacity(0.3),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: AppColors.purple.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -201,46 +302,100 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
         decoration: InputDecoration(
           hintText: 'Rechercher une demande...',
           hintStyle: AppTextStyles.bodyMedium.copyWith(
-            color: Colors.grey[500],
+            color: AppColors.textSecondary.withOpacity(0.7),
+            fontSize: 16,
           ),
           border: InputBorder.none,
-          prefixIcon: Icon(
-            Icons.search,
-            color: Colors.grey[500],
+          prefixIcon: Container(
+            margin: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.purple.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.search,
+              color: AppColors.purple,
+              size: 20,
+            ),
           ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 18,
+          ),
+        ),
+        style: AppTextStyles.bodyMedium.copyWith(
+          fontSize: 16,
+          color: Colors.black,
         ),
       ),
     );
   }
 
-  Widget _buildFilterChips() {
+  /// Construit les puces de filtre améliorées
+  Widget _buildEnhancedFilterChips() {
     return Container(
-      height: 50,
-      margin: const EdgeInsets.symmetric(vertical: 16),
+      height: 60,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 0),
         itemCount: _filters.length,
         itemBuilder: (context, index) {
           final filter = _filters[index];
           final isSelected = _selectedFilter == filter;
           
           return Container(
-            margin: const EdgeInsets.only(right: 12),
-            child: FilterChip(
-              label: Text(filter),
-              selected: isSelected,
-              onSelected: (selected) {
+            margin: const EdgeInsets.only(right: 16),
+            child: GestureDetector(
+              onTap: () {
                 setState(() {
                   _selectedFilter = filter;
                 });
               },
-              backgroundColor: Colors.white,
-              selectedColor: const Color(0xFF8B5CF6).withOpacity(0.2),
-              checkmarkColor: const Color(0xFF8B5CF6),
-              labelStyle: AppTextStyles.bodyMedium.copyWith(
-                color: isSelected ? const Color(0xFF8B5CF6) : Colors.grey[700],
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                decoration: BoxDecoration(
+                  gradient: isSelected
+                      ? LinearGradient(
+                          colors: [
+                            AppColors.purple.withOpacity(0.1),
+                            AppColors.purple.withOpacity(0.05),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : null,
+                  color: isSelected ? null : Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isSelected 
+                        ? AppColors.purple.withOpacity(0.3)
+                        : AppColors.borderColor.withOpacity(0.3),
+                    width: isSelected ? 2 : 1,
+                  ),
+                  boxShadow: [
+                    if (isSelected)
+                      BoxShadow(
+                        color: AppColors.purple.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  filter,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: isSelected ? AppColors.purple : AppColors.textSecondary,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    fontSize: 14,
+                  ),
+                ),
               ),
             ),
           );
@@ -249,32 +404,117 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     );
   }
 
-  Widget _buildTabBar() {
+  /// Construit la barre d'onglets améliorée
+  Widget _buildEnhancedTabBar() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white,
+            AppColors.lightGray.withOpacity(0.3),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppColors.purple.withOpacity(0.1),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 25,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: AppColors.purple.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color: const Color(0xFF8B5CF6),
-          borderRadius: BorderRadius.circular(12),
+          gradient: AppColors.purpleGradient,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.purple.withOpacity(0.4),
+              blurRadius: 15,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
         labelColor: Colors.white,
-        unselectedLabelColor: Colors.grey[600],
+        unselectedLabelColor: AppColors.textSecondary,
         labelStyle: AppTextStyles.bodyMedium.copyWith(
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
+          fontSize: 15,
         ),
-        tabs: const [
-          Tab(text: 'Toutes les demandes'),
-          Tab(text: 'Mes demandes'),
+        unselectedLabelStyle: AppTextStyles.bodyMedium.copyWith(
+          fontWeight: FontWeight.w500,
+          fontSize: 15,
+        ),
+        tabs: [
+          Tab(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.list_alt_outlined,
+                    size: 16,
+                    color: _tabController.index == 0 ? Colors.white : AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: 6),
+                  const Flexible(
+                    child: Text(
+                      'Toutes',
+                      style: TextStyle(fontSize: 13),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Tab(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.person_outline,
+                    size: 16,
+                    color: _tabController.index == 1 ? Colors.white : AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: 6),
+                  const Flexible(
+                    child: Text(
+                      'Mes demandes',
+                      style: TextStyle(fontSize: 13),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
+  /// Construit la liste de toutes les demandes
   Widget _buildRequestsList(List<ServiceRequest> requests) {
     final filteredRequests = _filterRequests(requests);
     
@@ -294,6 +534,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     );
   }
 
+  /// Construit la liste des demandes acceptées par l'utilisateur
   Widget _buildMyAcceptedRequests(List<ServiceRequest> requests) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
@@ -324,6 +565,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     );
   }
 
+  /// Filtre les demandes selon le filtre sélectionné
   List<ServiceRequest> _filterRequests(List<ServiceRequest> requests) {
     switch (_selectedFilter) {
       case 'En attente':
@@ -337,6 +579,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     }
   }
 
+  /// Construit une carte de demande de service
   Widget _buildRequestCard(ServiceRequest request) {
     final colors = {
       'Plomberie': const Color(0xFF8B5CF6),
@@ -349,195 +592,607 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     final color = colors[request.category] ?? const Color(0xFF8B5CF6);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: color.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 5),
           ),
         ],
+        border: Border.all(
+          color: AppColors.borderColor.withOpacity(0.2),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.work,
-                  color: color,
-                  size: 20,
-                ),
+          // Header avec titre complet
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  color.withOpacity(0.05),
+                  color.withOpacity(0.02),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Ligne 1: Catégorie et statut
+                Row(
                   children: [
-                    Text(
-                      request.title,
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF1F2937),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            color.withOpacity(0.2),
+                            color.withOpacity(0.1),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: color.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.category_outlined,
+                            color: color,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            request.category,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: color,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Text(
-                      request.category,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: color,
-                        fontWeight: FontWeight.w500,
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            _getStatusColor(request.status).withOpacity(0.1),
+                            _getStatusColor(request.status).withOpacity(0.05),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: _getStatusColor(request.status).withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        _getStatusText(request.status),
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: _getStatusColor(request.status),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _getStatusColor(request.status).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  _getStatusText(request.status),
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: _getStatusColor(request.status),
-                    fontWeight: FontWeight.w600,
+                const SizedBox(height: 16),
+                // Ligne 2: Titre complet (sans limitation de lignes)
+                Text(
+                  request.title,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black,
+                    fontSize: 20,
+                    height: 1.3,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            request.description,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: Colors.grey[600],
+              ],
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              ClientAvatar(
-                imageUrl: request.clientImage,
-                name: request.clientName,
-                size: 24.0,
-                showBorder: false,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                request.clientName,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(width: 16),
-              Icon(
-                Icons.location_on,
-                size: 16,
-                color: Colors.grey[600],
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  request.location,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Text(
-                PriceConverter.formatEuroToFcfa(request.budget),
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Icon(
-                Icons.schedule,
-                size: 16,
-                color: Colors.grey[600],
-              ),
-              const SizedBox(width: 4),
-              Text(
-                'Échéance: ${_formatDate(request.deadline)}',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: Colors.grey[600],
-                ),
-              ),
-              const Spacer(),
-              // Indicateur de statut
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _getStatusColor(request.status).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  _getStatusText(request.status),
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: _getStatusColor(request.status),
-                    fontWeight: FontWeight.w600,
+          // Contenu principal
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Description
+                Text(
+                  request.description,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: 16,
+                    height: 1.5,
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              if (request.status == 'pending')
-                ElevatedButton(
-                  onPressed: () => _acceptRequest(request),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8B5CF6),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                const SizedBox(height: 20),
+                
+                // Section informations détaillées
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.lightGray.withOpacity(0.2),
+                        AppColors.lightGray.withOpacity(0.05),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: AppColors.borderColor.withOpacity(0.2),
+                      width: 1,
                     ),
                   ),
-                  child: Text(
-                    'Accepter',
-                    style: AppTextStyles.bodySmall.copyWith(
+                  child: Column(
+                    children: [
+                      // Informations client
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: AppColors.purple.withOpacity(0.1),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.purple.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            // Ligne client
+                            Row(
+                              children: [
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.purple.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: AppColors.purple.withOpacity(0.2),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: ClientAvatar(
+                                    imageUrl: request.clientImage,
+                                    name: request.clientName,
+                                    size: 44.0,
+                                    showBorder: false,
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Client',
+                                        style: AppTextStyles.bodySmall.copyWith(
+                                          color: AppColors.textSecondary,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        request.clientName,
+                                        style: AppTextStyles.bodyLarge.copyWith(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 18,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            // Ligne prix
+                            Row(
+                              children: [
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    color: color.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: color.withOpacity(0.2),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.attach_money_outlined,
+                                    color: color,
+                                    size: 28,
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Prix proposé',
+                                        style: AppTextStyles.bodySmall.copyWith(
+                                          color: AppColors.textSecondary,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        '${request.budget.toStringAsFixed(0)} FCFA',
+                                        style: AppTextStyles.bodyLarge.copyWith(
+                                          color: color,
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 18,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Informations localisation
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: const Color(0xFF10B981).withOpacity(0.1),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF10B981).withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF10B981).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: const Color(0xFF10B981).withOpacity(0.2),
+                                  width: 1,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.location_on_outlined,
+                                color: Color(0xFF10B981),
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Localisation',
+                                    style: AppTextStyles.bodySmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    request.location,
+                                    style: AppTextStyles.bodyLarge.copyWith(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Informations échéance
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.orange.withOpacity(0.1),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.orange.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.orange.withOpacity(0.2),
+                                  width: 1,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.schedule_outlined,
+                                color: Colors.orange,
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Date d\'échéance',
+                                    style: AppTextStyles.bodySmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    _formatDate(request.deadline),
+                                    style: AppTextStyles.bodyLarge.copyWith(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Section photos si disponibles
+                if (request.photos.isNotEmpty) ...[
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
                       color: Colors.white,
-                      fontWeight: FontWeight.w600,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.purple.withOpacity(0.1),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.purple.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                gradient: AppColors.purpleGradient,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.purple.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.photo_camera,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Photos de la demande',
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${request.photos.length} photo${request.photos.length > 1 ? 's' : ''}',
+                                    style: AppTextStyles.bodySmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        ImageGallery(
+                          imageUrls: request.photos,
+                          height: 120,
+                          maxImagesToShow: 3,
+                          onTap: () {
+                            showPhotoViewer(
+                              context,
+                              imageUrls: request.photos,
+                              initialIndex: 0,
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              if (request.status == 'assigned' || request.status == 'in_progress')
-                ElevatedButton(
-                  onPressed: () => _completeRequest(request),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                  const SizedBox(height: 20),
+                ],
+                
+                // Section actions
+                if (request.status == 'pending' || request.status == 'assigned' || request.status == 'in_progress')
+                  Row(
+                    children: [
+                      if (request.status == 'pending')
+                        Expanded(
+                          child: Container(
+                            height: 48,
+                            decoration: BoxDecoration(
+                              gradient: AppColors.purpleGradient,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.purple.withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () => _acceptRequest(request),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: Text(
+                                'Accepter la demande',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (request.status == 'assigned' || request.status == 'in_progress')
+                        Expanded(
+                          child: Container(
+                            height: 48,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  const Color(0xFF10B981),
+                                  const Color(0xFF10B981).withOpacity(0.8),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF10B981).withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () => _completeRequest(request),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: Text(
+                                'Marquer comme terminé',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
-                  child: Text(
-                    'Terminer',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-            ],
+              ],
+            ),
           ),
           // Bouton Google Maps pour les coordonnées disponibles
           if (request.latitude != null && request.longitude != null && 
@@ -566,17 +1221,12 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     );
   }
 
+  /// Accepte une demande de service
   void _acceptRequest(ServiceRequest request) async {
     final authState = ref.read(authProvider);
     final user = authState.user;
     final token = authState.token;
     
-    print('=== ACCEPT REQUEST CALLED ===');
-    print('Request ID: ${request.id}');
-    print('User: ${user?.firstName} ${user?.lastName}');
-    print('User role: ${user?.role}');
-    print('User ID: ${user?.id}');
-    print('Token exists: ${token != null}');
     
     if (user != null && token != null) {
       // Afficher un indicateur de chargement
@@ -600,29 +1250,18 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
           _showPriceNegotiationDialog(request);
         }
       } catch (e) {
-        print('ERROR in assignPrestataire: $e');
         // Fermer l'indicateur de chargement
         if (context.mounted) {
           Navigator.of(context, rootNavigator: true).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Erreur: ${e.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          _showErrorSnackBar('Erreur: ${e.toString()}');
         }
       }
     } else {
-      print('ERROR: User or token is null');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Erreur d\'authentification'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showErrorSnackBar('Erreur d\'authentification');
     }
   }
 
+  /// Affiche le dialogue de négociation de prix
   void _showPriceNegotiationDialog(ServiceRequest request) {
     final TextEditingController priceController = TextEditingController();
     final TextEditingController messageController = TextEditingController();
@@ -841,6 +1480,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
   }
 
 
+  /// Marque une demande comme terminée
   void _completeRequest(ServiceRequest request) {
     final authState = ref.read(authProvider);
     final token = authState.token;
@@ -850,6 +1490,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     }
   }
 
+  /// Retourne la couleur associée au statut
   Color _getStatusColor(String status) {
     switch (status) {
       case 'pending':
@@ -867,6 +1508,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     }
   }
 
+  /// Retourne le texte associé au statut
   String _getStatusText(String status) {
     switch (status) {
       case 'pending':
@@ -884,6 +1526,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     }
   }
 
+  /// Formate une date pour l'affichage
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }

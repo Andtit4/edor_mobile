@@ -10,9 +10,7 @@ import '../../providers/upload_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../domain/entities/user.dart';
-import '../../widgets/custom_text_field.dart';
 import '../../widgets/phone_field.dart';
-import '../../widgets/custom_button.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -48,10 +46,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final authState = ref.read(authProvider);
     final currentUser = authState.user;
     if (currentUser != null) {
-      _firstNameController.text = currentUser.firstName ?? '';
-      _lastNameController.text = currentUser.lastName ?? '';
-      _emailController.text = currentUser.email ?? '';
-      _phoneController.text = currentUser.phone ?? '';
+      _firstNameController.text = currentUser.firstName;
+      _lastNameController.text = currentUser.lastName;
+      _emailController.text = currentUser.email;
+      _phoneController.text = currentUser.phone;
       _bioController.text = currentUser.bio ?? '';
       _addressController.text = currentUser.address ?? '';
       _cityController.text = currentUser.city ?? '';
@@ -210,124 +208,100 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final authState = ref.watch(authProvider);
+    final currentUser = authState.user;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        title: Text(
-          'Modifier le profil',
-          style: AppTextStyles.h4.copyWith(
-            color: AppColors.activityText,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        backgroundColor: AppColors.backgroundLight,
+        backgroundColor: AppColors.lightGray,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.activityText),
+          icon: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.borderColor.withOpacity(0.3),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.arrow_back_ios,
+              color: AppColors.purple,
+              size: 18,
+            ),
+          ),
           onPressed: () => context.pop(),
         ),
         actions: [
-          TextButton(
-            onPressed: _isLoading ? null : _saveProfile,
-            child: Text(
-              'Sauvegarder',
-              style: AppTextStyles.buttonMedium.copyWith(
-                color: _isLoading ? AppColors.gray400 : AppColors.primaryBlue,
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            child: TextButton(
+              onPressed: _isLoading ? null : _saveProfile,
+              style: TextButton.styleFrom(
+                backgroundColor: _isLoading ? Colors.grey[300] : AppColors.purple,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                'Sauvegarder',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: _isLoading ? Colors.grey[600] : Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Photo de profil
-              Center(
-                child: Stack(
-                  children: [
-                    GestureDetector(
-                      onTap: _pickImage,
-                      child: Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.gray200,
-                          border: Border.all(
-                            color: AppColors.primaryBlue,
-                            width: 3,
-                          ),
-                        ),
-                        child: ClipOval(
-                          child: _buildProfileImage(),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: _pickImage,
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: const BoxDecoration(
-                            color: AppColors.primaryBlue,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.camera_alt,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ),
+        physics: const BouncingScrollPhysics(),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screenWidth * 0.06,
+            vertical: 20,
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(height: screenHeight * 0.02),
+                
+                // Header style Profil
+                _buildProfileStyleHeader(currentUser),
+                
+                SizedBox(height: screenHeight * 0.025),
+                
+                // Section Photo de profil
+                _buildProfileStyleSection(
+                  title: 'Photo de profil',
+                  items: [
+                    _buildProfileImageSection(),
                   ],
                 ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Indicateur d'upload
-              Consumer(
-                builder: (context, ref, child) {
-                  final uploadState = ref.watch(uploadProvider);
-                  if (uploadState.isUploading) {
-                    return const Center(
-                      child: Column(
-                        children: [
-                          CircularProgressIndicator(),
-                          SizedBox(height: 8),
-                          Text('Upload en cours...'),
-                        ],
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-              
-              const SizedBox(height: 30),
-              
-              // Informations personnelles
-              Text(
-                'Informations personnelles',
-                style: AppTextStyles.h5.copyWith(
-                  color: AppColors.activityText,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 16),
-              
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomTextField(
+                
+                SizedBox(height: screenHeight * 0.02),
+                
+                // Section Informations personnelles
+                _buildProfileStyleSection(
+                  title: 'Informations personnelles',
+                  items: [
+                    _buildProfileStyleTextField(
                       label: 'Prénom',
                       controller: _firstNameController,
                       validator: (value) {
@@ -337,10 +311,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         return null;
                       },
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: CustomTextField(
+                    _buildProfileStyleTextField(
                       label: 'Nom',
                       controller: _lastNameController,
                       validator: (value) {
@@ -350,217 +321,504 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         return null;
                       },
                     ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 16),
-              
-              CustomTextField(
-                label: 'Email',
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'L\'email est requis';
-                  }
-                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                    return 'Format d\'email invalide';
-                  }
-                  return null;
-                },
-              ),
-              
-              const SizedBox(height: 16),
-              
-              PhoneField(
-                controller: _phoneController,
-                label: 'Téléphone',
-                hint: 'Entrez votre numéro de téléphone',
-                validator: (phone) {
-                  if (phone == null || phone.number.isEmpty) {
-                    return 'Le téléphone est requis';
-                  }
-                  return null;
-                },
-                onChanged: (phone) {
-                  _fullPhoneNumber = phone.completeNumber;
-                },
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Type de compte
-              Text(
-                'Type de compte',
-                style: AppTextStyles.h5.copyWith(
-                  color: AppColors.activityText,
-                  fontWeight: FontWeight.w600,
+                    _buildProfileStyleTextField(
+                      label: 'Email',
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'L\'email est requis';
+                        }
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                          return 'Format d\'email invalide';
+                        }
+                        return null;
+                      },
+                    ),
+                    _buildPhoneField(),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 16),
-              
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildRoleCard(
-                      UserRole.client,
-                      'Client',
-                      'Je cherche des services',
-                      Icons.person,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildRoleCard(
-                      UserRole.prestataire,
-                      'Prestataire',
-                      'Je propose des services',
-                      Icons.build,
-                    ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Informations supplémentaires
-              Text(
-                'Informations supplémentaires',
-                style: AppTextStyles.h5.copyWith(
-                  color: AppColors.activityText,
-                  fontWeight: FontWeight.w600,
+                
+                SizedBox(height: screenHeight * 0.02),
+                
+                // Section Type de compte
+                _buildProfileStyleSection(
+                  title: 'Type de compte',
+                  items: [
+                    _buildRoleSelection(),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 16),
-              
-              CustomTextField(
-                label: 'Bio',
-                controller: _bioController,
-                maxLines: 3,
-                hint: 'Parlez-nous de vous...',
-              ),
-              
-              const SizedBox(height: 16),
-              
-              CustomTextField(
-                label: 'Adresse',
-                controller: _addressController,
-                hint: '123 rue de la Paix',
-              ),
-              
-              const SizedBox(height: 16),
-              
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: CustomTextField(
-                      label: 'Ville',
-                      controller: _cityController,
-                      hint: 'Paris',
+                
+                SizedBox(height: screenHeight * 0.02),
+                
+                // Section Informations supplémentaires
+                _buildProfileStyleSection(
+                  title: 'Informations\n supplémentaires',
+                  items: [
+                    _buildProfileStyleTextField(
+                      label: 'Bio',
+                      controller: _bioController,
+                      maxLines: 3,
+                      hint: 'Parlez-nous de vous...',
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: CustomTextField(
-                      label: 'Code postal',
-                      controller: _postalCodeController,
-                      hint: '75001',
+                    _buildProfileStyleTextField(
+                      label: 'Adresse',
+                      controller: _addressController,
+                      hint: '123 rue de la Paix',
                     ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 40),
-              
-              // Bouton de sauvegarde
-              CustomButton(
-                text: 'Sauvegarder les modifications',
-                onPressed: _isLoading ? null : _saveProfile,
-                isLoading: _isLoading,
-                size: ButtonSize.large,
-              ),
-              
-              const SizedBox(height: 20),
-            ],
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: _buildProfileStyleTextField(
+                            label: 'Ville',
+                            controller: _cityController,
+                            hint: 'Paris',
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildProfileStyleTextField(
+                            label: 'Code postal',
+                            controller: _postalCodeController,
+                            hint: '75001',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                
+                SizedBox(height: screenHeight * 0.1),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildProfileImage() {
-    final authState = ref.read(authProvider);
-    final currentUser = authState.user;
-    
-    // Si une nouvelle image est sélectionnée, l'afficher
-    if (_selectedImage != null) {
-      // Pour Flutter Web, nous utilisons une approche différente
-      return FutureBuilder<Uint8List?>(
-        future: _getImageBytes(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data != null) {
-            return Image.memory(
-              snapshot.data!,
-              width: 120,
-              height: 120,
-              fit: BoxFit.cover,
-            );
-          } else if (snapshot.hasError) {
-            return const Icon(
-              Icons.error,
-              size: 60,
-              color: AppColors.error,
-            );
-          } else {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
-      );
-    }
-    
-    // Sinon, afficher l'image actuelle de l'utilisateur
-    if (currentUser?.profileImage != null && currentUser!.profileImage!.isNotEmpty) {
-      return CachedNetworkImage(
-        imageUrl: currentUser.profileImage!,
-        width: 120,
-        height: 120,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => const Center(
-          child: CircularProgressIndicator(),
+  /// Construit le header style Profil
+  Widget _buildProfileStyleHeader(currentUser) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.purple.withOpacity(0.1),
+            AppColors.purple.withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        errorWidget: (context, url, error) => const Icon(
-          Icons.person,
-          size: 60,
-          color: AppColors.gray400,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppColors.purple.withOpacity(0.1),
+          width: 1,
         ),
-      );
-    }
-    
-    // Image par défaut
-    return const Icon(
-      Icons.person,
-      size: 60,
-      color: AppColors.gray400,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.purple.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.purple.withOpacity(0.2),
+                  AppColors.purple.withOpacity(0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppColors.purple.withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            child: const Icon(
+              Icons.edit_outlined,
+              color: AppColors.purple,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Modifier le profil',
+                  style: AppTextStyles.h4.copyWith(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Mettez à jour vos informations personnelles',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Future<Uint8List?> _getImageBytes() async {
-    if (_selectedImage == null) return null;
-    
-    try {
-      // XFile.readAsBytes() fonctionne sur toutes les plateformes
-      return await _selectedImage!.readAsBytes();
-    } catch (e) {
-      print('Erreur lors de la lecture de l\'image: $e');
-      return null;
-    }
+  /// Construit une section style Profil
+  Widget _buildProfileStyleSection({
+    required String title,
+    required List<Widget> items,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.borderColor.withOpacity(0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: AppColors.purple.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Header de la section
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.purple.withOpacity(0.05),
+                  AppColors.purple.withOpacity(0.02),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.purple.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.settings_outlined,
+                    color: AppColors.purple,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: AppTextStyles.h5.copyWith(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Items de la section
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              children: items,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget _buildRoleCard(UserRole role, String title, String subtitle, IconData icon) {
+  /// Construit la section de photo de profil
+  Widget _buildProfileImageSection() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.borderColor.withOpacity(0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Photo de profil
+          Center(
+            child: Stack(
+              children: [
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.lightGray,
+                      border: Border.all(
+                        color: AppColors.purple.withOpacity(0.3),
+                        width: 3,
+                      ),
+                    ),
+                    child: ClipOval(
+                      child: _buildProfileImage(),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: AppColors.purple,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.purple.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Indicateur d'upload
+          Consumer(
+            builder: (context, ref, child) {
+              final uploadState = ref.watch(uploadProvider);
+              if (uploadState.isUploading) {
+                return Column(
+                  children: [
+                    const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.purple),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Upload en cours...',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          
+          const SizedBox(height: 8),
+          
+          Text(
+            'Appuyez pour changer la photo',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Construit un champ de texte style Profil
+  Widget _buildProfileStyleTextField({
+    required String label,
+    required TextEditingController controller,
+    String? Function(String?)? validator,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+    String? hint,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.borderColor.withOpacity(0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        validator: validator,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          labelStyle: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textSecondary,
+            fontSize: 14,
+          ),
+          hintStyle: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textSecondary.withOpacity(0.7),
+            fontSize: 14,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.transparent,
+          contentPadding: const EdgeInsets.all(16),
+        ),
+        style: AppTextStyles.bodyMedium.copyWith(
+          color: Colors.black,
+          fontSize: 15,
+        ),
+      ),
+    );
+  }
+
+  /// Construit le champ téléphone style Profil
+  Widget _buildPhoneField() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.borderColor.withOpacity(0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: PhoneField(
+        controller: _phoneController,
+        label: 'Téléphone',
+        hint: 'Entrez votre numéro de téléphone',
+        validator: (phone) {
+          if (phone == null || phone.number.isEmpty) {
+            return 'Le téléphone est requis';
+          }
+          return null;
+        },
+        onChanged: (phone) {
+          _fullPhoneNumber = phone.completeNumber;
+        },
+      ),
+    );
+  }
+
+  /// Construit la sélection de rôle style Profil
+  Widget _buildRoleSelection() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.borderColor.withOpacity(0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildProfileStyleRoleCard(
+              UserRole.client,
+              'Client',
+              'Je cherche des services',
+              Icons.person_outline,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _buildProfileStyleRoleCard(
+              UserRole.prestataire,
+              'Prestataire',
+              'Je propose des services',
+              Icons.build_outlined,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Construit une carte de rôle style Profil
+  Widget _buildProfileStyleRoleCard(UserRole role, String title, String subtitle, IconData icon) {
     final isSelected = _selectedRole == role;
     
     return GestureDetector(
@@ -572,9 +830,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryBlue.withOpacity(0.1) : AppColors.surfaceLight,
+          color: isSelected ? AppColors.purple.withOpacity(0.1) : Colors.white,
           border: Border.all(
-            color: isSelected ? AppColors.primaryBlue : AppColors.borderColor,
+            color: isSelected ? AppColors.purple : AppColors.borderColor.withOpacity(0.3),
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(12),
@@ -583,15 +841,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primaryBlue : AppColors.gray400,
-              size: 32,
+              color: isSelected ? AppColors.purple : AppColors.textSecondary,
+              size: 24,
             ),
             const SizedBox(height: 8),
             Text(
               title,
-              style: AppTextStyles.labelLarge.copyWith(
-                color: isSelected ? AppColors.primaryBlue : AppColors.activityText,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: isSelected ? AppColors.purple : Colors.black,
                 fontWeight: FontWeight.w600,
+                fontSize: 14,
               ),
             ),
             const SizedBox(height: 4),
@@ -599,6 +858,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               subtitle,
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.textSecondary,
+                fontSize: 12,
               ),
               textAlign: TextAlign.center,
             ),
@@ -607,4 +867,77 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       ),
     );
   }
+
+  Widget _buildProfileImage() {
+    final authState = ref.read(authProvider);
+    final currentUser = authState.user;
+    
+    // Si une nouvelle image est sélectionnée, l'afficher
+    if (_selectedImage != null) {
+      return FutureBuilder<Uint8List?>(
+        future: _getImageBytes(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data != null) {
+            return Image.memory(
+              snapshot.data!,
+              width: 100,
+              height: 100,
+              fit: BoxFit.cover,
+            );
+          } else if (snapshot.hasError) {
+            return const Icon(
+              Icons.error,
+              size: 50,
+              color: AppColors.error,
+            );
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.purple),
+              ),
+            );
+          }
+        },
+      );
+    }
+    
+    // Sinon, afficher l'image actuelle de l'utilisateur
+    if (currentUser?.profileImage != null && currentUser!.profileImage!.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: currentUser.profileImage!,
+        width: 100,
+        height: 100,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.purple),
+          ),
+        ),
+        errorWidget: (context, url, error) => const Icon(
+          Icons.person,
+          size: 50,
+          color: AppColors.textSecondary,
+        ),
+      );
+    }
+    
+    // Image par défaut
+    return const Icon(
+      Icons.person,
+      size: 50,
+      color: AppColors.textSecondary,
+    );
+  }
+
+  Future<Uint8List?> _getImageBytes() async {
+    if (_selectedImage == null) return null;
+    
+    try {
+      return await _selectedImage!.readAsBytes();
+    } catch (e) {
+      print('Erreur lors de la lecture de l\'image: $e');
+      return null;
+    }
+  }
+
 }

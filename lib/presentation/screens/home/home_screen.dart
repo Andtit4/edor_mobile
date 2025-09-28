@@ -341,7 +341,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               Expanded(
                 child: _buildEnhancedQuickActionCard(
                   'Demander un service',
-                  'Créer une demande',
+                  '',
                   Icons.add_circle_outline,
                   AppColors.purple,
                   () => context.push(AppRoutes.createRequest),
@@ -351,7 +351,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               Expanded(
                 child: _buildEnhancedQuickActionCard(
                   'Prestataires',
-                  'Voir les services',
+                  '',
                   Icons.people_outline,
                   const Color(0xFF10B981),
                   () => context.push(AppRoutes.serviceOffers),
@@ -512,24 +512,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   ],
                 ),
               ),
-              TextButton(
-                onPressed: () => context.push(AppRoutes.serviceRequests),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  backgroundColor: AppColors.purple.withOpacity(0.1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  'Voir tout',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.purple,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
+              
             ],
           ),
         ),
@@ -602,34 +585,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      'Découvrez nos meilleurs professionnels',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.textSecondary,
-                        fontSize: 14,
-                      ),
-                    ),
+                    
                   ],
                 ),
               ),
-              TextButton(
-                onPressed: () => context.push(AppRoutes.serviceOffers),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  backgroundColor: AppColors.purple.withOpacity(0.1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  'Voir tout',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.purple,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
+              
             ],
           ),
         ),
@@ -907,47 +867,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           const SizedBox(height: 16),
           // Price and Completed Jobs
           Row(
-          children: [
+            children: [
               if (prestataire.pricePerHour > 0) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    const Color(0xFF10B981).withOpacity(0.1),
-                    const Color(0xFF10B981).withOpacity(0.05),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFF10B981).withOpacity(0.1),
+                          const Color(0xFF10B981).withOpacity(0.05),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFF10B981).withOpacity(0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      '${prestataire.pricePerHour.toStringAsFixed(0)} FCFA/h',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: const Color(0xFF10B981),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: const Color(0xFF10B981).withOpacity(0.2),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                '${prestataire.pricePerHour.toStringAsFixed(0)} FCFA/h',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: const Color(0xFF10B981),
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                ),
-              ),
-            ),
                 const SizedBox(width: 12),
               ],
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF8B5CF6).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '${prestataire.completedJobs} travaux',
-                style: AppTextStyles.bodySmall.copyWith(
-                    color: const Color(0xFF8B5CF6),
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF8B5CF6).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${prestataire.completedJobs} travaux',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: const Color(0xFF8B5CF6),
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
@@ -958,34 +925,119 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           Row(
             children: [
               Expanded(
-                child: OutlinedButton(
-                  onPressed: () {
-          context.push('/prestataire/${prestataire.id}', extra: prestataire.id);
-        },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF8B5CF6),
-                    side: const BorderSide(color: Color(0xFF8B5CF6)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.purple.withOpacity(0.1),
+                        AppColors.purple.withOpacity(0.05),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppColors.purple.withOpacity(0.3),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.purple.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final authState = ref.read(authProvider);
+                      final currentUser = authState.user;
+                      
+                      // Si l'utilisateur connecté est le même prestataire, naviguer vers sa page profil
+                      if (currentUser?.role == UserRole.prestataire && 
+                          currentUser?.id == prestataire.id) {
+                        context.push(AppRoutes.viewProfile);
+                      } else {
+                        // Sinon, naviguer vers la page de détail du prestataire
+                        context.push('/prestataire/${prestataire.id}', extra: prestataire.id);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'Voir profil',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.purple,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: const Text('Voir profil'),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    _contactPrestataire(prestataire);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8B5CF6),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.purpleGradient,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.purple.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _contactPrestataire(prestataire);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                       
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'Contacter',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: const Text('Contacter'),
                 ),
               ),
             ],

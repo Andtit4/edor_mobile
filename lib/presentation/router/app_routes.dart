@@ -15,6 +15,7 @@ class AppRoutes {
   static const String chat = '/chat';
   static const String profile = '/profile';
   static const String editProfile = '/profile/edit';
+  static const String viewProfile = '/profile/view';
 
   // Route names (for named navigation)
   static const String splashName = 'splash';
@@ -32,4 +33,5 @@ class AppRoutes {
   static const String chatName = 'chat';
   static const String profileName = 'profile';
   static const String editProfileName = 'editProfile';
+  static const String viewProfileName = 'viewProfile';
 }
