@@ -703,50 +703,65 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
           ),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary.withOpacity(0.7),
-              fontSize: 15,
+            hintStyle: TextStyle(
+              color: Colors.grey[400],
+              fontSize: 16,
             ),
             prefixIcon: prefixIcon != null
-                ? Icon(
-                    prefixIcon,
-                    color: AppColors.textSecondary,
-                    size: 22,
+                ? Container(
+                    margin: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: AppColors.purpleGradient,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.purple.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      prefixIcon,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   )
                 : null,
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: AppColors.lightGray.withOpacity(0.5),
+            fillColor: Colors.white,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               borderSide: BorderSide(
-                color: AppColors.borderColor.withOpacity(0.3),
+                color: AppColors.borderColor.withOpacity(0.2),
                 width: 1,
               ),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               borderSide: BorderSide(
-                color: AppColors.borderColor.withOpacity(0.3),
+                color: AppColors.borderColor.withOpacity(0.2),
                 width: 1,
               ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               borderSide: const BorderSide(
                 color: AppColors.purple,
                 width: 2,
               ),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               borderSide: const BorderSide(
                 color: AppColors.error,
                 width: 1,
               ),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               borderSide: const BorderSide(
                 color: AppColors.error,
                 width: 2,

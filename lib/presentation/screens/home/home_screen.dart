@@ -236,56 +236,69 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   Widget _buildEnhancedSearchBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      margin: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width * 0.06,
+        vertical: 20,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.borderColor.withOpacity(0.3),
+          color: AppColors.borderColor.withOpacity(0.2),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
             blurRadius: 20,
-            offset: const Offset(0, 6),
-          ),
-          BoxShadow(
-            color: AppColors.purple.withOpacity(0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 3),
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: TextField(
         decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
           hintText: 'Rechercher un service...',
-          hintStyle: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.textSecondary.withOpacity(0.7),
+          hintStyle: TextStyle(
+            color: Colors.grey[400],
             fontSize: 16,
           ),
-          border: InputBorder.none,
           prefixIcon: Container(
             margin: const EdgeInsets.all(12),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.purple.withOpacity(0.1),
+              gradient: AppColors.purpleGradient,
               borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.purple.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: const Icon(
               Icons.search,
-              color: AppColors.purple,
+              color: Colors.white,
               size: 20,
             ),
           ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 18,
+          suffixIcon: Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.tune,
+              color: Colors.grey[600],
+              size: 20,
+            ),
           ),
-        ),
-        style: AppTextStyles.bodyMedium.copyWith(
-          fontSize: 16,
-          color: Colors.black,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),
       ),
     );
