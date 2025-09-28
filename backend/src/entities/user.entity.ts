@@ -31,7 +31,7 @@ export class User {
   @Column()
   phone: string;
 
-  @Column()
+  @Column({ nullable: true })
   password: string;
 
   @Column({
@@ -40,6 +40,22 @@ export class User {
     default: UserRole.CLIENT,
   })
   role: UserRole;
+
+  // Social Authentication fields
+  @Column({ nullable: true })
+  googleId: string;
+
+  @Column({ nullable: true })
+  facebookId: string;
+
+  @Column({ nullable: true })
+  appleId: string;
+
+  @Column({ nullable: true })
+  firebaseUid: string;
+
+  @Column({ default: false })
+  isSocialAuth: boolean;
 
   @Column({ nullable: true })
   profileImage: string;
@@ -76,7 +92,9 @@ export class User {
 
   @BeforeInsert()
   async hashPassword() {
-    this.password = await bcrypt.hash(this.password, 12);
+    if (this.password && !this.isSocialAuth) {
+      this.password = await bcrypt.hash(this.password, 12);
+    }
   }
 
   async validatePassword(password: string): Promise<boolean> {

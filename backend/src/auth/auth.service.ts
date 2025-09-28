@@ -11,6 +11,7 @@ import { User, UserRole } from '../entities/user.entity';
 import { Prestataire } from '../entities/prestataire.entity';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { SocialAuthDto, SocialAuthResponseDto } from './dto/social-auth.dto';
 import { EmailService } from '../email/email.service';
 
 @Injectable()
@@ -212,5 +213,123 @@ export class AuthService {
     console.log('Nouvelle image user:', updatedUser.profileImage);
     const { password: _, ...userWithoutPassword } = updatedUser;
     return userWithoutPassword as User;
+  }
+
+  async socialAuth(socialAuthDto: SocialAuthDto): Promise<SocialAuthResponseDto> {
+    console.log('🔵 === DÉBUT SOCIAL AUTH ===');
+    console.log('🔵 Données reçues:', JSON.stringify(socialAuthDto, null, 2));
+    
+    const { provider, providerId, email, firstName, lastName, phone, profileImage, role, firebaseUid, emailVerified } = socialAuthDto;
+
+    // Vérifier si l'utilisateur existe déjà avec cet email
+    console.log('🔵 Recherche d\'utilisateurs existants...');
+    let existingUser = await this.userRepository.findOne({ where: { email } });
+    let existingPrestataire = await this.prestataireRepository.findOne({ where: { email } });
+    
+    console.log('🔵 Utilisateur existant trouvé:', !!existingUser);
+    console.log('🔵 Prestataire existant trouvé:', !!existingPrestataire);
+    
+    let user: User | Prestataire;
+
+    if (existingUser) {
+      // Mettre à jour les informations sociales si nécessaire
+      if (!existingUser.isSocialAuth) {
+        existingUser.isSocialAuth = true;
+        existingUser[`${provider}Id`] = providerId;
+        if (profileImage) existingUser.profileImage = profileImage;
+        await this.userRepository.save(existingUser);
+      }
+      user = existingUser;
+    } else if (existingPrestataire) {
+      // Mettre à jour les informations sociales si nécessaire
+      if (!existingPrestataire.isSocialAuth) {
+        existingPrestataire.isSocialAuth = true;
+        existingPrestataire[`${provider}Id`] = providerId;
+        if (profileImage) existingPrestataire.profileImage = profileImage;
+        await this.prestataireRepository.save(existingPrestataire);
+      }
+      user = existingPrestataire;
+    } else {
+      // L'utilisateur n'existe pas - créer un nouvel utilisateur
+      console.log(`🔵 Création d'un nouvel utilisateur social: ${email} avec le rôle: ${role}`);
+      
+      if (role === 'prestataire') {
+        // Créer un nouveau prestataire
+        const newPrestataire = this.prestataireRepository.create({
+          email,
+          firstName,
+          lastName,
+          phone: phone || '',
+          password: '', // Pas de mot de passe pour l'auth sociale
+          role: UserRole.PRESTATAIRE,
+          name: `${firstName} ${lastName}`,
+          category: 'Général',
+          location: 'Non spécifié',
+          description: 'Prestataire de services',
+          pricePerHour: 0,
+          skills: [],
+          categories: [],
+          portfolio: [],
+          profileImage,
+          isSocialAuth: true,
+          [`${provider}Id`]: providerId,
+          firebaseUid: firebaseUid,
+          isAvailable: true,
+          rating: 0,
+          reviewCount: 0,
+          completedJobs: 0,
+          totalReviews: 0,
+        });
+
+        user = await this.prestataireRepository.save(newPrestataire);
+        console.log(`Nouveau prestataire créé: ${user.id}`);
+      } else {
+        // Créer un nouveau client
+        const newUser = this.userRepository.create({
+          email,
+          firstName,
+          lastName,
+          phone: phone || '',
+          password: '', // Pas de mot de passe pour l'auth sociale
+          role: UserRole.CLIENT,
+          isSocialAuth: true,
+          [`${provider}Id`]: providerId,
+          firebaseUid: firebaseUid,
+          profileImage,
+        });
+
+        user = await this.userRepository.save(newUser);
+        console.log(`Nouveau client créé: ${user.id}`);
+      }
+    }
+
+    // Générer le token JWT
+    console.log('🔵 Génération du token JWT...');
+    const token = this.jwtService.sign({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    // Retourner la réponse
+    console.log('🔵 Préparation de la réponse...');
+    const { password: _, ...userWithoutPassword } = user;
+    const response = {
+      user: {
+        id: userWithoutPassword.id,
+        email: userWithoutPassword.email,
+        firstName: userWithoutPassword.firstName,
+        lastName: userWithoutPassword.lastName,
+        phone: userWithoutPassword.phone,
+        role: userWithoutPassword.role,
+        profileImage: userWithoutPassword.profileImage,
+        isSocialAuth: userWithoutPassword.isSocialAuth,
+      },
+      token,
+    };
+    
+    console.log('✅ === FIN SOCIAL AUTH ===');
+    console.log('✅ Réponse:', JSON.stringify(response, null, 2));
+    return response;
   }
 }

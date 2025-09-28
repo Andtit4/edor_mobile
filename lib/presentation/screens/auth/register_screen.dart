@@ -108,9 +108,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
   @override
   Widget build(BuildContext context) {
     ref.listen<AuthState>(authProvider, (previous, next) {
+      print('🔵 RegisterScreen - AuthState changed:');
+      print('   Previous: isAuthenticated=${previous?.isAuthenticated}, isLoading=${previous?.isLoading}');
+      print('   Next: isAuthenticated=${next.isAuthenticated}, isLoading=${next.isLoading}');
+      print('   Error: ${next.error}');
+      
       if (next.isAuthenticated && !next.isLoading) {
+        print('✅ RegisterScreen - User authenticated, redirecting to home');
         context.go(AppRoutes.home);
       } else if (next.error != null && !next.isLoading) {
+        print('🔴 RegisterScreen - Error: ${next.error}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.error!),
@@ -177,6 +184,65 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                 ),
 
                 const SizedBox(height: 40),
+
+                // Connexion sociale
+                Text(
+                  'Inscription rapide',
+                  style: AppTextStyles.h5.copyWith(
+                    color: AppColors.activityText,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildSocialButton(
+                      icon: Icons.g_mobiledata,
+                      color: Colors.red,
+                      onTap: () {
+                        ref.read(authProvider.notifier).signInWithGoogle(role: _selectedRole, context: context);
+                      },
+                    ),
+                    _buildSocialButton(
+                      icon: Icons.facebook,
+                      color: Colors.blue,
+                      onTap: () {
+                        ref.read(authProvider.notifier).signInWithFacebook(role: _selectedRole);
+                      },
+                    ),
+                    _buildSocialButton(
+                      icon: Icons.apple,
+                      color: Colors.black,
+                      onTap: () {
+                        ref.read(authProvider.notifier).signInWithApple(role: _selectedRole);
+                      },
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 32),
+
+                // Divider
+                Row(
+                  children: [
+                    const Expanded(child: Divider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OU',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const Expanded(child: Divider()),
+                  ],
+                ),
+
+                const SizedBox(height: 32),
 
                 // Type de compte
                 Text(
@@ -428,6 +494,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
               textAlign: TextAlign.center,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSocialButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: color.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Icon(
+          icon,
+          color: color,
+          size: 28,
         ),
       ),
     );

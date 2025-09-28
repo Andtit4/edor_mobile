@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Facebook Configuration -->
+    <!-- Remplacez par vos vraies valeurs Facebook -->
+    <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+    
+    <!-- Google Sign In Configuration -->
+    <!-- Pas besoin de client web pour Android -->
+</resources>

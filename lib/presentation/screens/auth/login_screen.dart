@@ -5,7 +5,6 @@ import '../../providers/auth_provider.dart';
 import '../../router/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../widgets/custom_text_field.dart';
 import '../../widgets/custom_button.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -333,31 +332,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildSocialButton(
-                            icon: Icons.g_mobiledata,
-                            color: Colors.red,
-                            onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Google Sign In - À venir')),
-                              );
-                            },
-                          ),
+           _buildSocialButton(
+             icon: Icons.g_mobiledata,
+             color: Colors.red,
+             onTap: () {
+               ref.read(authProvider.notifier).loginWithGoogle();
+             },
+           ),
                           _buildSocialButton(
                             icon: Icons.facebook,
                             color: Colors.blue,
                             onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Facebook Sign In - À venir')),
-                              );
+                              ref.read(authProvider.notifier).signInWithFacebook();
                             },
                           ),
                           _buildSocialButton(
                             icon: Icons.apple,
                             color: Colors.black,
                             onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Apple Sign In - À venir')),
-                              );
+                              ref.read(authProvider.notifier).signInWithApple();
                             },
                           ),
                         ],

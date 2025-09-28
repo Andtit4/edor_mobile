@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "205344853554",
+    "project_id": "edor-mobile",
+    "storage_bucket": "edor-mobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:205344853554:android:6590c1d31178a0fd4eb62b",
+        "android_client_info": {
+          "package_name": "com.example.edor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "205344853554-o8u73e577qic9r3b5g24sbsrll9oukb3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.edor",
+            "certificate_hash": "40885a7ca4f8025bc3c5b5d7813b5ab0a7ad51da"
+          }
+        },
+        {
+          "client_id": "205344853554-p0qffu3icdbo0lk4kpeses6df6g1lusu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-fRVrhyEs0ugXFH2o0vWRvca5MFCO6Gs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "205344853554-p0qffu3icdbo0lk4kpeses6df6g1lusu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "205344853554-l8gfu0tknq27gc5oi9d668a0m51imm8u.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.edor"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
