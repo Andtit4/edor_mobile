@@ -181,7 +181,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   style: AppTextStyles.h4.copyWith(
                     color: Colors.black,
                     fontWeight: FontWeight.w700,
-                    fontSize: 20,
+                    fontSize: 15,
                   ),
                 ),
                 const SizedBox(height: 4),

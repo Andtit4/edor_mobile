@@ -25,7 +25,8 @@ class ServiceOffersScreen extends ConsumerStatefulWidget {
   const ServiceOffersScreen({super.key});
 
   @override
-  ConsumerState<ServiceOffersScreen> createState() => _ServiceOffersScreenState();
+  ConsumerState<ServiceOffersScreen> createState() =>
+      _ServiceOffersScreenState();
 }
 
 class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
@@ -33,7 +34,15 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
   late TabController _tabController;
   String _selectedFilter = 'Toutes';
 
-  final List<String> _filters = ['Toutes', 'Plomberie', 'Électricité', 'Peinture', 'Bricolage', 'Jardinage', 'Nettoyage'];
+  final List<String> _filters = [
+    'Toutes',
+    'Plomberie',
+    'Électricité',
+    'Peinture',
+    'Bricolage',
+    'Jardinage',
+    'Nettoyage'
+  ];
 
   @override
   void initState() {
@@ -42,8 +51,12 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     // Charger les données au démarrage
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(serviceOfferProvider.notifier).loadOffers();
-      ref.read(prestatairesProvider.notifier).loadPrestataires(); // Charger les prestataires
-      ref.read(serviceRequestProvider.notifier).loadAllRequests(); // Charger toutes les demandes
+      ref
+          .read(prestatairesProvider.notifier)
+          .loadPrestataires(); // Charger les prestataires
+      ref
+          .read(serviceRequestProvider.notifier)
+          .loadAllRequests(); // Charger toutes les demandes
       _loadMyRequests(); // Charger les demandes du client
       _loadMyOffers(); // Charger les offres du prestataire
       _loadAssignedRequests(); // Charger les demandes assignées au prestataire
@@ -54,12 +67,12 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
   void _loadMyRequests() async {
     final authState = ref.read(authProvider);
     var token = authState.token;
-    
+
     print('=== LOAD MY REQUESTS CALLED ===');
     print('User: ${authState.user?.firstName} ${authState.user?.lastName}');
     print('Role: ${authState.user?.role}');
     print('Token exists: ${token != null}');
-    
+
     // Si le token n'est pas disponible, essayer de le rafraîchir
     if (token == null && authState.user?.role == UserRole.client) {
       print('Token not available, trying to refresh...');
@@ -68,7 +81,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
       token = newAuthState.token;
       print('Token after refresh: ${token != null}');
     }
-    
+
     if (token != null && authState.user?.role == UserRole.client) {
       print('Loading my requests...');
       ref.read(serviceRequestProvider.notifier).loadMyRequests(token);
@@ -80,7 +93,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
   void _loadMyOffers() {
     final authState = ref.read(authProvider);
     final token = authState.token;
-    
+
     if (token != null && authState.user?.role == UserRole.prestataire) {
       ref.read(serviceOfferProvider.notifier).loadMyOffers(token);
     }
@@ -89,7 +102,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
   void _loadAssignedRequests() {
     final authState = ref.read(authProvider);
     final token = authState.token;
-    
+
     if (token != null && authState.user?.role == UserRole.prestataire) {
       ref.read(serviceRequestProvider.notifier).loadAssignedRequests(token);
     }
@@ -105,43 +118,45 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            // Header
+          child: Column(
+            children: [
+              // Header
               _buildEnhancedHeader(),
-            
-            // Search Bar
+
+              // Search Bar
               _buildEnhancedSearchBar(),
-            
-            // Filter Chips
+
+              // Filter Chips
               _buildEnhancedFilterChips(),
-            
-            // Tab Bar
+
+              // Tab Bar
               _buildEnhancedTabBar(),
-            
-            // Content
+
+              // Content
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.6,
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildPrestatairesList(), // Premier onglet
-                  user?.role == UserRole.prestataire
-                    ? _buildAllRequestsList() // Pour les prestataires - toutes les demandes
-                    : NegotiationWidgets.buildNegotiationsList(ref), // Pour les clients - négociations
-                  user?.role == UserRole.prestataire
-                    ? _buildAssignedRequestsList() // Pour les prestataires - demandes assignées
-                    : _buildMyRequestsList([]), // Pour les clients - leurs demandes
-                ],
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildPrestatairesList(), // Premier onglet
+                    user?.role == UserRole.prestataire
+                        ? _buildAllRequestsList() // Pour les prestataires - toutes les demandes
+                        : NegotiationWidgets.buildNegotiationsList(
+                            ref), // Pour les clients - négociations
+                    user?.role == UserRole.prestataire
+                        ? _buildAssignedRequestsList() // Pour les prestataires - demandes assignées
+                        : _buildMyRequestsList(
+                            []), // Pour les clients - leurs demandes
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
           ),
         ),
       ),
@@ -211,24 +226,24 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Trouvez votre',
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Trouvez votre',
                             style: AppTextStyles.h3.copyWith(
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              Text(
-                'prestataire',
-                style: AppTextStyles.h2.copyWith(
-                  color: const Color(0xFF1F2937),
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                          Text(
+                            'prestataire',
+                            style: AppTextStyles.h2.copyWith(
+                              color: const Color(0xFF1F2937),
                               fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -326,7 +341,8 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
             ),
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),
       ),
     );
@@ -346,7 +362,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
         itemBuilder: (context, index) {
           final filter = _filters[index];
           final isSelected = _selectedFilter == filter;
-          
+
           return Container(
             margin: const EdgeInsets.only(right: 12),
             child: AnimatedContainer(
@@ -357,16 +373,16 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                 color: isSelected ? null : Colors.white,
                 borderRadius: BorderRadius.circular(25),
                 border: Border.all(
-                  color: isSelected 
-                    ? AppColors.purple 
-                    : AppColors.borderColor.withOpacity(0.3),
+                  color: isSelected
+                      ? AppColors.purple
+                      : AppColors.borderColor.withOpacity(0.3),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: isSelected 
-                      ? AppColors.purple.withOpacity(0.3)
-                      : Colors.black.withOpacity(0.05),
+                    color: isSelected
+                        ? AppColors.purple.withOpacity(0.3)
+                        : Colors.black.withOpacity(0.05),
                     blurRadius: isSelected ? 12 : 8,
                     offset: const Offset(0, 4),
                   ),
@@ -390,7 +406,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
   Widget _buildEnhancedTabBar() {
     final authState = ref.watch(authProvider);
     final user = authState.user;
-    
+
     return Container(
       margin: EdgeInsets.symmetric(
         horizontal: MediaQuery.of(context).size.width * 0.06,
@@ -443,131 +459,106 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
           fontWeight: FontWeight.w500,
           fontSize: 14,
         ),
-        tabs: user?.role == UserRole.prestataire 
-          ? [
-              Tab(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.people_outline,
-                      size: 16,
-                      color: _tabController.index == 0 ? Colors.white : Colors.grey[600],
-                    ),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        'Prestataires',
-                        overflow: TextOverflow.ellipsis,
+        tabs: user?.role == UserRole.prestataire
+            ? [
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                     
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          'Prestataires',
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Tab(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.list_alt_outlined,
-                      size: 16,
-                      color: _tabController.index == 1 ? Colors.white : Colors.grey[600],
-                    ),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        'Demandes',
-                        overflow: TextOverflow.ellipsis,
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                     
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          'Demandes',
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Tab(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.person_outline,
-                      size: 16,
-                      color: _tabController.index == 2 ? Colors.white : Colors.grey[600],
-                    ),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        'Mes demandes',
-                        overflow: TextOverflow.ellipsis,
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                     
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          'Mes demandes',
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ]
-          : [
-              Tab(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.people_outline,
-                      size: 16,
-                      color: _tabController.index == 0 ? Colors.white : Colors.grey[600],
-                    ),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        'Prestataires',
-                        overflow: TextOverflow.ellipsis,
+              ]
+            : [
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                     
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          'Prestataires',
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Tab(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.local_offer_outlined,
-                      size: 16,
-                      color: _tabController.index == 1 ? Colors.white : Colors.grey[600],
-                    ),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        'Offres',
-                        overflow: TextOverflow.ellipsis,
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          'Offres',
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Tab(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.person_outline,
-                      size: 16,
-                      color: _tabController.index == 2 ? Colors.white : Colors.grey[600],
-                    ),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        'Mes demandes',
-                        overflow: TextOverflow.ellipsis,
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                     
+                      Flexible(
+                        child: Text(
+                          'Mes demandes',
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
       ),
     );
   }
@@ -576,13 +567,13 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     return Consumer(
       builder: (context, ref, child) {
         final prestatairesState = ref.watch(prestatairesProvider);
-        
+
         if (prestatairesState.isLoading) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
-        
+
         if (prestatairesState.error != null) {
           return Center(
             child: Column(
@@ -619,7 +610,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
             ),
           );
         }
-        
+
         if (prestatairesState.prestataires.isEmpty) {
           return Center(
             child: Column(
@@ -649,13 +640,14 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
             ),
           );
         }
-        
+
         // Filtrer les prestataires selon le filtre sélectionné
-        final filteredPrestataires = prestatairesState.prestataires.where((prestataire) {
+        final filteredPrestataires =
+            prestatairesState.prestataires.where((prestataire) {
           if (_selectedFilter == 'Toutes') return true;
           return prestataire.category == _selectedFilter;
         }).toList();
-        
+
         if (filteredPrestataires.isEmpty) {
           return Center(
             child: Column(
@@ -685,7 +677,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
             ),
           );
         }
-        
+
         return ListView.builder(
           padding: EdgeInsets.symmetric(
             horizontal: MediaQuery.of(context).size.width * 0.06,
@@ -706,7 +698,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
       builder: (context, ref, child) {
         final authState = ref.watch(authProvider);
         final requestState = ref.watch(serviceRequestProvider);
-        
+
         // Vérifier que l'utilisateur est un prestataire
         if (authState.user?.role != UserRole.prestataire) {
           return const Center(
@@ -730,13 +722,13 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
             ),
           );
         }
-        
+
         if (requestState.isLoading) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
-        
+
         if (requestState.error != null) {
           return Center(
             child: Column(
@@ -773,7 +765,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
             ),
           );
         }
-        
+
         if (requestState.allRequests.isEmpty) {
           return Center(
             child: Column(
@@ -828,13 +820,12 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     );
   }
 
-
   Widget _buildMyRequestsList(List<ServiceRequest> requests) {
     return Consumer(
       builder: (context, ref, child) {
         final authState = ref.watch(authProvider);
         final requestState = ref.watch(serviceRequestProvider);
-        
+
         // Debug logs
         print('=== DEBUG MY REQUESTS ===');
         print('User role: ${authState.user?.role}');
@@ -843,9 +834,10 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
         print('My requests count: ${requestState.myRequests.length}');
         print('Requests passed to widget: ${requests.length}');
         for (var request in requestState.myRequests) {
-          print('Request: ${request.title} - ${request.status} - ${request.clientId}');
+          print(
+              'Request: ${request.title} - ${request.status} - ${request.clientId}');
         }
-        
+
         // Vérifier que l'utilisateur est un client
         if (authState.user?.role != UserRole.client) {
           return const Center(
@@ -869,13 +861,13 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
             ),
           );
         }
-        
+
         if (requestState.isLoading) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
-        
+
         if (requestState.error != null) {
           return Center(
             child: Column(
@@ -906,7 +898,9 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                   onPressed: () {
                     final token = authState.token;
                     if (token != null) {
-                      ref.read(serviceRequestProvider.notifier).loadMyRequests(token);
+                      ref
+                          .read(serviceRequestProvider.notifier)
+                          .loadMyRequests(token);
                     }
                   },
                   child: const Text('Réessayer'),
@@ -915,7 +909,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
             ),
           );
         }
-        
+
         if (requestState.myRequests.isEmpty) {
           return Center(
             child: Column(
@@ -952,7 +946,9 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                       token = newAuthState.token;
                     }
                     if (token != null) {
-                      ref.read(serviceRequestProvider.notifier).loadMyRequests(token);
+                      ref
+                          .read(serviceRequestProvider.notifier)
+                          .loadMyRequests(token);
                     }
                   },
                   icon: Icon(Icons.refresh),
@@ -983,7 +979,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
       builder: (context, ref, child) {
         final authState = ref.watch(authProvider);
         final requestState = ref.watch(serviceRequestProvider);
-        
+
         // Vérifier que l'utilisateur est un prestataire
         if (authState.user?.role != UserRole.prestataire) {
           return const Center(
@@ -1007,13 +1003,13 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
             ),
           );
         }
-        
+
         if (requestState.isLoading) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
-        
+
         if (requestState.error != null) {
           return Center(
             child: Column(
@@ -1044,7 +1040,9 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                   onPressed: () {
                     final token = authState.token;
                     if (token != null) {
-                      ref.read(serviceRequestProvider.notifier).loadAssignedRequests(token);
+                      ref
+                          .read(serviceRequestProvider.notifier)
+                          .loadAssignedRequests(token);
                     }
                   },
                   child: const Text('Réessayer'),
@@ -1053,7 +1051,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
             ),
           );
         }
-        
+
         if (requestState.assignedRequests.isEmpty) {
           return Center(
             child: Column(
@@ -1085,7 +1083,9 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                   onPressed: () {
                     final token = authState.token;
                     if (token != null) {
-                      ref.read(serviceRequestProvider.notifier).loadAssignedRequests(token);
+                      ref
+                          .read(serviceRequestProvider.notifier)
+                          .loadAssignedRequests(token);
                     }
                   },
                   icon: Icon(Icons.refresh),
@@ -1110,8 +1110,6 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
       },
     );
   }
-
-
 
   Widget _buildAllRequestCard(ServiceRequest request) {
     return Container(
@@ -1199,7 +1197,8 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                 const Spacer(),
                 if (request.assignedPrestataireId != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.green.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -1352,7 +1351,8 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.blue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -1450,7 +1450,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 12),
-              
+
               // Affichage des photos si disponibles
               if (request.photos.isNotEmpty) ...[
                 ImageGallery(
@@ -1467,7 +1467,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                 ),
                 const SizedBox(height: 12),
               ],
-              
+
               Row(
                 children: [
                   Icon(
@@ -1510,7 +1510,8 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                   const Spacer(),
                   if (request.assignedPrestataireId != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.green.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -1525,7 +1526,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                     ),
                 ],
               ),
-              
+
               // Photos de la demande
               if (request.photos.isNotEmpty) ...[
                 const SizedBox(height: 12),
@@ -1558,7 +1559,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                   },
                 ),
               ],
-              
+
               // Bouton IA pour les demandes en attente
               if (request.status == 'pending') ...[
                 const SizedBox(height: 12),
@@ -1579,7 +1580,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                   ),
                 ),
               ],
-              
+
               // Les négociations sont maintenant gérées dans l'onglet "Offres"
               // Plus besoin d'afficher NegotiationListWidget ici
             ],
@@ -1592,7 +1593,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
   Widget _buildStatusChip(String status) {
     Color backgroundColor;
     Color textColor;
-    
+
     switch (status.toLowerCase()) {
       case 'pending':
         backgroundColor = Colors.orange.withOpacity(0.1);
@@ -1618,7 +1619,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
         backgroundColor = Colors.grey.withOpacity(0.1);
         textColor = Colors.grey[700]!;
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -1656,8 +1657,6 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     return '${date.day}/${date.month}/${date.year}';
   }
 
-
-
   /// Carte de prestataire moderne avec glassmorphism
   Widget _buildPrestataireCard(Prestataire prestataire) {
     final colors = {
@@ -1690,12 +1689,12 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
       ),
       child: Padding(
         padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             // Header avec avatar et informations principales
-          Row(
-            children: [
+            Row(
+              children: [
                 // Avatar avec bordure moderne
                 Container(
                   decoration: BoxDecoration(
@@ -1713,19 +1712,19 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                     ],
                   ),
                   child: PrestataireAvatar(
-                imageUrl: prestataire.profileImage ?? prestataire.avatar,
-                name: prestataire.name,
+                    imageUrl: prestataire.profileImage ?? prestataire.avatar,
+                    name: prestataire.name,
                     size: 60.0,
                     showBorder: false,
-              ),
+                  ),
                 ),
                 const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      prestataire.name,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        prestataire.name,
                         style: AppTextStyles.h3.copyWith(
                           fontWeight: FontWeight.w800,
                           color: const Color(0xFF1F2937),
@@ -1733,7 +1732,8 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                       ),
                       const SizedBox(height: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
@@ -1750,17 +1750,17 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                           ),
                         ),
                         child: Text(
-                      prestataire.category,
-                      style: AppTextStyles.bodyMedium.copyWith(
+                          prestataire.category,
+                          style: AppTextStyles.bodyMedium.copyWith(
                             color: color,
                             fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
+                      Row(
+                        children: [
+                          Icon(
                             Icons.location_on_outlined,
                             size: 16,
                             color: Colors.grey[600],
@@ -1768,24 +1768,25 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                          prestataire.location,
+                              prestataire.location,
                               style: AppTextStyles.bodySmall.copyWith(
                                 color: Colors.grey[600],
                                 fontWeight: FontWeight.w500,
                               ),
                               overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
                 // Badge de disponibilité moderne
-              Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                    gradient: prestataire.isAvailable 
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    gradient: prestataire.isAvailable
                         ? LinearGradient(
                             colors: [
                               const Color(0xFF10B981).withOpacity(0.1),
@@ -1804,7 +1805,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                           ),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                  color: prestataire.isAvailable 
+                      color: prestataire.isAvailable
                           ? const Color(0xFF10B981).withOpacity(0.3)
                           : Colors.grey.withOpacity(0.3),
                       width: 1,
@@ -1814,27 +1815,29 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        prestataire.isAvailable ? Icons.check_circle : Icons.cancel,
+                        prestataire.isAvailable
+                            ? Icons.check_circle
+                            : Icons.cancel,
                         size: 16,
-                        color: prestataire.isAvailable 
+                        color: prestataire.isAvailable
                             ? const Color(0xFF10B981)
                             : Colors.grey[600],
                       ),
                       const SizedBox(width: 6),
                       Text(
-                  prestataire.isAvailable ? 'Disponible' : 'Indisponible',
+                        prestataire.isAvailable ? 'Disponible' : 'Indisponible',
                         style: AppTextStyles.bodySmall.copyWith(
-                    color: prestataire.isAvailable 
-                        ? const Color(0xFF10B981)
-                        : Colors.grey[600],
+                          color: prestataire.isAvailable
+                              ? const Color(0xFF10B981)
+                              : Colors.grey[600],
                           fontWeight: FontWeight.w700,
-                  ),
+                        ),
                       ),
                     ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
             const SizedBox(height: 20),
             // Description
             Container(
@@ -1848,20 +1851,20 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                 ),
               ),
               child: Text(
-            prestataire.description,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: Colors.grey[700],
+                prestataire.description,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: Colors.grey[700],
                   height: 1.5,
-            ),
+                ),
                 maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             const SizedBox(height: 20),
             // Statistiques avec design moderne
-          Row(
-            children: [
-              // Rating
+            Row(
+              children: [
+                // Rating
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.all(16),
@@ -1881,40 +1884,40 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                       ),
                     ),
                     child: Row(
-                children: [
-                  Icon(
-                    Icons.star,
+                      children: [
+                        Icon(
+                          Icons.star,
                           size: 20,
-                    color: Colors.amber[600],
-                  ),
+                          color: Colors.amber[600],
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                  Text(
-                    '${prestataire.rating}',
+                              Text(
+                                '${prestataire.rating}',
                                 style: AppTextStyles.bodyLarge.copyWith(
                                   color: Colors.amber[700],
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
-                  Text(
+                              Text(
                                 '${prestataire.totalReviews} avis',
                                 style: AppTextStyles.bodySmall.copyWith(
-                      color: Colors.grey[600],
+                                  color: Colors.grey[600],
                                   fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
-              // Price
+                // Price
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.all(16),
@@ -1934,8 +1937,8 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                       ),
                     ),
                     child: Row(
-                children: [
-                  Icon(
+                      children: [
+                        Icon(
                           Icons.attach_money_outlined,
                           size: 20,
                           color: const Color(0xFF10B981),
@@ -1945,7 +1948,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                  Text(
+                              Text(
                                 '${prestataire.pricePerHour.toStringAsFixed(0)} FCFA/h',
                                 style: AppTextStyles.bodyLarge.copyWith(
                                   color: const Color(0xFF10B981),
@@ -1955,20 +1958,20 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                               Text(
                                 'Tarif horaire',
                                 style: AppTextStyles.bodySmall.copyWith(
-                      color: Colors.grey[600],
+                                  color: Colors.grey[600],
                                   fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             // Travaux terminés et téléphone
             Row(
               children: [
@@ -1984,8 +1987,8 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                       ),
                     ),
                     child: Row(
-            children: [
-              Icon(
+                      children: [
+                        Icon(
                           Icons.work_history_outlined,
                           size: 16,
                           color: AppColors.purple,
@@ -2019,7 +2022,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                     ),
                     child: Row(
                       children: [
-              Icon(
+                        Icon(
                           Icons.phone_outlined,
                           size: 16,
                           color: Colors.blue,
@@ -2027,27 +2030,27 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                prestataire.phone ?? 'Non disponible',
+                            prestataire.phone ?? 'Non disponible',
                             style: AppTextStyles.bodySmall.copyWith(
                               color: Colors.blue,
                               fontWeight: FontWeight.w600,
                             ),
                             overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 24),
             // Boutons d'action modernes
-          Row(
-            children: [
-              Expanded(
+            Row(
+              children: [
+                Expanded(
                   child: Container(
-                    height: 52,
+                    height: 40,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -2070,12 +2073,12 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                         ),
                       ],
                     ),
-                child: ElevatedButton(
-                  onPressed: () => _showPrestataireDetails(prestataire),
-                  style: ElevatedButton.styleFrom(
+                    child: ElevatedButton(
+                      onPressed: () => _showPrestataireDetails(prestataire),
+                      style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
@@ -2095,7 +2098,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                               style: AppTextStyles.bodyMedium.copyWith(
                                 color: AppColors.purple,
                                 fontWeight: FontWeight.w700,
-                                fontSize: 14,
+                                fontSize: 12,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -2106,9 +2109,9 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                   ),
                 ),
                 const SizedBox(width: 16),
-              Expanded(
+                Expanded(
                   child: Container(
-                    height: 52,
+                    height: 50,
                     decoration: BoxDecoration(
                       gradient: AppColors.purpleGradient,
                       borderRadius: BorderRadius.circular(16),
@@ -2120,12 +2123,12 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                         ),
                       ],
                     ),
-                child: ElevatedButton(
-                  onPressed: () => _contactPrestataireFromCard(prestataire),
-                  style: ElevatedButton.styleFrom(
+                    child: ElevatedButton(
+                      onPressed: () => _contactPrestataireFromCard(prestataire),
+                      style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
@@ -2145,17 +2148,17 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                               style: AppTextStyles.bodyMedium.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700,
-                                fontSize: 14,
+                                fontSize: 12,
                               ),
                               overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-          ),
-        ],
+                ),
+              ],
             ),
           ],
         ),
@@ -2244,10 +2247,10 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     print('=== ACCEPT REQUEST FROM ALL CALLED ===');
     print('Request ID: ${request.id}');
     print('Request title: ${request.title}');
-    
+
     final authState = ref.read(authProvider);
     final token = authState.token;
-    
+
     print('User: ${authState.user?.firstName} ${authState.user?.lastName}');
     print('User role: ${authState.user?.role}');
     print('User ID: ${authState.user?.id}');
@@ -2277,11 +2280,11 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
       print('Calling assignPrestataire...');
       // Assigner le prestataire à la demande
       await ref.read(serviceRequestProvider.notifier).assignPrestataire(
-        request.id,
-        authState.user!.id, // ID du prestataire connecté
-        '${authState.user!.firstName} ${authState.user!.lastName}', // Nom du prestataire
-        token,
-      );
+            request.id,
+            authState.user!.id, // ID du prestataire connecté
+            '${authState.user!.firstName} ${authState.user!.lastName}', // Nom du prestataire
+            token,
+          );
       print('assignPrestataire completed successfully');
 
       // Fermer l'indicateur de chargement
@@ -2418,10 +2421,10 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     try {
       // Mettre à jour le statut de la demande à "accepted"
       await ref.read(serviceRequestProvider.notifier).updateServiceRequest(
-        request.id,
-        {'status': 'accepted'},
-        token,
-      );
+            request.id,
+            {'status': 'accepted'},
+            token,
+          );
 
       // Fermer l'indicateur de chargement
       if (context.mounted) {
@@ -2480,10 +2483,10 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     try {
       // Mettre à jour le statut de la demande à "cancelled"
       await ref.read(serviceRequestProvider.notifier).updateServiceRequest(
-        request.id,
-        {'status': 'cancelled'},
-        token,
-      );
+            request.id,
+            {'status': 'cancelled'},
+            token,
+          );
 
       // Fermer l'indicateur de chargement
       if (context.mounted) {
@@ -2523,7 +2526,8 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     if (!authState.isAuthenticated || token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vous devez être connecté pour contacter un prestataire'),
+          content:
+              Text('Vous devez être connecté pour contacter un prestataire'),
           backgroundColor: Colors.red,
         ),
       );
@@ -2542,7 +2546,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     try {
       // Charger les conversations d'abord
       await ref.read(messagesProvider.notifier).loadConversations(token);
-      
+
       // Vérifier si une conversation existe déjà
       final existingConversations = ref.read(messagesProvider).conversations;
       Conversation? existingConversation;
@@ -2553,24 +2557,25 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
       } catch (e) {
         existingConversation = null;
       }
-      
+
       Conversation? conversation;
-      
+
       if (existingConversation != null) {
         conversation = existingConversation;
       } else {
         // Créer une nouvelle conversation
-        conversation = await ref.read(messagesProvider.notifier).createConversation(
-          prestataireId: prestataire.id,
-          token: token,
-        );
+        conversation =
+            await ref.read(messagesProvider.notifier).createConversation(
+                  prestataireId: prestataire.id,
+                  token: token,
+                );
       }
-      
+
       // Fermer l'indicateur de chargement
       if (context.mounted) {
         Navigator.of(context, rootNavigator: true).pop();
       }
-      
+
       if (conversation != null && context.mounted) {
         // Naviguer vers le chat
         context.push('/messages/chat/${conversation.id}');
@@ -2599,19 +2604,19 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
   void _loadClientNegotiations() async {
     final authState = ref.read(authProvider);
     var token = authState.token;
-    
+
     print('=== LOAD CLIENT NEGOTIATIONS CALLED ===');
     print('User: ${authState.user?.firstName} ${authState.user?.lastName}');
     print('Role: ${authState.user?.role}');
     print('User ID: ${authState.user?.id}');
     print('Token exists: ${token != null}');
-    
+
     if (token != null && authState.user?.role == UserRole.client) {
       print('Loading client negotiations for client ID: ${authState.user!.id}');
       ref.read(priceNegotiationProvider.notifier).loadClientNegotiations(
-        clientId: authState.user!.id,
-        token: token,
-      );
+            clientId: authState.user!.id,
+            token: token,
+          );
     } else {
       print('Not loading negotiations - conditions not met');
     }
@@ -2658,65 +2663,79 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
               // Catégorie
               _buildDetailRow(Icons.category, 'Catégorie', request.category),
               const SizedBox(height: 12),
-              
+
               // Description
-              _buildDetailRow(Icons.description, 'Description', request.description),
+              _buildDetailRow(
+                  Icons.description, 'Description', request.description),
               const SizedBox(height: 12),
-              
+
               // Client
               _buildDetailRow(Icons.person, 'Client', request.clientName),
               const SizedBox(height: 12),
-              
+
               // Téléphone
               _buildDetailRow(Icons.phone, 'Téléphone', request.clientPhone),
               const SizedBox(height: 12),
-              
+
               // Localisation
               _buildDetailRow(Icons.location_on, 'Lieu', request.location),
               const SizedBox(height: 12),
-              
+
               // Budget
-              _buildDetailRow(Icons.attach_money, 'Budget', '${request.budget.toStringAsFixed(0)} FCFA'),
+              _buildDetailRow(Icons.attach_money, 'Budget',
+                  '${request.budget.toStringAsFixed(0)} FCFA'),
               const SizedBox(height: 12),
-              
+
               // Échéance
-              _buildDetailRow(Icons.calendar_today, 'Échéance', _formatDate(request.deadline)),
+              _buildDetailRow(Icons.calendar_today, 'Échéance',
+                  _formatDate(request.deadline)),
               const SizedBox(height: 12),
-              
+
               // Statut
               _buildDetailRow(
-                Icons.info_outline, 
-                'Statut', 
+                Icons.info_outline,
+                'Statut',
                 _getStatusText(request.status),
                 color: _getStatusColor(request.status),
               ),
-              
+
               // Prestataire assigné
               if (request.assignedPrestataireId != null) ...[
                 const SizedBox(height: 12),
-                _buildDetailRow(Icons.assignment_ind, 'Prestataire assigné', request.assignedPrestataireName ?? request.prestataireName ?? 'Inconnu'),
+                _buildDetailRow(
+                    Icons.assignment_ind,
+                    'Prestataire assigné',
+                    request.assignedPrestataireName ??
+                        request.prestataireName ??
+                        'Inconnu'),
               ],
-              
+
               // Notes
               if (request.notes != null && request.notes!.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 _buildDetailRow(Icons.notes, 'Notes', request.notes!),
               ],
-              
+
               // Date de création
               const SizedBox(height: 12),
-              _buildDetailRow(Icons.access_time, 'Créée le', _formatDateTime(request.createdAt)),
-              
+              _buildDetailRow(Icons.access_time, 'Créée le',
+                  _formatDateTime(request.createdAt)),
+
               // Date de réalisation
               if (request.completionDate != null) ...[
                 const SizedBox(height: 12),
-                _buildDetailRow(Icons.check_circle_outline, 'Date de réalisation', _formatDate(request.completionDate!)),
+                _buildDetailRow(
+                    Icons.check_circle_outline,
+                    'Date de réalisation',
+                    _formatDate(request.completionDate!)),
               ],
-              
+
               // Remarques de clôture
-              if (request.completionNotes != null && request.completionNotes!.isNotEmpty) ...[
+              if (request.completionNotes != null &&
+                  request.completionNotes!.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                _buildDetailRow(Icons.rate_review, 'Remarques de clôture', request.completionNotes!),
+                _buildDetailRow(Icons.rate_review, 'Remarques de clôture',
+                    request.completionNotes!),
               ],
             ],
           ),
@@ -2731,7 +2750,8 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value, {Color? color}) {
+  Widget _buildDetailRow(IconData icon, String label, String value,
+      {Color? color}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

@@ -31,7 +31,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    
+
     // Charger les données au démarrage
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
@@ -41,10 +41,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void _loadData() {
     // Charger les prestataires
     ref.read(prestatairesProvider.notifier).loadPrestataires();
-    
+
     // Charger les offres de service
     ref.read(serviceOfferProvider.notifier).loadOffers();
-    
+
     // Charger toutes les demandes de service - CORRECTION
     ref.read(serviceRequestProvider.notifier).loadAllRequests();
   }
@@ -67,7 +67,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           builder: (context, ref, child) {
             final authState = ref.watch(authProvider);
             final user = authState.user;
-            
+
             if (user == null) {
               return const Center(
                 child: CircularProgressIndicator(
@@ -88,30 +88,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   children: [
                     // Espace flexible pour centrer le contenu
                     SizedBox(height: screenHeight * 0.02),
-                    
+
                     // Header amélioré
                     _buildEnhancedHeader(user),
-                    
+
                     SizedBox(height: screenHeight * 0.025),
-                    
+
                     // Search Bar amélioré
                     _buildEnhancedSearchBar(),
-                    
+
                     SizedBox(height: screenHeight * 0.025),
-                    
+
                     // Quick Actions based on role
                     _buildQuickActions(user.role),
-                    
+
                     SizedBox(height: screenHeight * 0.02),
-                    
+
                     // Content based on role
                     SizedBox(
-                      height: screenHeight * 0.5, // Hauteur fixe pour éviter les conflits
-                      child: user.role == UserRole.prestataire 
+                      height: screenHeight *
+                          0.5, // Hauteur fixe pour éviter les conflits
+                      child: user.role == UserRole.prestataire
                           ? _buildPrestataireContent()
                           : _buildClientContent(),
                     ),
-                    
+
                     // Espace en bas
                     SizedBox(height: screenHeight * 0.1),
                   ],
@@ -186,7 +187,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   style: AppTextStyles.h3.copyWith(
                     color: Colors.black,
                     fontWeight: FontWeight.w700,
-                    fontSize: 22,
+                    fontSize: 15,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -298,7 +299,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ),
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),
       ),
     );
@@ -312,7 +314,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       return _buildClientQuickActions();
     }
   }
-
 
   Widget _buildClientQuickActions() {
     return Container(
@@ -345,7 +346,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             style: AppTextStyles.labelLarge.copyWith(
               fontWeight: FontWeight.w700,
               color: Colors.black,
-              fontSize: 20,
+              fontSize: 16,
             ),
           ),
           const SizedBox(height: 20),
@@ -443,7 +444,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               style: AppTextStyles.labelLarge.copyWith(
                 fontWeight: FontWeight.w700,
                 color: Colors.black,
-                fontSize: 16,
+                fontSize: 14,
               ),
             ),
             const SizedBox(height: 6),
@@ -518,14 +519,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       style: AppTextStyles.labelLarge.copyWith(
                         fontWeight: FontWeight.w700,
                         color: Colors.black,
-                        fontSize: 20,
+                        fontSize: 16,
                       ),
                     ),
-                    
                   ],
                 ),
               ),
-              
             ],
           ),
         ),
@@ -542,7 +541,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         // Titre de la section
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -561,8 +560,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           child: Row(
             children: [
               Container(
-                width: 50,
-                height: 50,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -581,7 +580,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 child: const Icon(
                   Icons.people_outline,
                   color: AppColors.purple,
-                  size: 26,
+                  size: 20,
                 ),
               ),
               const SizedBox(width: 16),
@@ -594,19 +593,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       style: AppTextStyles.labelLarge.copyWith(
                         fontWeight: FontWeight.w700,
                         color: Colors.black,
-                        fontSize: 20,
+                        fontSize: 16,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    
                   ],
                 ),
               ),
-              
             ],
           ),
         ),
-        
+
         // Liste des prestataires
         Expanded(
           child: _buildPopularServicesList(),
@@ -615,14 +612,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-
   Widget _buildRecentRequestsList() {
     final serviceRequestState = ref.watch(serviceRequestProvider);
-    
+
     if (serviceRequestState.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (serviceRequestState.error != null) {
       return Center(
         child: Column(
@@ -630,14 +626,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           children: [
             Text('Erreur: ${serviceRequestState.error}'),
             ElevatedButton(
-              onPressed: () => ref.read(serviceRequestProvider.notifier).loadAllRequests(),
+              onPressed: () =>
+                  ref.read(serviceRequestProvider.notifier).loadAllRequests(),
               child: const Text('Réessayer'),
             ),
           ],
         ),
       );
     }
-    
+
     if (serviceRequestState.allRequests.isEmpty) {
       return const Center(
         child: Text('Aucune demande récente'),
@@ -645,7 +642,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      //padding: const EdgeInsets.symmetric(horizontal: 20),
       itemCount: serviceRequestState.allRequests.length,
       itemBuilder: (context, index) {
         final request = serviceRequestState.allRequests[index];
@@ -656,17 +653,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   Widget _buildPopularServicesList() {
     final prestataireState = ref.watch(prestatairesProvider);
-    
+
     print('=== DEBUG PRESTATAIRES ===');
     print('Loading: ${prestataireState.isLoading}');
     print('Error: ${prestataireState.error}');
     print('Count: ${prestataireState.prestataires.length}');
     print('========================');
-    
+
     if (prestataireState.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (prestataireState.error != null) {
       return Center(
         child: Column(
@@ -674,14 +671,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           children: [
             Text('Erreur: ${prestataireState.error}'),
             ElevatedButton(
-              onPressed: () => ref.read(prestatairesProvider.notifier).loadPrestataires(),
+              onPressed: () =>
+                  ref.read(prestatairesProvider.notifier).loadPrestataires(),
               child: const Text('Réessayer'),
             ),
           ],
         ),
       );
     }
-    
+
     if (prestataireState.prestataires.isEmpty) {
       return const Center(
         child: Text('Aucun prestataire disponible'),
@@ -689,7 +687,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      //padding: const EdgeInsets.symmetric(horizontal: 20),
       itemCount: prestataireState.prestataires.length,
       itemBuilder: (context, index) {
         final prestataire = prestataireState.prestataires[index];
@@ -712,7 +710,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(25),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -748,9 +746,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
                       prestataire.name,
                       style: AppTextStyles.h4.copyWith(
                         fontWeight: FontWeight.bold,
@@ -759,14 +757,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ),
                     const SizedBox(height: 4),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: color.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-              prestataire.category,
-              style: AppTextStyles.bodySmall.copyWith(
+                        prestataire.category,
+                        style: AppTextStyles.bodySmall.copyWith(
                           color: color,
                           fontWeight: FontWeight.w600,
                         ),
@@ -779,12 +778,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: prestataire.isAvailable 
+                  color: prestataire.isAvailable
                       ? const Color(0xFF10B981).withOpacity(0.1)
                       : Colors.grey.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: prestataire.isAvailable 
+                    color: prestataire.isAvailable
                         ? const Color(0xFF10B981)
                         : Colors.grey,
                     width: 1,
@@ -793,10 +792,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 child: Text(
                   prestataire.isAvailable ? 'Disponible' : 'Indisponible',
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: prestataire.isAvailable 
+                    color: prestataire.isAvailable
                         ? const Color(0xFF10B981)
                         : Colors.grey[600],
-                fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -828,14 +827,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.star,
+                  children: [
+                    Icon(
+                      Icons.star,
                       size: 16,
-                  color: Colors.amber[600],
-                ),
-                const SizedBox(width: 4),
-                Text(
+                      color: Colors.amber[600],
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
                       '${prestataire.rating.toStringAsFixed(1)}',
                       style: AppTextStyles.bodySmall.copyWith(
                         color: Colors.amber[700],
@@ -845,10 +844,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     const SizedBox(width: 4),
                     Text(
                       '(${prestataire.totalReviews})',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -857,26 +856,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               Expanded(
                 child: Row(
                   children: [
-                Icon(
-                  Icons.location_on,
+                    Icon(
+                      Icons.location_on,
                       size: 16,
-                  color: Colors.grey[600],
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    prestataire.location,
-                    style: AppTextStyles.bodySmall.copyWith(
                       color: Colors.grey[600],
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        prestataire.location,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-                ),
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
           // Price and Completed Jobs
           Row(
@@ -884,7 +883,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               if (prestataire.pricePerHour > 0) ...[
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -915,7 +915,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ],
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: const Color(0xFF8B5CF6).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -966,14 +967,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     onPressed: () {
                       final authState = ref.read(authProvider);
                       final currentUser = authState.user;
-                      
+
                       // Si l'utilisateur connecté est le même prestataire, naviguer vers sa page profil
-                      if (currentUser?.role == UserRole.prestataire && 
+                      if (currentUser?.role == UserRole.prestataire &&
                           currentUser?.id == prestataire.id) {
                         context.push(AppRoutes.viewProfile);
                       } else {
                         // Sinon, naviguer vers la page de détail du prestataire
-                        context.push('/prestataire/${prestataire.id}', extra: prestataire.id);
+                        context.push('/prestataire/${prestataire.id}',
+                            extra: prestataire.id);
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -987,7 +989,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
@@ -1035,7 +1036,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                       
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
@@ -1191,7 +1191,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -1218,7 +1219,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             ],
           ),
-          
+
           // Photos de la demande
           if (request.photos.isNotEmpty) ...[
             const SizedBox(height: 12),

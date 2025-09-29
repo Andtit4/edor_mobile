@@ -10,7 +10,6 @@ import '../../../domain/entities/user.dart';
 import '../../providers/service_request_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/price_negotiation_provider.dart';
-import '../../widgets/profile_avatar.dart';
 import '../../widgets/image_gallery.dart';
 import '../../widgets/photo_viewer.dart';
 
@@ -226,7 +225,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
                   style: AppTextStyles.h3.copyWith(
                     color: Colors.black,
                     fontWeight: FontWeight.w700,
-                    fontSize: 24,
+                    fontSize: 16,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -468,11 +467,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.list_alt_outlined,
-                    size: 16,
-                    color: _tabController.index == 0 ? Colors.white : AppColors.textSecondary,
-                  ),
+                  
                   const SizedBox(width: 6),
                   const Flexible(
                     child: Text(
@@ -492,11 +487,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.person_outline,
-                    size: 16,
-                    color: _tabController.index == 1 ? Colors.white : AppColors.textSecondary,
-                  ),
+                  
                   const SizedBox(width: 6),
                   const Flexible(
                     child: Text(
@@ -592,69 +583,53 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
     final color = colors[request.category] ?? const Color(0xFF8B5CF6);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 24),
+      margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
-          ),
-          BoxShadow(
-            color: color.withOpacity(0.08),
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 20,
-            offset: const Offset(0, 5),
+            offset: const Offset(0, 8),
           ),
         ],
         border: Border.all(
-          color: AppColors.borderColor.withOpacity(0.2),
+          color: AppColors.borderColor.withOpacity(0.1),
           width: 1,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header avec titre complet
+          // Header avec gradient subtil
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  color.withOpacity(0.05),
-                  color.withOpacity(0.02),
+                  color.withOpacity(0.08),
+                  color.withOpacity(0.03),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(24),
-                topRight: Radius.circular(24),
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
               ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Ligne 1: Catégorie et statut
+                // Catégorie et statut
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            color.withOpacity(0.2),
-                            color.withOpacity(0.1),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: color.withOpacity(0.3),
-                          width: 1,
-                        ),
+                        color: color.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -662,15 +637,15 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
                           Icon(
                             Icons.category_outlined,
                             color: color,
-                            size: 16,
+                            size: 14,
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 4),
                           Text(
                             request.category,
                             style: AppTextStyles.bodySmall.copyWith(
                               color: color,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
                             ),
                           ),
                         ],
@@ -678,50 +653,40 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
                     ),
                     const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            _getStatusColor(request.status).withOpacity(0.1),
-                            _getStatusColor(request.status).withOpacity(0.05),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: _getStatusColor(request.status).withOpacity(0.3),
-                          width: 1,
-                        ),
+                        color: _getStatusColor(request.status).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         _getStatusText(request.status),
                         style: AppTextStyles.bodySmall.copyWith(
                           color: _getStatusColor(request.status),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11,
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                // Ligne 2: Titre complet (sans limitation de lignes)
+                const SizedBox(height: 12),
+                // Titre
                 Text(
                   request.title,
                   style: AppTextStyles.bodyLarge.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: Colors.black,
-                    fontSize: 20,
+                    fontSize: 18,
                     height: 1.3,
                   ),
                 ),
               ],
             ),
           ),
+          
           // Contenu principal
           Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -730,369 +695,108 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
                   request.description,
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.textSecondary,
-                    fontSize: 16,
-                    height: 1.5,
+                    fontSize: 15,
+                    height: 1.4,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 
-                // Section informations détaillées
+                // Informations en grille compacte
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.lightGray.withOpacity(0.2),
-                        AppColors.lightGray.withOpacity(0.05),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: AppColors.borderColor.withOpacity(0.2),
-                      width: 1,
-                    ),
+                    color: AppColors.lightGray.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
                     children: [
-                      // Informations client
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: AppColors.purple.withOpacity(0.1),
-                            width: 1,
+                      // Client et Prix sur une ligne
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildInfoItem(
+                              icon: Icons.person_outline,
+                              label: 'Client',
+                              value: request.clientName,
+                              color: AppColors.purple,
+                            ),
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.purple.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildInfoItem(
+                              icon: Icons.attach_money_outlined,
+                              label: 'Prix',
+                              value: '${request.budget.toStringAsFixed(0)} FCFA',
+                              color: color,
                             ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            // Ligne client
-                            Row(
-                              children: [
-                                Container(
-                                  width: 56,
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.purple.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: AppColors.purple.withOpacity(0.2),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: ClientAvatar(
-                                    imageUrl: request.clientImage,
-                                    name: request.clientName,
-                                    size: 44.0,
-                                    showBorder: false,
-                                  ),
-                                ),
-                                const SizedBox(width: 20),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Client',
-                                        style: AppTextStyles.bodySmall.copyWith(
-                                          color: AppColors.textSecondary,
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        request.clientName,
-                                        style: AppTextStyles.bodyLarge.copyWith(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 18,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            // Ligne prix
-                            Row(
-                              children: [
-                                Container(
-                                  width: 56,
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    color: color.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: color.withOpacity(0.2),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Icon(
-                                    Icons.attach_money_outlined,
-                                    color: color,
-                                    size: 28,
-                                  ),
-                                ),
-                                const SizedBox(width: 20),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Prix proposé',
-                                        style: AppTextStyles.bodySmall.copyWith(
-                                          color: AppColors.textSecondary,
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        '${request.budget.toStringAsFixed(0)} FCFA',
-                                        style: AppTextStyles.bodyLarge.copyWith(
-                                          color: color,
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 18,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      
-                      const SizedBox(height: 16),
-                      
-                      // Informations localisation
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: const Color(0xFF10B981).withOpacity(0.1),
-                            width: 1,
+                      const SizedBox(height: 12),
+                      // Localisation et Date sur une ligne
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildInfoItem(
+                              icon: Icons.location_on_outlined,
+                              label: 'Localisation',
+                              value: request.location,
+                              color: const Color(0xFF10B981),
+                            ),
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF10B981).withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildInfoItem(
+                              icon: Icons.schedule_outlined,
+                              label: 'Échéance',
+                              value: _formatDate(request.deadline),
+                              color: Colors.orange,
                             ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 56,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF10B981).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: const Color(0xFF10B981).withOpacity(0.2),
-                                  width: 1,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.location_on_outlined,
-                                color: Color(0xFF10B981),
-                                size: 28,
-                              ),
-                            ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Localisation',
-                                    style: AppTextStyles.bodySmall.copyWith(
-                                      color: AppColors.textSecondary,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    request.location,
-                                    style: AppTextStyles.bodyLarge.copyWith(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 16),
-                      
-                      // Informations échéance
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.orange.withOpacity(0.1),
-                            width: 1,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.orange.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 56,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: Colors.orange.withOpacity(0.2),
-                                  width: 1,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.schedule_outlined,
-                                color: Colors.orange,
-                                size: 28,
-                              ),
-                            ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Date d\'échéance',
-                                    style: AppTextStyles.bodySmall.copyWith(
-                                      color: AppColors.textSecondary,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    _formatDate(request.deadline),
-                                    style: AppTextStyles.bodyLarge.copyWith(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                        ],
                       ),
                     ],
                   ),
                 ),
                 
-                const SizedBox(height: 20),
-                
-                // Section photos si disponibles
+                // Photos si disponibles
                 if (request.photos.isNotEmpty) ...[
+                  const SizedBox(height: 16),
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: AppColors.purple.withOpacity(0.1),
+                        color: AppColors.borderColor.withOpacity(0.2),
                         width: 1,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.purple.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                gradient: AppColors.purpleGradient,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.purple.withOpacity(0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.photo_camera,
-                                color: Colors.white,
-                                size: 20,
-                              ),
+                            Icon(
+                              Icons.photo_camera_outlined,
+                              color: AppColors.purple,
+                              size: 18,
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Photos de la demande',
-                                    style: AppTextStyles.bodyMedium.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.black,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${request.photos.length} photo${request.photos.length > 1 ? 's' : ''}',
-                                    style: AppTextStyles.bodySmall.copyWith(
-                                      color: AppColors.textSecondary,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ],
+                            const SizedBox(width: 8),
+                            Text(
+                              'Photos (${request.photos.length})',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                                fontSize: 14,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         ImageGallery(
                           imageUrls: request.photos,
-                          height: 120,
+                          height: 100,
                           maxImagesToShow: 3,
                           onTap: () {
                             showPhotoViewer(
@@ -1105,25 +809,26 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
                 ],
                 
-                // Section actions
+                const SizedBox(height: 16),
+                
+                // Actions
                 if (request.status == 'pending' || request.status == 'assigned' || request.status == 'in_progress')
                   Row(
                     children: [
                       if (request.status == 'pending')
                         Expanded(
                           child: Container(
-                            height: 48,
+                            height: 44,
                             decoration: BoxDecoration(
                               gradient: AppColors.purpleGradient,
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.purple.withOpacity(0.3),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 6),
+                                  color: AppColors.purple.withOpacity(0.25),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
@@ -1133,15 +838,15 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
                                 backgroundColor: Colors.transparent,
                                 shadowColor: Colors.transparent,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
                               child: Text(
-                                'Accepter la demande',
+                                'Accepter',
                                 style: AppTextStyles.bodyMedium.copyWith(
                                   color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
                                 ),
                               ),
                             ),
@@ -1150,7 +855,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
                       if (request.status == 'assigned' || request.status == 'in_progress')
                         Expanded(
                           child: Container(
-                            height: 48,
+                            height: 44,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
@@ -1160,12 +865,12 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF10B981).withOpacity(0.3),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 6),
+                                  color: const Color(0xFF10B981).withOpacity(0.25),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
@@ -1175,15 +880,15 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
                                 backgroundColor: Colors.transparent,
                                 shadowColor: Colors.transparent,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
                               child: Text(
-                                'Marquer comme terminé',
+                                'Terminer',
                                 style: AppTextStyles.bodyMedium.copyWith(
                                   color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
                                 ),
                               ),
                             ),
@@ -1194,28 +899,82 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen>
               ],
             ),
           ),
-          // Bouton Google Maps pour les coordonnées disponibles
+          
+          // Bouton Google Maps
           if (request.latitude != null && request.longitude != null && 
               (request.status == 'assigned' || request.status == 'in_progress'))
             Container(
-              margin: const EdgeInsets.only(top: 12),
+              margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
               child: SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   onPressed: () => _openGoogleMaps(request.latitude!, request.longitude!),
-                  icon: const Icon(Icons.directions, size: 18),
+                  icon: const Icon(Icons.directions, size: 16),
                   label: const Text('Ouvrir dans Google Maps'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: const Color(0xFF4285F4),
-                    side: const BorderSide(color: Color(0xFF4285F4)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    side: const BorderSide(color: Color(0xFF4285F4), width: 1),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoItem({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
+                color: color,
+                size: 16,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Colors.black,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
         ],
       ),
     );
