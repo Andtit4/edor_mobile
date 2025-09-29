@@ -244,79 +244,100 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Email
-          _buildEnhancedTextField(
-            controller: _emailController,
-            label: 'Email',
-            hint: 'Entrez votre email',
-            keyboardType: TextInputType.emailAddress,
-            prefixIcon: Icons.email_outlined,
-            validator: (value) {
-              if (value?.isEmpty ?? true) {
-                return 'Veuillez saisir votre email';
-              }
-              if (!value!.contains('@')) {
-                return 'Email invalide';
-              }
-              return null;
-            },
-          ),
-
-          const SizedBox(height: 24),
-
-          // Mot de passe
-          _buildEnhancedTextField(
-            controller: _passwordController,
-            label: 'Mot de passe',
-            hint: 'Entrez votre mot de passe',
-            obscureText: _obscurePassword,
-            prefixIcon: Icons.lock_outline,
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscurePassword
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
-                color: AppColors.textSecondary,
-              ),
-              onPressed: () {
-                setState(() {
-                  _obscurePassword = !_obscurePassword;
-                });
-              },
+          // Message d'accueil
+          Text(
+            'Connectez-vous avec votre compte Google',
+            style: AppTextStyles.h3.copyWith(
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
             ),
-            validator: (value) {
-              if (value?.isEmpty ?? true) {
-                return 'Veuillez entrer votre mot de passe';
-              }
-              return null;
-            },
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 12),
+          
+          Text(
+            'Accédez rapidement à tous vos services',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 40),
 
-          // Remember me et Forgot password avec design amélioré
-          _buildRememberMeAndForgotPassword(),
-
-          const SizedBox(height: 28),
-
-          // Bouton Sign In amélioré
-          _buildEnhancedSignInButton(authState),
-
-          const SizedBox(height: 28),
-
-          // Lien vers inscription avec design amélioré
-          _buildSignUpLink(),
-
-          const SizedBox(height: 28),
-
-          // Divider avec "Or" amélioré
-          _buildEnhancedDivider(),
-
-          const SizedBox(height: 28),
-
-          // Boutons de connexion sociale améliorés
-                          _buildEnhancedSocialButtons(),
+          // Bouton Google uniquement
+          _buildGoogleOnlyButton(),
         ],
+      ),
+    );
+  }
+
+  /// Construit le bouton Google uniquement
+  Widget _buildGoogleOnlyButton() {
+    return Container(
+      height: 56,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFFDB4437),
+            Color(0xFFDB4437).withOpacity(0.8),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFDB4437).withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: () {
+          ref.read(authProvider.notifier).loginWithGoogle();
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Icon(
+                Icons.g_mobiledata,
+                color: Color(0xFFDB4437),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Continuer avec Google',
+              style: AppTextStyles.bodyLarge.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -521,7 +542,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ref.read(authProvider.notifier).loginWithGoogle();
           },
         ),
-        
+        _buildEnhancedSocialButton(
+          icon: Icons.facebook,
+          color: const Color(0xFF1877F2),
+          onTap: () {
+            ref.read(authProvider.notifier).signInWithFacebook();
+          },
+        ),
+        _buildEnhancedSocialButton(
+          icon: Icons.apple,
+          color: Colors.black,
+          onTap: () {
+            ref.read(authProvider.notifier).signInWithApple();
+          },
+        ),
       ],
     );
   }
@@ -534,8 +568,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: MediaQuery.of(context).size.width * .7,
-        height: MediaQuery.of(context).size.height * .08,
+        width: 60,
+        height: 60,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -562,7 +596,83 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Widget _buildDemoInfo() {
     return Container(
-      
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.purple.withOpacity(0.05),
+            AppColors.purple.withOpacity(0.02),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.purple.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                color: AppColors.purple,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Mode Démo',
+                style: AppTextStyles.labelMedium.copyWith(
+                  color: AppColors.purple,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Utilisez ces identifiants pour tester :',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppColors.borderColor.withOpacity(0.5),
+              ),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'Email: jean.dupont@email.com',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    fontFamily: 'monospace',
+                    color: AppColors.gray700,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Mot de passe: n\'importe quoi',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    fontFamily: 'monospace',
+                    color: AppColors.gray700,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

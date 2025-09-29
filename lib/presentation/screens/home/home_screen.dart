@@ -399,7 +399,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: color.withOpacity(0.2),
+            color: color.withOpacity(0.3),
             width: 1,
           ),
           boxShadow: [

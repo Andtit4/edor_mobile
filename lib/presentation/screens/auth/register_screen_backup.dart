@@ -856,7 +856,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      hild: Container(
         width: MediaQuery.of(context).size.width * .7,
         height: MediaQuery.of(context).size.height * .08,
         decoration: BoxDecoration(

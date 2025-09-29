@@ -111,37 +111,37 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          child: Column(
-            children: [
-              // Header
+        child: Column(
+          children: [
+            // Header
               _buildEnhancedHeader(),
-              
-              // Search Bar
+            
+            // Search Bar
               _buildEnhancedSearchBar(),
-              
-              // Filter Chips
+            
+            // Filter Chips
               _buildEnhancedFilterChips(),
-              
-              // Tab Bar
+            
+            // Tab Bar
               _buildEnhancedTabBar(),
-              
-              // Content
+            
+            // Content
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.6,
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildPrestatairesList(), // Premier onglet
-                    user?.role == UserRole.prestataire
-                      ? _buildAllRequestsList() // Pour les prestataires - toutes les demandes
-                      : NegotiationWidgets.buildNegotiationsList(ref), // Pour les clients - négociations
-                    user?.role == UserRole.prestataire
-                      ? _buildAssignedRequestsList() // Pour les prestataires - demandes assignées
-                      : _buildMyRequestsList([]), // Pour les clients - leurs demandes
-                  ],
-                ),
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildPrestatairesList(), // Premier onglet
+                  user?.role == UserRole.prestataire
+                    ? _buildAllRequestsList() // Pour les prestataires - toutes les demandes
+                    : NegotiationWidgets.buildNegotiationsList(ref), // Pour les clients - négociations
+                  user?.role == UserRole.prestataire
+                    ? _buildAssignedRequestsList() // Pour les prestataires - demandes assignées
+                    : _buildMyRequestsList([]), // Pour les clients - leurs demandes
+                ],
               ),
-            ],
+            ),
+          ],
           ),
         ),
       ),
@@ -211,24 +211,24 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Trouvez votre',
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Trouvez votre',
                             style: AppTextStyles.h3.copyWith(
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          Text(
-                            'prestataire',
-                            style: AppTextStyles.h2.copyWith(
-                              color: const Color(0xFF1F2937),
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              Text(
+                'prestataire',
+                style: AppTextStyles.h2.copyWith(
+                  color: const Color(0xFF1F2937),
                               fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
-                      ),
+                ),
+              ),
+            ],
+          ),
                     ),
                   ],
                 ),
@@ -1690,12 +1690,12 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
       ),
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
             // Header avec avatar et informations principales
-            Row(
-              children: [
+          Row(
+            children: [
                 // Avatar avec bordure moderne
                 Container(
                   decoration: BoxDecoration(
@@ -1713,19 +1713,19 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                     ],
                   ),
                   child: PrestataireAvatar(
-                    imageUrl: prestataire.profileImage ?? prestataire.avatar,
-                    name: prestataire.name,
+                imageUrl: prestataire.profileImage ?? prestataire.avatar,
+                name: prestataire.name,
                     size: 60.0,
                     showBorder: false,
-                  ),
+              ),
                 ),
                 const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        prestataire.name,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      prestataire.name,
                         style: AppTextStyles.h3.copyWith(
                           fontWeight: FontWeight.w800,
                           color: const Color(0xFF1F2937),
@@ -1750,17 +1750,17 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                           ),
                         ),
                         child: Text(
-                          prestataire.category,
-                          style: AppTextStyles.bodyMedium.copyWith(
+                      prestataire.category,
+                      style: AppTextStyles.bodyMedium.copyWith(
                             color: color,
                             fontWeight: FontWeight.w700,
-                          ),
-                        ),
+                      ),
+                    ),
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(
+                    Row(
+                      children: [
+                        Icon(
                             Icons.location_on_outlined,
                             size: 16,
                             color: Colors.grey[600],
@@ -1768,23 +1768,23 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              prestataire.location,
+                          prestataire.location,
                               style: AppTextStyles.bodySmall.copyWith(
                                 color: Colors.grey[600],
                                 fontWeight: FontWeight.w500,
                               ),
                               overflow: TextOverflow.ellipsis,
-                            ),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
+              ),
                 // Badge de disponibilité moderne
-                Container(
+              Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
+                decoration: BoxDecoration(
                     gradient: prestataire.isAvailable 
                         ? LinearGradient(
                             colors: [
@@ -1804,7 +1804,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                           ),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: prestataire.isAvailable 
+                  color: prestataire.isAvailable 
                           ? const Color(0xFF10B981).withOpacity(0.3)
                           : Colors.grey.withOpacity(0.3),
                       width: 1,
@@ -1822,19 +1822,19 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        prestataire.isAvailable ? 'Disponible' : 'Indisponible',
+                  prestataire.isAvailable ? 'Disponible' : 'Indisponible',
                         style: AppTextStyles.bodySmall.copyWith(
-                          color: prestataire.isAvailable 
-                              ? const Color(0xFF10B981)
-                              : Colors.grey[600],
+                    color: prestataire.isAvailable 
+                        ? const Color(0xFF10B981)
+                        : Colors.grey[600],
                           fontWeight: FontWeight.w700,
-                        ),
+                  ),
                       ),
                     ],
-                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
             const SizedBox(height: 20),
             // Description
             Container(
@@ -1848,20 +1848,20 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                 ),
               ),
               child: Text(
-                prestataire.description,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: Colors.grey[700],
+            prestataire.description,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Colors.grey[700],
                   height: 1.5,
-                ),
+            ),
                 maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-              ),
+            overflow: TextOverflow.ellipsis,
+          ),
             ),
             const SizedBox(height: 20),
             // Statistiques avec design moderne
-            Row(
-              children: [
-                // Rating
+          Row(
+            children: [
+              // Rating
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.all(16),
@@ -1881,40 +1881,40 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                       ),
                     ),
                     child: Row(
-                      children: [
-                        Icon(
-                          Icons.star,
+                children: [
+                  Icon(
+                    Icons.star,
                           size: 20,
-                          color: Colors.amber[600],
-                        ),
+                    color: Colors.amber[600],
+                  ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                '${prestataire.rating}',
+                  Text(
+                    '${prestataire.rating}',
                                 style: AppTextStyles.bodyLarge.copyWith(
                                   color: Colors.amber[700],
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
-                              Text(
+                  Text(
                                 '${prestataire.totalReviews} avis',
                                 style: AppTextStyles.bodySmall.copyWith(
-                                  color: Colors.grey[600],
+                      color: Colors.grey[600],
                                   fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
+                    ),
+                  ),
+                ],
+              ),
                         ),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
-                // Price
+              // Price
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.all(16),
@@ -1934,8 +1934,8 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                       ),
                     ),
                     child: Row(
-                      children: [
-                        Icon(
+                children: [
+                  Icon(
                           Icons.attach_money_outlined,
                           size: 20,
                           color: const Color(0xFF10B981),
@@ -1945,7 +1945,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                  Text(
                                 '${prestataire.pricePerHour.toStringAsFixed(0)} FCFA/h',
                                 style: AppTextStyles.bodyLarge.copyWith(
                                   color: const Color(0xFF10B981),
@@ -1955,20 +1955,20 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                               Text(
                                 'Tarif horaire',
                                 style: AppTextStyles.bodySmall.copyWith(
-                                  color: Colors.grey[600],
+                      color: Colors.grey[600],
                                   fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
+                    ),
+                  ),
+                ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
             // Travaux terminés et téléphone
             Row(
               children: [
@@ -1984,8 +1984,8 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                       ),
                     ),
                     child: Row(
-                      children: [
-                        Icon(
+            children: [
+              Icon(
                           Icons.work_history_outlined,
                           size: 16,
                           color: AppColors.purple,
@@ -2019,7 +2019,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                     ),
                     child: Row(
                       children: [
-                        Icon(
+              Icon(
                           Icons.phone_outlined,
                           size: 16,
                           color: Colors.blue,
@@ -2027,25 +2027,25 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            prestataire.phone ?? 'Non disponible',
+                prestataire.phone ?? 'Non disponible',
                             style: AppTextStyles.bodySmall.copyWith(
                               color: Colors.blue,
                               fontWeight: FontWeight.w600,
                             ),
                             overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                ),
+              ),
+            ],
+          ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 24),
             // Boutons d'action modernes
-            Row(
-              children: [
-                Expanded(
+          Row(
+            children: [
+              Expanded(
                   child: Container(
                     height: 52,
                     decoration: BoxDecoration(
@@ -2070,12 +2070,12 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                         ),
                       ],
                     ),
-                    child: ElevatedButton(
-                      onPressed: () => _showPrestataireDetails(prestataire),
-                      style: ElevatedButton.styleFrom(
+                child: ElevatedButton(
+                  onPressed: () => _showPrestataireDetails(prestataire),
+                  style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
+                    shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
@@ -2106,7 +2106,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                   ),
                 ),
                 const SizedBox(width: 16),
-                Expanded(
+              Expanded(
                   child: Container(
                     height: 52,
                     decoration: BoxDecoration(
@@ -2120,12 +2120,12 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                         ),
                       ],
                     ),
-                    child: ElevatedButton(
-                      onPressed: () => _contactPrestataireFromCard(prestataire),
-                      style: ElevatedButton.styleFrom(
+                child: ElevatedButton(
+                  onPressed: () => _contactPrestataireFromCard(prestataire),
+                  style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
+                    shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
@@ -2148,14 +2148,14 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                                 fontSize: 14,
                               ),
                               overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
+                ),
+              ),
+            ],
                       ),
                     ),
                   ),
-                ),
-              ],
+          ),
+        ],
             ),
           ],
         ),

@@ -25,14 +25,14 @@ class AppTextStyles {
   );
 
   static TextStyle get h4 => GoogleFonts.poppins(
-    fontSize: 20,
+    fontSize: 14,
     fontWeight: FontWeight.w500,
     height: 1.4,
     letterSpacing: -0.1,
   );
 
   static TextStyle get h5 => GoogleFonts.poppins(
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: FontWeight.w500,
     height: 1.44,
   );
@@ -45,13 +45,13 @@ class AppTextStyles {
 
   // Body Text - Police plus lisible
   static TextStyle get bodyLarge => GoogleFonts.poppins(
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: FontWeight.w400,
     height: 1.5,
   );
 
   static TextStyle get bodyMedium => GoogleFonts.poppins(
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: FontWeight.w400,
     height: 1.43,
   );
@@ -64,7 +64,7 @@ class AppTextStyles {
 
   // Labels - Police plus moderne
   static TextStyle get labelLarge => GoogleFonts.poppins(
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: FontWeight.w500,
     height: 1.43,
   );
@@ -83,7 +83,7 @@ class AppTextStyles {
 
   // Buttons - Police plus impactante
   static TextStyle get buttonLarge => GoogleFonts.poppins(
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: FontWeight.w600,
     height: 1.25,
     letterSpacing: 0.1,
@@ -119,7 +119,7 @@ class AppTextStyles {
 
   // Styles spéciaux pour l'UI moderne
   static TextStyle get cardTitle => GoogleFonts.poppins(
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: FontWeight.w600,
     height: 1.25,
   );
