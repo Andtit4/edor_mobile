@@ -348,7 +348,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   'Se souvenir de moi',
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.textSecondary,
-                    fontSize: 14,
+                    fontSize: 10,
                   ),
                 ),
               ),
@@ -375,7 +375,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.purple,
               fontWeight: FontWeight.w600,
-              fontSize: 14,
+              fontSize: 10,
             ),
           ),
         ),
@@ -418,7 +418,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     style: AppTextStyles.buttonLarge.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
-                      fontSize: 16,
+                      fontSize: 14,
                     ),
                   ),
           ),
@@ -437,7 +437,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             'Pas encore de compte ? ',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
-              fontSize: 15,
+              fontSize: 11,
             ),
           ),
           TextButton(
@@ -450,7 +450,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.purple,
                 fontWeight: FontWeight.w700,
-                fontSize: 15,
+                fontSize: 11,
               ),
             ),
           ),
@@ -594,14 +594,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           keyboardType: keyboardType,
           validator: validator,
           style: AppTextStyles.bodyMedium.copyWith(
-            fontSize: 16,
+            fontSize: 14,
             color: Colors.black,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(
               color: Colors.grey[400],
-              fontSize: 16,
+              fontSize: 14,
             ),
             prefixIcon: prefixIcon != null
                 ? Container(

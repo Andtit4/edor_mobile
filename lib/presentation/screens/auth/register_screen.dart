@@ -616,7 +616,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                     style: AppTextStyles.buttonLarge.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
-                      fontSize: 16,
+                      fontSize: 14,
                     ),
                   ),
           ),
@@ -635,7 +635,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
             'Vous avez déjà un compte ? ',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
-              fontSize: 15,
+              fontSize: 10,
             ),
           ),
           TextButton(
@@ -648,7 +648,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.purple,
                 fontWeight: FontWeight.w700,
-                fontSize: 15,
+                fontSize: 10,
               ),
             ),
           ),
@@ -675,7 +675,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
           style: AppTextStyles.labelMedium.copyWith(
             fontWeight: FontWeight.w600,
             color: Colors.black,
-            fontSize: 15,
+            fontSize: 14,
           ),
         ),
         const SizedBox(height: 10),
@@ -685,14 +685,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
           keyboardType: keyboardType,
           validator: validator,
           style: AppTextStyles.bodyMedium.copyWith(
-            fontSize: 16,
+            fontSize: 14,
             color: Colors.black,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(
               color: Colors.grey[400],
-              fontSize: 16,
+              fontSize: 14,
             ),
             prefixIcon: prefixIcon != null
                 ? Container(
@@ -809,28 +809,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
         ),
         child: Column(
           children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: isSelected 
-                    ? AppColors.purple.withOpacity(0.1)
-                    : AppColors.lightGray,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                icon,
-                color: isSelected ? AppColors.purple : AppColors.textSecondary,
-                size: 28,
-              ),
-            ),
+            
             const SizedBox(height: 12),
             Text(
               title,
               style: AppTextStyles.labelLarge.copyWith(
                 color: isSelected ? AppColors.purple : Colors.black,
                 fontWeight: FontWeight.w700,
-                fontSize: 16,
+                fontSize: 10,
               ),
             ),
             const SizedBox(height: 6),
@@ -838,7 +824,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
               subtitle,
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.textSecondary,
-                fontSize: 13,
+                fontSize: 10,
                 height: 1.3,
               ),
               textAlign: TextAlign.center,

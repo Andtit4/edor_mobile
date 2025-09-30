@@ -1752,6 +1752,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                         child: Text(
                           prestataire.category,
                           style: AppTextStyles.bodyMedium.copyWith(
+                            fontSize: 8,
                             color: color,
                             fontWeight: FontWeight.w700,
                           ),
@@ -1784,7 +1785,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                 // Badge de disponibilité moderne
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   decoration: BoxDecoration(
                     gradient: prestataire.isAvailable
                         ? LinearGradient(
@@ -1827,6 +1828,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                       Text(
                         prestataire.isAvailable ? 'Disponible' : 'Indisponible',
                         style: AppTextStyles.bodySmall.copyWith(
+                          fontSize: 8,
                           color: prestataire.isAvailable
                               ? const Color(0xFF10B981)
                               : Colors.grey[600],
@@ -1918,57 +1920,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                 ),
                 const SizedBox(width: 12),
                 // Price
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          const Color(0xFF10B981).withOpacity(0.1),
-                          const Color(0xFF10B981).withOpacity(0.05),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: const Color(0xFF10B981).withOpacity(0.2),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.attach_money_outlined,
-                          size: 20,
-                          color: const Color(0xFF10B981),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${prestataire.pricePerHour.toStringAsFixed(0)} FCFA/h',
-                                style: AppTextStyles.bodyLarge.copyWith(
-                                  color: const Color(0xFF10B981),
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              Text(
-                                'Tarif horaire',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                
               ],
             ),
             const SizedBox(height: 16),
@@ -1988,11 +1940,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.work_history_outlined,
-                          size: 16,
-                          color: AppColors.purple,
-                        ),
+                       
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -2086,11 +2034,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.visibility_outlined,
-                            color: AppColors.purple,
-                            size: 18,
-                          ),
+                          
                           const SizedBox(width: 8),
                           Flexible(
                             child: Text(
@@ -2136,11 +2080,7 @@ class _ServiceOffersScreenState extends ConsumerState<ServiceOffersScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
-                            Icons.message_outlined,
-                            color: Colors.white,
-                            size: 18,
-                          ),
+                        
                           const SizedBox(width: 8),
                           Flexible(
                             child: Text(

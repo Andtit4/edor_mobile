@@ -11,7 +11,7 @@ class AppTextStyles {
   );
 
   static TextStyle get h2 => GoogleFonts.poppins(
-    fontSize: 28,
+    fontSize: 14,
     fontWeight: FontWeight.w600,
     height: 1.29,
     letterSpacing: -0.3,
@@ -51,7 +51,7 @@ class AppTextStyles {
   );
 
   static TextStyle get bodyMedium => GoogleFonts.poppins(
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: FontWeight.w400,
     height: 1.43,
   );

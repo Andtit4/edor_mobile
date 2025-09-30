@@ -845,25 +845,7 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
                   children: [
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            gradient: AppColors.purpleGradient,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.purple.withOpacity(0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.add_task_outlined,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ),
+                      
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
