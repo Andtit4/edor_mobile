@@ -54,12 +54,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       subtitle: 'Consulter vos informations publiques',
                       onTap: () => context.push(AppRoutes.viewProfile),
                     ),
-                    _buildHomeStyleSettingsItem(
-                      icon: Icons.person_outline,
-                      title: 'Modifier le profil',
-                      subtitle: 'Photo, nom, email et informations',
-                      onTap: () => context.push(AppRoutes.editProfile),
-                    ),
+                    
                     _buildHomeStyleSettingsItem(
                       icon: Icons.lock_outline,
                       title: 'Changer le mot de passe',
@@ -72,12 +67,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       subtitle: 'Protéger votre compte',
                       onTap: () => _showComingSoonSnackBar('Conditions d\'utilisation'),
                     ),
-                    _buildHomeStyleSettingsItem(
-                      icon: Icons.credit_card_outlined,
-                      title: 'Ajouter une carte',
-                      subtitle: 'Méthode de paiement sécurisée',
-                      onTap: () => _showComingSoonSnackBar('Ajouter une carte'),
-                    ),
+                   
                   ],
                 ),
                 
@@ -103,7 +93,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       icon: Icons.logout,
                       title: 'Déconnexion',
                       subtitle: 'Se déconnecter en toute sécurité',
-                      isDestructive: true,
                       onTap: () => _showLogoutDialog(context),
                     ),
                   ],

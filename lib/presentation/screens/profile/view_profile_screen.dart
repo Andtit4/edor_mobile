@@ -71,7 +71,7 @@ class _ViewProfileScreenState extends ConsumerState<ViewProfileScreen> {
             child: IconButton(
               onPressed: () {
                 // Navigation vers l'édition du profil
-                context.push('/edit-profile');
+                context.push('/profile/edit');
               },
               icon: Container(
                 width: 40,
@@ -566,14 +566,20 @@ class _ViewProfileScreenState extends ConsumerState<ViewProfileScreen> {
   Widget _buildPrestataireStats() {
     return Consumer(
       builder: (context, ref, child) {
-        // Ici on pourrait récupérer les vraies statistiques du prestataire
+        final authState = ref.watch(authProvider);
+        final currentUser = authState.user;
+        
+        if (currentUser == null) {
+          return const SizedBox.shrink();
+        }
+        
         return Row(
           children: [
             Expanded(
               child: _buildStatItem(
                 icon: Icons.work_outline,
                 label: 'Missions',
-                value: '12',
+                value: '${currentUser.reviewCount ?? 0}',
                 color: Colors.blue,
               ),
             ),
@@ -582,7 +588,7 @@ class _ViewProfileScreenState extends ConsumerState<ViewProfileScreen> {
               child: _buildStatItem(
                 icon: Icons.star_outline,
                 label: 'Note',
-                value: '4.8',
+                value: currentUser.rating != null ? '${currentUser.rating!.toStringAsFixed(1)}' : '0.0',
                 color: Colors.amber,
               ),
             ),
@@ -590,8 +596,8 @@ class _ViewProfileScreenState extends ConsumerState<ViewProfileScreen> {
             Expanded(
               child: _buildStatItem(
                 icon: Icons.attach_money_outlined,
-                label: 'Tarif/h',
-                value: '5000',
+                label: 'Avis',
+                value: '${currentUser.reviewCount ?? 0}',
                 color: Colors.green,
               ),
             ),
@@ -603,35 +609,46 @@ class _ViewProfileScreenState extends ConsumerState<ViewProfileScreen> {
 
   /// Construit les statistiques pour les clients
   Widget _buildClientStats() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatItem(
-            icon: Icons.shopping_cart_outlined,
-            label: 'Commandes',
-            value: '8',
-            color: Colors.blue,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildStatItem(
-            icon: Icons.favorite_outline,
-            label: 'Favoris',
-            value: '15',
-            color: Colors.red,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildStatItem(
-            icon: Icons.star_outline,
-            label: 'Avis',
-            value: '6',
-            color: Colors.amber,
-          ),
-        ),
-      ],
+    return Consumer(
+      builder: (context, ref, child) {
+        final authState = ref.watch(authProvider);
+        final currentUser = authState.user;
+        
+        if (currentUser == null) {
+          return const SizedBox.shrink();
+        }
+        
+        return Row(
+          children: [
+            Expanded(
+              child: _buildStatItem(
+                icon: Icons.shopping_cart_outlined,
+                label: 'Commande',
+                value: '${currentUser.reviewCount ?? 0}',
+                color: Colors.blue,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildStatItem(
+                icon: Icons.favorite_outline,
+                label: 'Favoris',
+                value: '0',
+                color: Colors.red,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildStatItem(
+                icon: Icons.star_outline,
+                label: 'Avis',
+                value: '${currentUser.reviewCount ?? 0}',
+                color: Colors.amber,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
