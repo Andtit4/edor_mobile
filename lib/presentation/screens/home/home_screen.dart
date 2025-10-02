@@ -76,47 +76,57 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               );
             }
 
-            return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: screenWidth * 0.06, // 6% de la largeur
-                  vertical: 20,
+            return RefreshIndicator(
+              onRefresh: () async {
+                _loadData();
+                await Future.delayed(const Duration(milliseconds: 1000));
+              },
+              color: AppColors.purple,
+              backgroundColor: Colors.white,
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Espace flexible pour centrer le contenu
-                    SizedBox(height: screenHeight * 0.02),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.06, // 6% de la largeur
+                        vertical: 20,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Espace flexible pour centrer le contenu
+                          SizedBox(height: screenHeight * 0.02),
 
-                    // Header amélioré
-                    _buildEnhancedHeader(user),
+                          // Header amélioré
+                          _buildEnhancedHeader(user),
 
-                    SizedBox(height: screenHeight * 0.025),
+                          SizedBox(height: screenHeight * 0.025),
 
-                    // Search Bar amélioré
-                    _buildEnhancedSearchBar(),
+                          // Search Bar amélioré
+                          _buildEnhancedSearchBar(),
 
-                    SizedBox(height: screenHeight * 0.025),
+                          SizedBox(height: screenHeight * 0.025),
 
-                    // Quick Actions based on role
-                    _buildQuickActions(user.role),
+                          // Quick Actions based on role
+                          _buildQuickActions(user.role),
 
-                    SizedBox(height: screenHeight * 0.02),
+                          SizedBox(height: screenHeight * 0.02),
 
-                    // Content based on role
-                    SizedBox(
-                      height: screenHeight *
-                          0.5, // Hauteur fixe pour éviter les conflits
-                      child: user.role == UserRole.prestataire
-                          ? _buildPrestataireContent()
-                          : _buildClientContent(),
+                          // Content based on role
+                          user.role == UserRole.prestataire
+                              ? _buildPrestataireContent()
+                              : _buildClientContent(),
+
+                          // Espace en bas
+                          SizedBox(height: screenHeight * 0.1),
+                        ],
+                      ),
                     ),
-
-                    // Espace en bas
-                    SizedBox(height: screenHeight * 0.1),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           },
@@ -522,9 +532,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ],
           ),
         ),
-        Expanded(
-          child: _buildRecentRequestsList(),
-        ),
+        _buildRecentRequestsList(),
       ],
     );
   }
@@ -600,9 +608,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         SizedBox(height: 16),
 
         // Liste des prestataires
-        Expanded(
-          child: _buildPopularServicesList(),
-        ),
+        _buildPopularServicesList(),
       ],
     );
   }
@@ -636,13 +642,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       );
     }
 
-    return ListView.builder(
-      //padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: serviceRequestState.allRequests.length,
-      itemBuilder: (context, index) {
-        final request = serviceRequestState.allRequests[index];
+    return Column(
+      children: serviceRequestState.allRequests.map((request) {
         return _buildRequestCardFromEntity(request);
-      },
+      }).toList(),
     );
   }
 
@@ -681,13 +684,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       );
     }
 
-    return ListView.builder(
-      //padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: prestataireState.prestataires.length,
-      itemBuilder: (context, index) {
-        final prestataire = prestataireState.prestataires[index];
+    return Column(
+      children: prestataireState.prestataires.map((prestataire) {
         return _buildPrestataireListItem(prestataire);
-      },
+      }).toList(),
     );
   }
 
