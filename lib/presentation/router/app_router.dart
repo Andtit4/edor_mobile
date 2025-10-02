@@ -317,14 +317,27 @@ class _MainWrapperState extends ConsumerState<MainWrapper>
                 ),
             ],
           ),
-          bottomNavigationBar: AnimatedBottomNav(
-            currentIndex: _getCurrentIndex(context),
-            onTap: (index) => _onTap(context, index),
-            user: user,
-          ),
+          bottomNavigationBar: _shouldShowBottomNav(context) 
+            ? AnimatedBottomNav(
+                currentIndex: _getCurrentIndex(context),
+                onTap: (index) => _onTap(context, index),
+                user: user,
+              )
+            : null,
         );
       },
     );
+  }
+
+  bool _shouldShowBottomNav(BuildContext context) {
+    final location = GoRouterState.of(context).matchedLocation;
+    
+    // Masquer la bottom navigation bar pour les routes de chat
+    if (location.contains('/messages/chat/')) {
+      return false;
+    }
+    
+    return true;
   }
 
   int _getCurrentIndex(BuildContext context) {

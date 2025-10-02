@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/prestataire_provider.dart';
 import '../../providers/service_offer_provider.dart';
 import '../../providers/service_request_provider.dart';
+import '../../providers/message_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../domain/entities/user.dart';
@@ -1289,8 +1290,60 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
   }
 
-  void _contactPrestataire(Prestataire prestataire) {
-    // Navigation vers la page des messages ou création d'une conversation
-    context.push(AppRoutes.messages);
+  void _contactPrestataire(Prestataire prestataire) async {
+    final authState = ref.read(authProvider);
+    final currentUser = authState.user;
+    final token = authState.token;
+
+    if (currentUser == null || token == null) {
+      // Afficher un message d'erreur si l'utilisateur n'est pas connecté
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vous devez être connecté pour contacter un prestataire'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Vérifier si l'utilisateur ne tente pas de se contacter lui-même
+    if (currentUser.role == UserRole.prestataire && currentUser.id == prestataire.id) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vous ne pouvez pas vous contacter vous-même'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Créer une conversation avec le prestataire
+      final conversation = await ref.read(messagesProvider.notifier).createConversation(
+        prestataireId: prestataire.id,
+        token: token,
+      );
+
+      if (conversation != null) {
+        // Naviguer vers le chat de la conversation créée
+        context.push('/messages/chat/${conversation.id}');
+      } else {
+        // Afficher un message d'erreur si la création a échoué
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Impossible de créer la conversation'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      // Afficher un message d'erreur en cas d'exception
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }
