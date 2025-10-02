@@ -237,17 +237,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   Widget _buildEnhancedSearchBar() {
     return Container(
-      margin: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.06,
-        vertical: 20,
-      ),
+      
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.borderColor.withOpacity(0.2),
-          width: 1,
-        ),
+        
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -354,7 +348,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             children: [
               Expanded(
                 child: _buildEnhancedQuickActionCard(
-                  'Demander un service',
+                  'Besoin d\'un service',
                   '',
                   Icons.add_circle_outline,
                   AppColors.purple,
@@ -603,6 +597,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ],
           ),
         ),
+        SizedBox(height: 16),
 
         // Liste des prestataires
         Expanded(
@@ -734,6 +729,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+
           Row(
             children: [
               // Prestataire Avatar
