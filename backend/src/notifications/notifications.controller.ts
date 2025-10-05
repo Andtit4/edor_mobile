@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Prestataire } from '../entities/prestataire.entity';
 import { User } from '../entities/user.entity';
+import { UpdateFcmTokenDto } from './dto/update-fcm-token.dto';
 
 @Controller('notifications')
 export class NotificationsController {
@@ -20,9 +21,9 @@ export class NotificationsController {
   @UseGuards(JwtAuthGuard)
   async updateFcmToken(
     @Request() req,
-    @Body() body: { fcmToken: string }
+    @Body() updateFcmTokenDto: UpdateFcmTokenDto
   ) {
-    await this.notificationsService.updateFcmToken(req.user.id, body.fcmToken);
+    await this.notificationsService.updateFcmToken(req.user.id, updateFcmTokenDto.fcmToken);
     return { message: 'Token FCM mis à jour avec succès' };
   }
 

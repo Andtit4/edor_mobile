@@ -1,5 +1,5 @@
 // src/auth/dto/register.dto.ts
-import { IsString, IsEmail, IsOptional, IsEnum, IsNumber, IsArray } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsEnum, IsNumber, IsArray, IsBoolean } from 'class-validator';
 
 export class RegisterDto {
   @IsEmail()
@@ -72,4 +72,29 @@ export class RegisterDto {
   @IsArray()
   @IsString({ each: true })
   portfolio?: string[];
+
+  // Champs d'authentification sociale et notifications
+  @IsOptional()
+  @IsString()
+  googleId?: string;
+
+  @IsOptional()
+  @IsString()
+  facebookId?: string;
+
+  @IsOptional()
+  @IsString()
+  appleId?: string;
+
+  @IsOptional()
+  @IsString()
+  firebaseUid?: string;
+
+  @IsOptional()
+  @IsString()
+  fcmToken?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isSocialAuth?: boolean;
 }

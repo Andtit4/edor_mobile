@@ -8,6 +8,18 @@ export class UpdatePrestataireProfileDto {
 
   @IsOptional()
   @IsString()
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
   category?: string;
 
   @IsOptional()
@@ -35,4 +47,49 @@ export class UpdatePrestataireProfileDto {
   @IsOptional()
   @IsBoolean()
   isAvailable?: boolean;
+
+  // Champs d'authentification sociale et notifications
+  @IsOptional()
+  @IsString()
+  googleId?: string;
+
+  @IsOptional()
+  @IsString()
+  facebookId?: string;
+
+  @IsOptional()
+  @IsString()
+  appleId?: string;
+
+  @IsOptional()
+  @IsString()
+  firebaseUid?: string;
+
+  @IsOptional()
+  @IsString()
+  fcmToken?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isSocialAuth?: boolean;
+
+  @IsOptional()
+  @IsString()
+  profileImage?: string;
+
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @IsOptional()
+  @IsString()
+  postalCode?: string;
+
+  @IsOptional()
+  @IsString()
+  bio?: string;
 }
