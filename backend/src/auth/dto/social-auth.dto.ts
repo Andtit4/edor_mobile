@@ -91,6 +91,11 @@ export class SocialAuthDto {
   @IsArray()
   @IsString({ each: true })
   portfolio?: string[];
+
+  // Champs de notification
+  @IsOptional()
+  @IsString()
+  fcmToken?: string;
 }
 
 export class SocialAuthResponseDto {
