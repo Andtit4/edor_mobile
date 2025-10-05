@@ -7,6 +7,7 @@ import { CreateServiceRequestDto } from './dto/create-service-request';
 import { CompleteServiceRequestDto } from './dto/complete-service-request.dto';
 import { ServiceRequestResponseDto } from './dto/service-request-response.dto';
 import { EmailService } from '../email/email.service';
+import { NotificationsService } from '../notifications/notifications.service';
 // import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class ServiceRequestsService {
     @InjectRepository(ServiceRequest)
     private serviceRequestRepository: Repository<ServiceRequest>,
     private emailService: EmailService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async create(
@@ -74,6 +76,31 @@ export class ServiceRequestsService {
           deadline: deadlineDate.toLocaleDateString('fr-FR'),
         }
       );
+    }
+
+    // Envoyer des notifications push aux prestataires de la catégorie
+    try {
+      const serviceRequest = Array.isArray(savedServiceRequest) ? savedServiceRequest[0] : savedServiceRequest;
+      
+      await this.notificationsService.sendNotificationToCategory(
+        createServiceRequestDto.category,
+        {
+          title: `Nouvelle demande ${createServiceRequestDto.category}`,
+          body: `${createServiceRequestDto.title} - ${createServiceRequestDto.location} - Budget: ${createServiceRequestDto.budget}€`,
+          data: {
+            requestId: serviceRequest.id,
+            category: createServiceRequestDto.category,
+            location: createServiceRequestDto.location,
+            budget: createServiceRequestDto.budget.toString(),
+            deadline: createServiceRequestDto.deadline,
+          }
+        }
+      );
+      
+      console.log(`🔔 Notifications envoyées aux prestataires de la catégorie ${createServiceRequestDto.category}`);
+    } catch (notificationError) {
+      console.error('❌ Erreur lors de l\'envoi des notifications:', notificationError);
+      // Ne pas faire échouer la création de demande si les notifications échouent
     }
     
     return Array.isArray(savedServiceRequest) ? savedServiceRequest[0] : savedServiceRequest;

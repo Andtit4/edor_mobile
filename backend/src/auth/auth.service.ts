@@ -219,7 +219,31 @@ export class AuthService {
     console.log('🔵 === DÉBUT SOCIAL AUTH ===');
     console.log('🔵 Données reçues:', JSON.stringify(socialAuthDto, null, 2));
     
-    const { provider, providerId, email, firstName, lastName, phone, profileImage, role, firebaseUid, emailVerified } = socialAuthDto;
+    const { 
+      provider, 
+      providerId, 
+      email, 
+      firstName, 
+      lastName, 
+      phone, 
+      profileImage, 
+      role, 
+      firebaseUid, 
+      emailVerified,
+      // Champs optionnels pour tous les utilisateurs
+      address,
+      city,
+      postalCode,
+      bio,
+      skills,
+      categories,
+      // Champs spécifiques aux prestataires
+      category,
+      location,
+      description,
+      pricePerHour,
+      portfolio
+    } = socialAuthDto;
 
     try {
       // Vérifier si l'utilisateur existe déjà avec cet email
@@ -268,49 +292,60 @@ export class AuthService {
       console.log(`🔵 Création d'un nouvel utilisateur social: ${email} avec le rôle: ${role}`);
       
       if (role === 'prestataire') {
-        // Créer un nouveau prestataire
-        const newPrestataire = this.prestataireRepository.create({
-          email,
-          firstName,
-          lastName,
-          phone: phone || '',
-          password: '', // Pas de mot de passe pour l'auth sociale
-          role: UserRole.PRESTATAIRE,
-          name: `${firstName} ${lastName}`,
-          category: 'Général',
-          location: 'Non spécifié',
-          description: 'Prestataire de services',
-          pricePerHour: 0,
-          skills: [],
-          categories: [],
-          portfolio: [],
-          profileImage,
-          isSocialAuth: true,
-          [`${provider}Id`]: providerId,
-          firebaseUid: firebaseUid,
-          isAvailable: true,
-          rating: 0,
-          reviewCount: 0,
-          completedJobs: 0,
-          totalReviews: 0,
-        });
+        // Créer un nouveau prestataire avec les données fournies
+        const newPrestataire = new Prestataire();
+        newPrestataire.email = email;
+        newPrestataire.firstName = firstName;
+        newPrestataire.lastName = lastName;
+        newPrestataire.phone = phone || '';
+        newPrestataire.password = ''; // Pas de mot de passe pour l'auth sociale
+        newPrestataire.role = UserRole.PRESTATAIRE;
+        newPrestataire.name = `${firstName} ${lastName}`;
+        // Utiliser les données fournies ou des valeurs par défaut
+        newPrestataire.category = category || 'Général';
+        newPrestataire.location = location || 'Non spécifié';
+        newPrestataire.description = description || 'Prestataire de services';
+        newPrestataire.pricePerHour = pricePerHour || 0;
+        newPrestataire.skills = skills || [];
+        newPrestataire.categories = categories || [];
+        newPrestataire.portfolio = portfolio || [];
+        newPrestataire.profileImage = profileImage || '';
+        // Champs optionnels pour tous les utilisateurs
+        newPrestataire.address = address || '';
+        newPrestataire.city = city || '';
+        newPrestataire.postalCode = postalCode || '';
+        newPrestataire.bio = bio || '';
+        newPrestataire.isSocialAuth = true;
+        newPrestataire[`${provider}Id`] = providerId;
+        newPrestataire.firebaseUid = firebaseUid || '';
+        newPrestataire.isAvailable = true;
+        newPrestataire.rating = 0;
+        newPrestataire.reviewCount = 0;
+        newPrestataire.completedJobs = 0;
+        newPrestataire.totalReviews = 0;
 
         user = await this.prestataireRepository.save(newPrestataire);
         console.log(`Nouveau prestataire créé: ${user.id}`);
       } else {
-        // Créer un nouveau client
-        const newUser = this.userRepository.create({
-          email,
-          firstName,
-          lastName,
-          phone: phone || '',
-          password: '', // Pas de mot de passe pour l'auth sociale
-          role: UserRole.CLIENT,
-          isSocialAuth: true,
-          [`${provider}Id`]: providerId,
-          firebaseUid: firebaseUid,
-          profileImage,
-        });
+        // Créer un nouveau client avec les données fournies
+        const newUser = new User();
+        newUser.email = email;
+        newUser.firstName = firstName;
+        newUser.lastName = lastName;
+        newUser.phone = phone || '';
+        newUser.password = ''; // Pas de mot de passe pour l'auth sociale
+        newUser.role = UserRole.CLIENT;
+        newUser.isSocialAuth = true;
+        newUser[`${provider}Id`] = providerId;
+        newUser.firebaseUid = firebaseUid || '';
+        newUser.profileImage = profileImage || '';
+        // Champs optionnels pour tous les utilisateurs
+        newUser.address = address || '';
+        newUser.city = city || '';
+        newUser.postalCode = postalCode || '';
+        newUser.bio = bio || '';
+        newUser.skills = skills || [];
+        newUser.categories = categories || [];
 
         user = await this.userRepository.save(newUser);
         console.log(`Nouveau client créé: ${user.id}`);

@@ -46,6 +46,12 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	
+	<!-- Location Permissions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Cette application a besoin d'accéder à votre localisation pour détecter automatiquement votre ville et quartier lors de l'inscription.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Cette application a besoin d'accéder à votre localisation pour détecter automatiquement votre ville et quartier lors de l'inscription.</string>
+	
 	<!-- Facebook Configuration -->
 	<key>CFBundleURLTypes</key>
 	<array>

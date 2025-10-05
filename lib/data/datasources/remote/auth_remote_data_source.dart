@@ -108,7 +108,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'role': role.name,
         'category': category,
         'location': location,
-        'description': description,
+        'bio': description, // Mapper description vers bio
         'pricePerHour': pricePerHour,
         'skills': skills,
       }),

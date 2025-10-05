@@ -8,6 +8,7 @@ import { CreatePriceNegotiationDto } from './dto/create-price-negotiation.dto';
 import { UpdatePriceNegotiationDto } from './dto/update-price-negotiation.dto';
 import { PriceNegotiationResponseDto } from './dto/price-negotiation-response.dto';
 import { EmailService } from '../email/email.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class PriceNegotiationsService {
@@ -17,6 +18,7 @@ export class PriceNegotiationsService {
     @InjectRepository(ServiceRequest)
     private serviceRequestRepository: Repository<ServiceRequest>,
     private emailService: EmailService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async create(
@@ -86,6 +88,7 @@ export class PriceNegotiationsService {
         .getOne();
 
       if (negotiationWithDetails && negotiationWithDetails.client && negotiationWithDetails.prestataire) {
+        // Envoyer un email de notification
         await this.emailService.sendPriceProposalNotification(
           negotiationWithDetails.client.email,
           `${negotiationWithDetails.client.firstName} ${negotiationWithDetails.client.lastName}`,
@@ -102,6 +105,22 @@ export class PriceNegotiationsService {
             message: negotiationWithDetails.message,
           }
         );
+
+        // Envoyer une notification push au client
+        try {
+          await this.notificationsService.notifyClientOfOffer({
+            clientId: negotiationWithDetails.client.id,
+            prestataireId: negotiationWithDetails.prestataire.id,
+            prestataireName: `${negotiationWithDetails.prestataire.firstName} ${negotiationWithDetails.prestataire.lastName}`,
+            serviceRequestId: negotiationWithDetails.serviceRequest.id,
+            serviceTitle: negotiationWithDetails.serviceRequest.title,
+            proposedPrice: negotiationWithDetails.proposedPrice,
+            message: negotiationWithDetails.message,
+          });
+        } catch (notificationError) {
+          console.error('❌ Erreur lors de l\'envoi de notification push au client:', notificationError);
+          // Ne pas faire échouer la création de la négociation si la notification échoue
+        }
       }
     }
 
@@ -337,6 +356,21 @@ export class PriceNegotiationsService {
           message: acceptedNegotiation.message,
         }
       );
+
+      // Envoyer une notification push au prestataire
+      try {
+        await this.notificationsService.notifyPrestataireOfAcceptance({
+          prestataireId: acceptedNegotiation.prestataire.id,
+          clientId: acceptedNegotiation.client.id,
+          clientName: `${acceptedNegotiation.client.firstName} ${acceptedNegotiation.client.lastName}`,
+          serviceRequestId: acceptedNegotiation.serviceRequest.id,
+          serviceTitle: acceptedNegotiation.serviceRequest.title,
+          acceptedPrice: acceptedNegotiation.proposedPrice,
+        });
+      } catch (notificationError) {
+        console.error('❌ Erreur lors de l\'envoi de notification push au prestataire:', notificationError);
+        // Ne pas faire échouer l'acceptation si la notification échoue
+      }
     }
 
     return new PriceNegotiationResponseDto(negotiationWithNames);

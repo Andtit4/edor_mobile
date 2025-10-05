@@ -766,8 +766,8 @@ class _ViewProfileScreenState extends ConsumerState<ViewProfileScreen> {
 
   /// Construit la carte des compétences (pour les prestataires)
   Widget _buildSkillsCard(User user) {
-    // Ici on pourrait récupérer les vraies compétences du prestataire
-    final skills = ['Plomberie', 'Électricité', 'Peinture', 'Menuiserie'];
+    // Utiliser les vraies compétences du prestataire
+    final skills = user.skills ?? [];
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -817,38 +817,48 @@ class _ViewProfileScreenState extends ConsumerState<ViewProfileScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: skills.map((skill) {
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.purple.withOpacity(0.1),
-                      AppColors.purple.withOpacity(0.05),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+          if (skills.isEmpty)
+            Text(
+              'Aucune compétence renseignée pour le moment.',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+                fontStyle: FontStyle.italic,
+              ),
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: skills.map((skill) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.purple.withOpacity(0.1),
+                        AppColors.purple.withOpacity(0.05),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.purple.withOpacity(0.2),
+                      width: 1,
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppColors.purple.withOpacity(0.2),
-                    width: 1,
+                  child: Text(
+                    skill,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.purple,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
                   ),
-                ),
-                child: Text(
-                  skill,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.purple,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
+                );
+              }).toList(),
+            ),
         ],
       ),
     );

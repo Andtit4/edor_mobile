@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/constants/service_categories.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/service_request_provider.dart';
 import '../../providers/service_request_images_provider.dart';
@@ -33,7 +34,7 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
   final _notesController = TextEditingController();
   double? latitude;
   double? longitude;
-  String _selectedCategory = 'Plomberie';
+  String _selectedCategory = ServiceCategories.plomberie;
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 7));
   String _selectedUrgency = 'Normal';
   bool _isSubmitting = false;
@@ -45,17 +46,7 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
   late AnimationController _fabAnimationController;
   late Animation<double> _fabAnimation;
 
-  final List<String> _categories = [
-    'Plomberie',
-    'Électricité',
-    'Peinture',
-    'Bricolage',
-    'Jardinage',
-    'Nettoyage',
-    'Climatisation',
-    'Sécurité',
-    'Autre',
-  ];
+  final List<String> _categories = ServiceCategories.categoryIds;
 
   final List<String> _urgencyLevels = [
     'Urgent (Aujourd\'hui)',
@@ -1320,11 +1311,12 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen>
           value: _selectedCategory,
           isExpanded: true,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          items: _categories.map((category) {
+          items: _categories.map((categoryId) {
+            final categoryName = ServiceCategories.idToName(categoryId) ?? categoryId;
             return DropdownMenuItem(
-              value: category,
+              value: categoryId,
               child: Text(
-                category,
+                categoryName,
                 style: AppTextStyles.bodyLarge,
               ),
             );

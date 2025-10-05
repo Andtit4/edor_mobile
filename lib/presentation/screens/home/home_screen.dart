@@ -1069,7 +1069,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final color = colors[request.category] ?? const Color(0xFF8B5CF6);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(bottom: 20, top: 20),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
