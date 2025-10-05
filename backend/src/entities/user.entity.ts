@@ -54,6 +54,9 @@ export class User {
   @Column({ nullable: true })
   firebaseUid: string;
 
+  @Column({ nullable: true })
+  fcmToken: string;
+
   @Column({ default: false })
   isSocialAuth: boolean;
 

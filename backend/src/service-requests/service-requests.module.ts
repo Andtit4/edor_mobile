@@ -8,11 +8,13 @@ import { ServiceRequest } from '../entities/service-request.entity';
 import { Review } from '../entities/review.entity';
 import { Prestataire } from '../entities/prestataire.entity';
 import { EmailModule } from '../email/email.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ServiceRequest, Review, Prestataire]),
     EmailModule,
+    NotificationsModule,
   ],
   controllers: [ServiceRequestsController],
   providers: [ServiceRequestsService, ServiceCompletionService],

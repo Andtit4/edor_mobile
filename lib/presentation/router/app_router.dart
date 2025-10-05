@@ -14,6 +14,7 @@ import '../providers/auth_provider.dart';
 import '../screens/splash/splash_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
+import '../screens/auth/prestataire_registration_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/prestataire_detail/prestataire_detail_screen.dart';
 import '../screens/reservation/reservation_screen.dart';
@@ -21,6 +22,7 @@ import '../screens/messages/messages_screen.dart';
 import '../screens/chat/chat_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/profile/view_profile_screen.dart';
+import '../screens/notifications/notifications_screen.dart';
 import '../widgets/animated_bottom_nav.dart';
 import 'app_routes.dart';
 
@@ -81,6 +83,31 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.register,
         name: AppRoutes.registerName,
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.prestataireRegister,
+        name: AppRoutes.prestataireRegisterName,
+        builder: (context, state) {
+          // Récupérer les paramètres depuis l'état
+          final extra = state.extra as Map<String, dynamic>?;
+          if (extra == null) {
+            return const Scaffold(
+              body: Center(
+                child: Text('Erreur: Données manquantes'),
+              ),
+            );
+          }
+          
+          return PrestataireRegistrationScreen(
+            email: extra['email'] as String,
+            password: extra['password'] as String,
+            firstName: extra['firstName'] as String,
+            lastName: extra['lastName'] as String,
+            phone: extra['phone'] as String,
+            isGoogleAuth: extra['isGoogleAuth'] as bool? ?? false,
+            googleData: extra['googleData'] as Map<String, dynamic>?,
+          );
+        },
       ),
 
       // Main App Routes
@@ -196,6 +223,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ViewProfileScreen(),
       ),
 
+      // Notifications (Full Screen)
+      GoRoute(
+        path: AppRoutes.notifications,
+        name: AppRoutes.notificationsName,
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(
@@ -227,7 +261,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
 // Helper function to check if a route is an auth route
 bool _isAuthRoute(String location) {
-  return location == AppRoutes.login || location == AppRoutes.register;
+  return location == AppRoutes.login || location == AppRoutes.register || location == AppRoutes.prestataireRegister;
 }
 
 // Stream notifier pour GoRouter refresh

@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsEnum, IsArray, IsNumber } from 'class-validator';
 import { UserRole } from '../../entities/user.entity';
 
 export class SocialAuthDto {
@@ -42,6 +42,55 @@ export class SocialAuthDto {
 
   @IsOptional()
   emailVerified?: boolean;
+
+  // Champs optionnels pour tous les utilisateurs
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @IsOptional()
+  @IsString()
+  postalCode?: string;
+
+  @IsOptional()
+  @IsString()
+  bio?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  skills?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  categories?: string[];
+
+  // Champs spécifiques aux prestataires
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsNumber()
+  pricePerHour?: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  portfolio?: string[];
 }
 
 export class SocialAuthResponseDto {

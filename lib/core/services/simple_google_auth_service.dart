@@ -91,24 +91,42 @@ class SimpleGoogleAuthService {
   /// Synchroniser les données Google avec la base de données
   static Future<Map<String, dynamic>?> syncWithBackend(
     Map<String, dynamic> googleData,
-    UserRole role,
-  ) async {
+    UserRole role, {
+    Map<String, dynamic>? additionalData,
+  }) async {
     try {
       print('🔵 === SYNCHRONISATION AVEC BACKEND ===');
       print('🔵 Rôle sélectionné: $role');
       print('🔵 Email: ${googleData['email']}');
       print('🔵 Google ID: ${googleData['firebaseUid']}');
       
+      // Préparer les données à envoyer
+      final requestData = {
+        ...googleData,
+        'role': role.name,
+      };
+
+      // Ajouter les données supplémentaires si elles existent
+      if (additionalData != null) {
+        requestData.addAll(additionalData.map((key, value) {
+          // Mapper description vers bio pour la cohérence
+          if (key == 'description') {
+            return MapEntry('bio', value);
+          }
+          return MapEntry(key, value);
+        }));
+      }
+
+      print('🔵 Données à envoyer: ${json.encode(requestData)}');
+      
+      // Envoyer toutes les données en une seule requête
       final response = await http.post(
         Uri.parse('${AppConfig.apiBaseUrl}/auth/social'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: json.encode({
-          ...googleData,
-          'role': role.name,
-        }),
+        body: json.encode(requestData),
       );
 
       print('🔵 Réponse backend: ${response.statusCode}');

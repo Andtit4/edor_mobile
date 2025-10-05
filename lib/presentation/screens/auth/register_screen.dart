@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../domain/entities/user.dart';
 import '../../router/app_routes.dart';
+import 'prestataire_registration_screen.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -51,6 +52,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // Si c'est un prestataire, rediriger vers la page spécialisée
+    if (_selectedRole == UserRole.prestataire) {
+      context.push(AppRoutes.prestataireRegister, extra: {
+        'email': _emailController.text.trim(),
+        'password': _passwordController.text,
+        'firstName': _firstNameController.text.trim(),
+        'lastName': _lastNameController.text.trim(),
+        'phone': _phoneController.text.trim(),
+      });
+      return;
+    }
+
+    // Pour les clients, procéder à l'inscription normale
     try {
       await ref.read(authProvider.notifier).register(
         email: _emailController.text.trim(),

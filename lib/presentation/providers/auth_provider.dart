@@ -4,6 +4,7 @@ import 'package:edor/domain/repositories/auth_repository.dart';
 import 'package:edor/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import '../../data/repositories_impl/auth_repository_impl.dart';
 import '../../data/datasources/local/local_data_source.dart';
@@ -12,7 +13,9 @@ import '../../domain/entities/user.dart';
 import '../../core/network/network_info.dart';
 import '../../core/services/social_auth_service.dart';
 import '../../core/services/simple_google_auth_service.dart';
+import '../../core/services/firebase_notification_service.dart';
 import '../widgets/role_selection_dialog.dart';
+import '../router/app_routes.dart';
 
 // Providers pour les dépendances
 final localDataSourceProvider = Provider<LocalDataSource>((ref) {
@@ -172,6 +175,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
             token: token, // Ajouter le token à l'état
             error: null,
           );
+
+          // Synchroniser le token FCM avec le backend
+          if (token != null) {
+            await FirebaseNotificationService().syncTokenWithBackend(token!);
+          }
         },
       );
     } catch (e) {
@@ -234,7 +242,7 @@ Future<void> register({
       _authRepository.getToken().then((tokenResult) {
         tokenResult.fold(
           (failure) => print('Token retrieval failed: ${failure.message}'),
-          (token) {
+          (token) async {
             state = state.copyWith(
               isLoading: false,
               isAuthenticated: true,
@@ -243,6 +251,9 @@ Future<void> register({
               error: null,
             );
             print('Auth state updated with token');
+            
+            // Synchroniser le token FCM avec le backend
+            await FirebaseNotificationService().syncTokenWithBackend(token);
           },
         );
       });
@@ -379,7 +390,30 @@ Future<void> register({
 
       print('✅ Rôle sélectionné: $selectedRole');
       
-      // Synchroniser avec le backend
+      // Si c'est un prestataire, rediriger vers la page spécialisée
+      if (selectedRole == UserRole.prestataire) {
+        print('🔵 Redirection vers la page d\'inscription prestataire...');
+        state = state.copyWith(isLoading: false, error: null);
+        
+        // Naviguer vers la page d'inscription prestataire avec les données Google
+        if (context.mounted) {
+          context.pushNamed(
+            AppRoutes.prestataireRegisterName,
+            extra: {
+              'email': firebaseData['email'] as String,
+              'password': '', // Pas de mot de passe pour Google Auth
+              'firstName': firebaseData['firstName'] as String,
+              'lastName': firebaseData['lastName'] as String,
+              'phone': firebaseData['phone'] as String? ?? '',
+              'isGoogleAuth': true,
+              'googleData': firebaseData,
+            },
+          );
+        }
+        return;
+      }
+      
+      // Pour les clients, synchroniser directement avec le backend
       print('🔵 Synchronisation avec le backend...');
       final backendResponse = await SimpleGoogleAuthService.syncWithBackend(firebaseData, selectedRole);
       
@@ -411,6 +445,9 @@ Future<void> register({
         token: token,
         error: null,
       );
+      
+      // Synchroniser le token FCM avec le backend
+      await FirebaseNotificationService().syncTokenWithBackend(token);
       
       print('✅ Authentification Google Firebase réussie pour: ${user.email}');
       print('✅ État final: isAuthenticated=${state.isAuthenticated}, user=${state.user?.email}');
@@ -477,6 +514,9 @@ Future<void> register({
         token: token,
         error: null,
       );
+      
+      // Synchroniser le token FCM avec le backend
+      await FirebaseNotificationService().syncTokenWithBackend(token);
       
       print('✅ Connexion Google réussie pour: ${user.email}');
       print('✅ État final: isAuthenticated=${state.isAuthenticated}, user=${state.user?.email}');

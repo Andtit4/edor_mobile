@@ -8,6 +8,7 @@ import 'presentation/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/config/app_config.dart';
 import 'core/services/firebase_auth_service.dart';
+import 'core/services/firebase_notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +21,9 @@ void main() async {
   
   // Initialiser Firebase Auth
   await FirebaseAuthService.initialize();
+  
+  // Initialiser le service de notifications Firebase
+  await FirebaseNotificationService().initialize();
   
   // Charger la configuration depuis le fichier .env
   await AppConfig.loadFromEnvFile();
